@@ -303,7 +303,7 @@ window.selectMeeting = async (id) => {
   if (state.currentMeeting) {
     let { data } = await supabase.from('records').select('*').eq('meeting_id', id).order('created_at')
     state.records = (data || []).map(r => {
-      if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
       else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
       return r
     })
@@ -529,7 +529,7 @@ window.calcTotal = (id) => {
   const charEl = document.getElementById('char-' + id)
   if (charEl) {
     if (stdPrice > 0) {
-      charEl.value = price <= stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      charEl.value = price === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
     } else {
       charEl.value = 'ไม่มีในเกณฑ์ราคากลาง'
     }
@@ -573,7 +573,7 @@ window.saveRecords = async () => {
     
     let char = ''
     if (stdPrice > 0) {
-      char = unitPrice <= stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      char = unitPrice === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
     } else {
       char = 'ไม่มีในเกณฑ์ราคากลาง'
     }
@@ -609,7 +609,7 @@ window.refreshRecords = async () => {
   if (!state.currentMeeting) return
   let { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id).order('created_at')
   state.records = (data || []).map(r => {
-    if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
     else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
     return r
   })
@@ -931,7 +931,7 @@ window.saveAllResolutions = async () => {
   // Reload records
   let { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id)
   data = (data || []).map(r => {
-    if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
     else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
     return r
   })

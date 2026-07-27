@@ -52,7 +52,7 @@ async function loadDashboard() {
 
     let { data: records } = await supabase.from('records').select('*')
     records = (records || []).map(r => {
-      if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
       else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
       return r
     })
@@ -226,8 +226,8 @@ function resolutionBadge(val, comment) {
 
 function charBadge(c) {
   if (!c) return '-'
-  if (c.includes('ตรงเกณฑ์') || c.includes('ตรงตามเกณฑ์')) return '<span class="badge badge-green">ตรงตามเกณฑ์</span>'
   if (c.includes('ไม่ตรงเกณฑ์') || c.includes('ไม่ตรงตามเกณฑ์')) return '<span class="badge badge-red">ไม่ตรงตามเกณฑ์</span>'
+  if (c.includes('ตรงเกณฑ์') || c.includes('ตรงตามเกณฑ์')) return '<span class="badge badge-green">ตรงตามเกณฑ์</span>'
   return '<span class="badge badge-orange">' + escHtml(c) + '</span>'
 }
 
