@@ -835,13 +835,17 @@ function renderResolution(el) {
       </div>
     </div>
 
-    <!-- Agenda 5 -->
+    <!-- Agenda 5 & Extra -->
     <div class="card mb-4">
-      <div class="card-header">ระเบียบวาระที่ ๕ เรื่องเสนออื่น ๆ</div>
+      <div class="card-header">ระเบียบวาระที่ ๕ และ ข้อมูลเพิ่มเติม</div>
       <div class="card-body">
-        <div class="alert alert-info" style="margin-bottom:0;">
+        <div class="alert alert-info" style="margin-bottom:12px;">
           <strong>วาระที่ ๕ เรื่องเสนออื่น ๆ</strong><br>
           <textarea id="res-agenda5" class="form-control" style="margin-top:8px;font-size:0.85rem;" rows="2" placeholder="(ไม่มี)" onchange="if(state.currentMeeting) state.currentMeeting.agenda5_text = this.value">${escHtml(state.currentMeeting?.agenda5_text || '')}</textarea>
+        </div>
+        <div class="alert alert-secondary" style="margin-bottom:0;">
+          <strong>ลิงก์เอกสารประกอบการประชุม (สำหรับสร้าง QR Code คู่)</strong><br>
+          <input type="text" id="res-doc-link" class="form-control" style="margin-top:8px;font-size:0.85rem;" placeholder="https://..." value="${escHtml(state.currentMeeting?.doc_link || '')}" onchange="if(state.currentMeeting) state.currentMeeting.doc_link = this.value">
         </div>
       </div>
     </div>
@@ -880,6 +884,7 @@ window.saveAllResolutions = async () => {
     await supabase.from('meetings').update({
       agenda2_text: state.currentMeeting.agenda2_text || null,
       agenda5_text: state.currentMeeting.agenda5_text || null,
+      doc_link: state.currentMeeting.doc_link || null,
       absent_ids: state.currentMeeting.absent_ids || []
     }).eq('id', state.currentMeeting.id)
   }
@@ -965,7 +970,13 @@ window.previewMinutes = async () => {
 
   // Generate QR
   let qrBase64 = ''
-  try { qrBase64 = await QRCode.toDataURL(window.location.origin + '/', { width: 120 }) } catch {}
+  let docQrBase64 = ''
+  try { 
+    qrBase64 = await QRCode.toDataURL(window.location.origin + '/', { width: 120, margin: 1 }) 
+    if (state.currentMeeting.doc_link) {
+      docQrBase64 = await QRCode.toDataURL(state.currentMeeting.doc_link, { width: 120, margin: 1 })
+    }
+  } catch {}
 
   // Build report data
   const reportData = {}
@@ -1003,6 +1014,7 @@ window.previewMinutes = async () => {
     recorder,
     checker,
     qrBase64,
+    docQrBase64,
     agenda3Items: state.agenda3Items,
     agenda2Text: state.currentMeeting.agenda2_text || '',
     agenda5Text: state.currentMeeting.agenda5_text || '',

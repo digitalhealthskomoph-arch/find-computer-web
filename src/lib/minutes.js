@@ -6,7 +6,7 @@ import { toThaiDate, toThaiNumeral, thaiCurrency } from './utils.js'
 export function buildMinutesHTML(opts) {
   const {
     meetingName, dateDisplay, attended, absent,
-    recorder, checker, qrBase64,
+    recorder, checker, qrBase64, docQrBase64,
     agenda3Items, agenda2Text, agenda5Text,
     allMeetings, currentMeetingId,
     reportData, totalAgencies,
@@ -141,10 +141,19 @@ export function buildMinutesHTML(opts) {
       + '<div>ผู้ตรวจรายงานการประชุม</div></div>'
   }
   let qrHtml = ''
-  if (qrBase64) {
-    qrHtml = '<div style="display:inline-block;text-align:center;">'
-      + '<img src="' + qrBase64 + '" style="width:100px;height:100px;object-fit:contain;display:block;margin:0 auto;" alt="QR Code">'
-      + '<div style="font-size:14pt;text-align:center;margin-top:6px;font-weight:bold;">QRcode เอกสารประชุม</div></div>'
+  if (qrBase64 || docQrBase64) {
+    qrHtml = '<div style="display:inline-flex;gap:16px;">'
+    if (qrBase64) {
+      qrHtml += '<div style="text-align:center;">'
+        + '<img src="' + qrBase64 + '" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto;" alt="QR Code ระบบ">'
+        + '<div style="font-size:12pt;text-align:center;margin-top:4px;font-weight:bold;">QRcode ระบบ</div></div>'
+    }
+    if (docQrBase64) {
+      qrHtml += '<div style="text-align:center;">'
+        + '<img src="' + docQrBase64 + '" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto;" alt="QR Code เอกสาร">'
+        + '<div style="font-size:12pt;text-align:center;margin-top:4px;font-weight:bold;">QRcode เอกสาร</div></div>'
+    }
+    qrHtml += '</div>'
   }
   const sigHtml = (recorderSig || checkerSig) ? recorderSig + checkerSig : ''
   const bottomTable = '<table style="width:100%;margin-top:40px;border-collapse:collapse;border:none;page-break-inside:avoid;"><tr>'
