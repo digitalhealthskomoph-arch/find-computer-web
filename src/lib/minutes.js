@@ -68,14 +68,14 @@ export function buildMinutesHTML(opts) {
         const agThai = toThaiNumeral(agencyNum)
         const agRecs = agencies[agency]
         let agTotal = 0
-        let appCount = 0, rejCount = 0, othCount = 0
+        let appCount = 0, condCount = 0, rejCount = 0
 
         agRecs.forEach(r => {
           agTotal += parseFloat(r.total_price || r.totalPrice) || 0
           const rType = (r.resolution_type || r.resolutionType || r.resolution || 'เห็นชอบ').trim()
-          if (rType === 'เห็นชอบ' || rType.indexOf('เห็นชอบ') === 0) appCount++
+          if (rType === 'เห็นชอบโดยมีเงื่อนไข') condCount++
+          else if (rType === 'เห็นชอบ' || rType.indexOf('เห็นชอบ') === 0) appCount++
           else if (rType === 'ไม่เห็นชอบ' || rType.indexOf('ไม่เห็นชอบ') === 0) rejCount++
-          else othCount++
         })
 
         let resTextHTML = ''
@@ -86,9 +86,20 @@ export function buildMinutesHTML(opts) {
           if (appCount > 0) {
             const appItems = agRecs.map((r, idx) => {
               const rT = (r.resolution_type || r.resolutionType || r.resolution || 'เห็นชอบ').trim()
-              return (rT === 'เห็นชอบ' || rT.indexOf('เห็นชอบ') === 0) ? 'รายการที่ ' + toThaiNumeral(idx + 1) : null
+              return (rT === 'เห็นชอบ' || (rT.indexOf('เห็นชอบ') === 0 && rT !== 'เห็นชอบโดยมีเงื่อนไข')) ? 'รายการที่ ' + toThaiNumeral(idx + 1) : null
             }).filter(Boolean).join(', ')
             resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;">- <span style="font-weight:bold;">เห็นชอบให้ดำเนินการ</span> จำนวน ' + toThaiNumeral(appCount) + ' รายการ (' + appItems + ')</div>'
+          }
+          if (condCount > 0) {
+            const condDetails = agRecs.map((r, idx) => {
+              const rT = (r.resolution_type || r.resolutionType || r.resolution || 'เห็นชอบ').trim()
+              if (rT === 'เห็นชอบโดยมีเงื่อนไข') {
+                const comm = r.resolution_comment || r.resolutionComment || ''
+                return 'รายการที่ ' + toThaiNumeral(idx + 1) + ' (' + (r.item_name || r.itemName || 'ไม่ระบุ') + ')' + (comm ? ' ข้อเสนอแนะ: ' + comm : '')
+              }
+              return null
+            }).filter(Boolean).join('; ')
+            resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;color:#f57c00;">- <span style="font-weight:bold;">เห็นชอบโดยมีเงื่อนไข</span> จำนวน ' + toThaiNumeral(condCount) + ' รายการ ได้แก่ ' + condDetails + '</div>'
           }
           if (rejCount > 0) {
             const rejDetails = agRecs.map((r, idx) => {
