@@ -192,10 +192,10 @@ function renderMeetingTable(recs, mId) {
                   <td>${formatCurrency(r.standard_price)}</td>
                   <td>${formatCurrency(r.unit_price)}</td>
                   <td style="font-weight:600;">${formatCurrency(r.total_price)}</td>
-                  <td><span class="badge" style="background:#dcfce7;color:#15803d;font-weight:500;">${escHtml(r.characteristics || '')}</span></td>
+                  <td>${charBadge(r.characteristics || '')}</td>
                   <td>${escHtml(r.funding_source || '')}</td>
                   <td>${escHtml(r.procurement_method || '')}</td>
-                  <td>${resolutionBadge(r.resolution_type || r.resolution || 'เห็นชอบ')}</td>
+                  <td>${resolutionBadge(r.resolution_type || r.resolution || 'เห็นชอบ', r.resolution_comment)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -206,11 +206,24 @@ function renderMeetingTable(recs, mId) {
   }).join('')
 }
 
-function resolutionBadge(val) {
+function resolutionBadge(val, comment) {
   if (!val) return ''
-  if (val.includes('เห็นชอบ') && !val.includes('ไม่')) return '<span class="badge badge-green">เห็นชอบ</span>'
-  if (val.includes('ไม่เห็นชอบ')) return '<span class="badge badge-red">ไม่เห็นชอบ</span>'
-  return '<span class="badge badge-orange">' + escHtml(val) + '</span>'
+  let out = ''
+  if (val.includes('เห็นชอบ') && !val.includes('ไม่')) out = '<span class="badge badge-green">เห็นชอบ</span>'
+  else if (val.includes('ไม่เห็นชอบ')) out = '<span class="badge badge-red">ไม่เห็นชอบ</span>'
+  else out = '<span class="badge badge-orange">' + escHtml(val) + '</span>'
+  
+  if (val === 'อื่นๆ' && comment) {
+    out += '<div style="font-size:0.8rem;color:#f57c00;margin-top:4px;">เหตุผล: ' + escHtml(comment) + '</div>'
+  }
+  return out
+}
+
+function charBadge(c) {
+  if (!c) return '-'
+  if (c.includes('ตรงเกณฑ์') || c.includes('ตรงตามเกณฑ์')) return '<span class="badge badge-green">ตรงตามเกณฑ์</span>'
+  if (c.includes('ไม่ตรงเกณฑ์') || c.includes('ไม่ตรงตามเกณฑ์')) return '<span class="badge badge-red">ไม่ตรงตามเกณฑ์</span>'
+  return '<span class="badge badge-orange">' + escHtml(c) + '</span>'
 }
 
 window.toggleMeeting = function(id) {
