@@ -436,6 +436,15 @@ function resBadge(val) {
   return '<span class="badge badge-orange">' + escHtml(val) + '</span>'
 }
 
+function charBadge(val) {
+  if (!val) return ''
+  const c = val.trim()
+  if (c.includes('ไม่ตรงเกณฑ์') || c.includes('ไม่ตรงตามเกณฑ์')) return '<span class="badge badge-red">ไม่ตรงตามเกณฑ์</span>'
+  if (c.includes('ตรงเกณฑ์') || c.includes('ตรงตามเกณฑ์')) return '<span class="badge badge-green">ตรงตามเกณฑ์</span>'
+  if (c.includes('ไม่มี')) return '<span class="badge badge-orange">ไม่มีในเกณฑ์</span>'
+  return '<span class="badge badge-blue">' + escHtml(c) + '</span>'
+}
+
 window.addDtRow = () => {
   state.dtRowId++
   const id = state.dtRowId
@@ -710,8 +719,10 @@ function renderResolution(el) {
       <div class="card-body">
         <div class="alert alert-info" style="margin-bottom:0;">
           <strong>วาระที่ ๑ เรื่องที่ประธานแจ้งให้ที่ประชุมทราบ</strong><br>
+          <span style="font-size:0.85rem;"><em>*ข้อมูลวาระนี้จะถูกสร้างอัตโนมัติในหน้ารายงานการประชุม</em></span>
+          <br><br>
           <strong>วาระที่ ๒ เรื่องรับรองรายงานการประชุม</strong><br>
-          <span style="font-size:0.85rem;"><em>*ข้อมูล ๒ วาระนี้จะถูกสร้างอัตโนมัติในหน้ารายงานการประชุม ตามจำนวนรายการและรอบการประชุมก่อนหน้า</em></span>
+          <textarea id="res-agenda2" class="form-control" style="margin-top:8px;font-size:0.85rem;" rows="2" placeholder="พิมพ์ข้อความวาระที่ 2 รับรองรายงานการประชุมที่นี่..." onchange="if(state.currentMeeting) state.currentMeeting.agenda2_text = this.value; const m = document.getElementById('min-agenda2'); if(m) m.value = this.value;">${escHtml(state.currentMeeting?.agenda2_text || '')}</textarea>
         </div>
       </div>
     </div>
@@ -752,7 +763,9 @@ function renderResolution(el) {
                           <th>รายการครุภัณฑ์</th>
                           <th>จำนวน/หน่วย</th>
                           <th>ราคา/หน่วย</th>
+                          <th>ราคากลาง</th>
                           <th>วงเงินรวม</th>
+                          <th>เกณฑ์</th>
                           <th style="min-width:280px;">มติความเห็นชอบ</th>
                         </tr>
                       </thead>
@@ -766,7 +779,9 @@ function renderResolution(el) {
                             <td>${escHtml(r.item_name || '')}</td>
                             <td>${r.quantity || ''} ${escHtml(r.unit || '')}</td>
                             <td>${formatCurrency(r.unit_price)}</td>
+                            <td>${formatCurrency(r.standard_price)}</td>
                             <td style="font-weight:600;">${formatCurrency(r.total_price)}</td>
+                            <td>${charBadge(r.characteristics)}</td>
                             <td>
                               <div style="display:flex;gap:8px;flex-direction:column;">
                                 <select id="res-type-${r.id}" class="form-control" style="font-size:0.85rem;" onchange="toggleResComment('${r.id}')">
