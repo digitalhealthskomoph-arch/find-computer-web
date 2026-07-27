@@ -881,6 +881,13 @@ window.saveAllResolutions = async () => {
 
   // Save meeting details
   if (state.currentMeeting) {
+    const a2 = document.getElementById('res-agenda2')
+    const a5 = document.getElementById('res-agenda5')
+    const dL = document.getElementById('res-doc-link')
+    if (a2) state.currentMeeting.agenda2_text = a2.value
+    if (a5) state.currentMeeting.agenda5_text = a5.value
+    if (dL) state.currentMeeting.doc_link = dL.value
+
     await supabase.from('meetings').update({
       agenda2_text: state.currentMeeting.agenda2_text || null,
       agenda5_text: state.currentMeeting.agenda5_text || null,
@@ -967,6 +974,15 @@ window.previewMinutes = async () => {
   const preview = document.getElementById('minutes-preview')
   if (!preview) return
   preview.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>'
+
+  if (state.currentMeeting) {
+    const a2 = document.getElementById('res-agenda2')
+    const a5 = document.getElementById('res-agenda5')
+    const dL = document.getElementById('res-doc-link')
+    if (a2) state.currentMeeting.agenda2_text = a2.value
+    if (a5) state.currentMeeting.agenda5_text = a5.value
+    if (dL) state.currentMeeting.doc_link = dL.value
+  }
 
   // Generate QR
   let qrBase64 = ''
