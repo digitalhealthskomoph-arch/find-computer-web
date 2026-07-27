@@ -7,7 +7,7 @@ export function buildMinutesHTML(opts) {
   const {
     meetingName, dateDisplay, attended, absent,
     recorder, checker, qrBase64,
-    agenda3Items, agenda2Text,
+    agenda3Items, agenda2Text, agenda5Text,
     allMeetings, currentMeetingId,
     reportData, totalAgencies,
     countMatch, countNotMatch, countNoSpec, totalRecords
@@ -141,6 +141,11 @@ export function buildMinutesHTML(opts) {
     + '<td style="vertical-align:bottom;text-align:center;border:none;padding:0;">' + sigHtml + '</td>'
     + '</tr></table>'
 
+  // Agenda 5 HTML
+  const agenda5Display = agenda5Text
+    ? agenda5Text.replace(/\n/g, '<br>')
+    : '(ไม่มี)'
+
   return `
   <div style="font-family:'TH Sarabun PSK','TH Sarabun New','Sarabun',sans-serif;font-size:16pt;line-height:1.5;color:#000;">
     <div style="text-align:center;font-weight:bold;font-size:18pt;line-height:1.5;">
@@ -178,7 +183,8 @@ export function buildMinutesHTML(opts) {
     <div style="font-weight:bold;margin-bottom:4px;">ระเบียบวาระที่ ๔ เรื่องที่เสนอให้ที่ประชุมพิจารณา</div>
     ${agenda4Body}
 
-    <div style="font-weight:bold;margin-top:10px;margin-bottom:16px;">ระเบียบวาระที่ ๕ เรื่องเสนออื่น ๆ (ไม่มี)</div>
+    <div style="font-weight:bold;margin-top:10px;margin-bottom:4px;">ระเบียบวาระที่ ๕ เรื่องเสนออื่น ๆ</div>
+    <div style="text-indent:2cm;margin-bottom:16px;">${agenda5Display}</div>
 
     ${bottomTable}
   </div>`

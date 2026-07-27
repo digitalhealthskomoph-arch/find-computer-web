@@ -730,6 +730,19 @@ function renderResolution(el) {
       <button class="btn btn-primary" onclick="saveAllResolutions()">💾 บันทึกมติทั้งหมด</button>
     </div>
 
+    <!-- Attendance -->
+    <div class="card mb-4">
+      <div class="card-header">รายชื่อผู้เข้าร่วมประชุม (ติ๊กออกหากไม่มาประชุม)</div>
+      <div class="card-body">
+        <div style="display:flex; flex-wrap:wrap; gap:16px; font-size:0.9rem;">
+          ${state.committees.map(c => {
+             const isAbsent = state.currentMeeting?.absent_ids?.includes(c.id)
+             return `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleAttendance('${c.id}', this.checked)" ${!isAbsent ? 'checked' : ''}> ${escHtml(c.full_name || '')}</label>`
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
     <!-- Agenda 1 & 2 -->
     <div class="card mb-4">
       <div class="card-header">ระเบียบวาระที่ ๑ และ ๒</div>
@@ -827,12 +840,22 @@ function renderResolution(el) {
       <div class="card-header">ระเบียบวาระที่ ๕ เรื่องเสนออื่น ๆ</div>
       <div class="card-body">
         <div class="alert alert-info" style="margin-bottom:0;">
-          <strong>วาระที่ ๕ เรื่องเสนออื่น ๆ (ไม่มี)</strong><br>
-          <span style="font-size:0.85rem;"><em>*รายงานการประชุมจะแสดงเป็น (ไม่มี) เป็นค่าเริ่มต้น</em></span>
+          <strong>วาระที่ ๕ เรื่องเสนออื่น ๆ</strong><br>
+          <textarea id="res-agenda5" class="form-control" style="margin-top:8px;font-size:0.85rem;" rows="2" placeholder="(ไม่มี)" onchange="if(state.currentMeeting) state.currentMeeting.agenda5_text = this.value">${escHtml(state.currentMeeting?.agenda5_text || '')}</textarea>
         </div>
       </div>
     </div>
   `
+}
+
+window.toggleAttendance = (id, isChecked) => {
+  if (!state.currentMeeting) return
+  if (!state.currentMeeting.absent_ids) state.currentMeeting.absent_ids = []
+  if (isChecked) {
+    state.currentMeeting.absent_ids = state.currentMeeting.absent_ids.filter(x => String(x) !== String(id))
+  } else {
+    if (!state.currentMeeting.absent_ids.includes(id)) state.currentMeeting.absent_ids.push(id)
+  }
 }
 
 window.toggleResComment = (id) => {
@@ -904,37 +927,20 @@ function renderMinutes(el) {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
       <h2 style="font-size:1.1rem;font-weight:700;">รายงานการประชุม: ${escHtml(state.currentMeeting.name)}</h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm no-print" onclick="previewMinutes()">👁 สร้าง / รีเฟรช ตัวอย่าง</button>
         <button class="btn btn-ghost btn-sm no-print" onclick="window.print()">🖨 พิมพ์</button>
         <button class="btn btn-secondary btn-sm no-print" onclick="exportMinutesWord()">📄 ส่งออก Word</button>
       </div>
     </div>
 
-    <div class="card mb-4 no-print">
-      <div class="card-header">ตั้งค่ารายงาน</div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="form-group">
-            <label class="form-label">ผู้บันทึกรายงาน</label>
-            <input id="min-recorder" class="form-control" placeholder="ชื่อผู้บันทึก">
-          </div>
-          <div class="form-group">
-            <label class="form-label">ผู้ตรวจรายงาน</label>
-            <input id="min-checker" class="form-control" placeholder="ชื่อผู้ตรวจ">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">วาระที่ 2 - รับรองรายงาน (ปล่อยว่างเพื่อใช้ค่าอัตโนมัติ)</label>
-          <textarea id="min-agenda2" class="form-control" rows="2" placeholder="รับรองรายงานการประชุม (ชื่อรอบก่อน) วันที่ ..."></textarea>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" onclick="previewMinutes()">👁 แสดงตัวอย่าง</button>
-        </div>
-      </div>
+    <div class="alert alert-info no-print mb-4">
+      รายชื่อผู้เข้าร่วมประชุม, วาระที่ 2, และวาระที่ 5 สามารถตั้งค่าได้ในแท็บ <strong>"บันทึกมติ"</strong><br>
+      ส่วนผู้บันทึกรายงานจะถูกดึงมาจาก "ผู้ช่วยเลขานุการ" และผู้ตรวจรายงานจะดึงมาจาก "กรรมการ/เลขานุการ" โดยอัตโนมัติ
     </div>
 
     <div id="minutes-preview" class="card">
       <div class="card-body text-center text-muted" style="padding:40px;">
-        กดปุ่ม "แสดงตัวอย่าง" เพื่อสร้างรายงาน
+        กดปุ่ม "สร้าง / รีเฟรช ตัวอย่าง" ด้านบนเพื่อดูรายงานการประชุม
       </div>
     </div>`
 }
@@ -965,19 +971,28 @@ window.previewMinutes = async () => {
     else countNoSpec++
   })
 
-  // Split committees into attended/absent (all attended by default)
-  const attended = state.committees.filter(c => c.full_name)
+  // Split committees into attended/absent
+  const absentIds = state.currentMeeting.absent_ids || []
+  const attended = state.committees.filter(c => c.full_name && !absentIds.includes(String(c.id)))
+  const absent = state.committees.filter(c => c.full_name && absentIds.includes(String(c.id)))
+
+  // Find Recorder and Checker based on position
+  const recorderComm = state.committees.find(c => c.position && c.position.includes('ผู้ช่วยเลขานุการ'))
+  const checkerComm = state.committees.find(c => c.position && (c.position.includes('กรรมการ/เลขานุการ') || c.position.includes('กรรมการและเลขานุการ')))
+  const recorder = recorderComm ? (recorderComm.prefix || '') + recorderComm.full_name : ''
+  const checker = checkerComm ? (checkerComm.prefix || '') + checkerComm.full_name : ''
 
   const html = buildMinutesHTML({
     meetingName: state.currentMeeting.name,
     dateDisplay: toThaiDate(state.currentMeeting.meeting_date),
     attended,
-    absent: [],
-    recorder: document.getElementById('min-recorder')?.value || '',
-    checker: document.getElementById('min-checker')?.value || '',
+    absent,
+    recorder,
+    checker,
     qrBase64,
     agenda3Items: state.agenda3Items,
-    agenda2Text: document.getElementById('min-agenda2')?.value || '',
+    agenda2Text: state.currentMeeting.agenda2_text || '',
+    agenda5Text: state.currentMeeting.agenda5_text || '',
     allMeetings: state.meetings,
     currentMeetingId: state.currentMeeting.id,
     reportData,
