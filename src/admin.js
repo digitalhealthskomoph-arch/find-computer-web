@@ -736,15 +736,15 @@ function renderResolution(el) {
           : Object.entries(grouped).map(([agencyKey, recs], idx) => {
               const total = recs.reduce((s, r) => s + (parseFloat(r.total_price) || 0), 0)
               const agencyId = 'res-agency-' + idx
-              return \`
+              return `
                 <div style="border:1px solid var(--border); border-radius:6px; margin-bottom:12px; overflow:hidden;">
-                  <div style="background:#f8fafc; padding:12px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; flex-wrap:wrap;" onclick="toggleAgency('\${agencyId}')">
-                    <span id="chev-\${agencyId}" style="color:var(--text-muted); font-size:0.8rem; width:16px;">▼</span>
-                    <span style="font-weight:700; color:var(--text); font-size:1rem;">\${escHtml(agencyKey)}</span>
-                    <span class="badge badge-blue">\${recs.length} รายการ</span>
-                    <span class="badge badge-green">รวม \${formatCurrency(total)} บาท</span>
+                  <div style="background:#f8fafc; padding:12px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; flex-wrap:wrap;" onclick="toggleAgency('${agencyId}')">
+                    <span id="chev-${agencyId}" style="color:var(--text-muted); font-size:0.8rem; width:16px;">▼</span>
+                    <span style="font-weight:700; color:var(--text); font-size:1rem;">${escHtml(agencyKey)}</span>
+                    <span class="badge badge-blue">${recs.length} รายการ</span>
+                    <span class="badge badge-green">รวม ${formatCurrency(total)} บาท</span>
                   </div>
-                  <div id="detail-\${agencyId}" class="table-wrap">
+                  <div id="detail-${agencyId}" class="table-wrap">
                     <table style="margin:0; border-top:1px solid var(--border);">
                       <thead>
                         <tr>
@@ -757,33 +757,33 @@ function renderResolution(el) {
                         </tr>
                       </thead>
                       <tbody>
-                        \${recs.map((r, i) => \`
+                        ${recs.map((r, i) => `
                           <tr>
                             <td style="color:var(--text-muted); text-align:center;">
                               <span style="display:inline-block; border-left:1px solid #cbd5e1; border-bottom:1px solid #cbd5e1; width:8px; height:8px; margin-right:4px; margin-bottom:4px;"></span>
-                              \${i + 1}
+                              ${i + 1}
                             </td>
-                            <td>\${escHtml(r.item_name || '')}</td>
-                            <td>\${r.quantity || ''} \${escHtml(r.unit || '')}</td>
-                            <td>\${formatCurrency(r.unit_price)}</td>
-                            <td style="font-weight:600;">\${formatCurrency(r.total_price)}</td>
+                            <td>${escHtml(r.item_name || '')}</td>
+                            <td>${r.quantity || ''} ${escHtml(r.unit || '')}</td>
+                            <td>${formatCurrency(r.unit_price)}</td>
+                            <td style="font-weight:600;">${formatCurrency(r.total_price)}</td>
                             <td>
                               <div style="display:flex;gap:8px;flex-direction:column;">
-                                <select id="res-type-\${r.id}" class="form-control" style="font-size:0.85rem;" onchange="toggleResComment('\${r.id}')">
-                                  <option value="เห็นชอบ" \${r.resolution_type==='เห็นชอบ'?'selected':''}>เห็นชอบ</option>
-                                  <option value="ไม่เห็นชอบ" \${r.resolution_type==='ไม่เห็นชอบ'?'selected':''}>ไม่เห็นชอบ</option>
-                                  <option value="เห็นชอบโดยมีเงื่อนไข" \${r.resolution_type==='เห็นชอบโดยมีเงื่อนไข'?'selected':''}>เห็นชอบโดยมีเงื่อนไข</option>
+                                <select id="res-type-${r.id}" class="form-control" style="font-size:0.85rem;" onchange="toggleResComment('${r.id}')">
+                                  <option value="เห็นชอบ" ${r.resolution_type==='เห็นชอบ'?'selected':''}>เห็นชอบ</option>
+                                  <option value="ไม่เห็นชอบ" ${r.resolution_type==='ไม่เห็นชอบ'?'selected':''}>ไม่เห็นชอบ</option>
+                                  <option value="เห็นชอบโดยมีเงื่อนไข" ${r.resolution_type==='เห็นชอบโดยมีเงื่อนไข'?'selected':''}>เห็นชอบโดยมีเงื่อนไข</option>
                                 </select>
-                                <input id="res-comment-\${r.id}" type="text" class="form-control \${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="font-size:0.85rem;" placeholder="ความเห็น/เหตุผล..." value="\${escHtml(r.resolution_comment||'')}">
+                                <input id="res-comment-${r.id}" type="text" class="form-control ${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="font-size:0.85rem;" placeholder="ความเห็น/เหตุผล..." value="${escHtml(r.resolution_comment||'')}">
                               </div>
                             </td>
                           </tr>
-                        \`).join('')}
+                        `).join('')}
                       </tbody>
                     </table>
                   </div>
                 </div>
-              \`
+              `
             }).join('')
         }
       </div>
