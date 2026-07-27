@@ -50,7 +50,7 @@ async function loadDashboard() {
 
     if (mErr) throw mErr
 
-    const { data: records } = await supabase.from('records').select('meeting_id, total_price, characteristics, standard_price, unit_price')
+    const { data: records } = await supabase.from('records').select('*')
 
     renderStats(meetings, records)
     renderMeetings(meetings, records)
