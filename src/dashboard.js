@@ -65,7 +65,8 @@ function renderStats(meetings, records) {
   let countMatch = 0, countNoSpec = 0, countNotMatch = 0
   ;(records || []).forEach(r => {
     const char = (r.characteristics || '').trim()
-    if (char.includes('ตรงเกณฑ์')) countMatch++
+    if (char.includes('ไม่ตรงเกณฑ์') || char.includes('ไม่ตรงตามเกณฑ์')) countNotMatch++
+    else if (char.includes('ตรงเกณฑ์') || char.includes('ตรงตามเกณฑ์')) countMatch++
     else if (char.includes('ไม่มี')) countNoSpec++
     else if (char) countNotMatch++
   })

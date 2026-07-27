@@ -693,7 +693,7 @@ function renderResolution(el) {
 
   const grouped = {}
   state.records.forEach(r => {
-    const key = `${r.district}||${r.agency}`
+    const key = `${r.agency || 'ไม่ระบุ'} (${r.district || 'ไม่ระบุ'})`
     if (!grouped[key]) grouped[key] = []
     grouped[key].push(r)
   })
@@ -702,6 +702,18 @@ function renderResolution(el) {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <h2 style="font-size:1.1rem;font-weight:700;">บันทึกมติ: ${escHtml(state.currentMeeting.name)}</h2>
       <button class="btn btn-primary" onclick="saveAllResolutions()">💾 บันทึกมติทั้งหมด</button>
+    </div>
+
+    <!-- Agenda 1 & 2 -->
+    <div class="card mb-4">
+      <div class="card-header">ระเบียบวาระที่ ๑ และ ๒</div>
+      <div class="card-body">
+        <div class="alert alert-info" style="margin-bottom:0;">
+          <strong>วาระที่ ๑ เรื่องที่ประธานแจ้งให้ที่ประชุมทราบ</strong><br>
+          <strong>วาระที่ ๒ เรื่องรับรองรายงานการประชุม</strong><br>
+          <span style="font-size:0.85rem;"><em>*ข้อมูล ๒ วาระนี้จะถูกสร้างอัตโนมัติในหน้ารายงานการประชุม ตามจำนวนรายการและรอบการประชุมก่อนหน้า</em></span>
+        </div>
+      </div>
     </div>
 
     <!-- Agenda 3 -->
@@ -715,30 +727,78 @@ function renderResolution(el) {
       </div>
     </div>
 
-    <!-- Resolution per agency -->
-    ${Object.keys(grouped).length === 0
-      ? '<div class="alert alert-info">ยังไม่มีรายการ กรอกข้อมูลในแท็บ "กรอกข้อมูล" ก่อน</div>'
-      : Object.entries(grouped).map(([key, recs]) => {
-          const [district, agency] = key.split('||')
-          return `
-            <div class="card mb-4">
-              <div class="card-header">🏢 ${escHtml(district)} — ${escHtml(agency)}</div>
-              <div class="card-body">
-                ${recs.map((r, i) => `
-                  <div style="padding:10px 0;border-bottom:1px solid var(--border);">
-                    <div style="font-weight:500;margin-bottom:8px;">${i+1}. ${escHtml(r.item_name || '')} — ${formatCurrency(r.total_price)} บาท</div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                      <select id="res-type-${r.id}" class="form-control" style="width:180px;font-size:0.85rem;" onchange="toggleResComment('${r.id}')">
-                        <option value="เห็นชอบ" ${r.resolution_type==='เห็นชอบ'?'selected':''}>เห็นชอบ</option>
-                        <option value="ไม่เห็นชอบ" ${r.resolution_type==='ไม่เห็นชอบ'?'selected':''}>ไม่เห็นชอบ</option>
-                        <option value="เห็นชอบโดยมีเงื่อนไข" ${r.resolution_type==='เห็นชอบโดยมีเงื่อนไข'?'selected':''}>เห็นชอบโดยมีเงื่อนไข</option>
-                      </select>
-                      <input id="res-comment-${r.id}" type="text" class="form-control ${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="flex:1;min-width:200px;font-size:0.85rem;" placeholder="ความเห็น/เหตุผล..." value="${escHtml(r.resolution_comment||'')}">
-                    </div>
-                  </div>`).join('')}
-              </div>
-            </div>`
-        }).join('')}
+    <!-- Agenda 4 -->
+    <div class="card mb-4">
+      <div class="card-header">ระเบียบวาระที่ ๔ เรื่องที่เสนอให้ที่ประชุมพิจารณา</div>
+      <div class="card-body">
+        ${Object.keys(grouped).length === 0
+          ? '<p class="text-muted text-center">ยังไม่มีรายการ กรอกข้อมูลในแท็บ "กรอกข้อมูล" ก่อน</p>'
+          : Object.entries(grouped).map(([agencyKey, recs], idx) => {
+              const total = recs.reduce((s, r) => s + (parseFloat(r.total_price) || 0), 0)
+              const agencyId = 'res-agency-' + idx
+              return \`
+                <div style="border:1px solid var(--border); border-radius:6px; margin-bottom:12px; overflow:hidden;">
+                  <div style="background:#f8fafc; padding:12px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; flex-wrap:wrap;" onclick="toggleAgency('\${agencyId}')">
+                    <span id="chev-\${agencyId}" style="color:var(--text-muted); font-size:0.8rem; width:16px;">▼</span>
+                    <span style="font-weight:700; color:var(--text); font-size:1rem;">\${escHtml(agencyKey)}</span>
+                    <span class="badge badge-blue">\${recs.length} รายการ</span>
+                    <span class="badge badge-green">รวม \${formatCurrency(total)} บาท</span>
+                  </div>
+                  <div id="detail-\${agencyId}" class="table-wrap">
+                    <table style="margin:0; border-top:1px solid var(--border);">
+                      <thead>
+                        <tr>
+                          <th style="width:50px;text-align:center;">ลำดับ</th>
+                          <th>รายการครุภัณฑ์</th>
+                          <th>จำนวน/หน่วย</th>
+                          <th>ราคา/หน่วย</th>
+                          <th>วงเงินรวม</th>
+                          <th style="min-width:280px;">มติความเห็นชอบ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        \${recs.map((r, i) => \`
+                          <tr>
+                            <td style="color:var(--text-muted); text-align:center;">
+                              <span style="display:inline-block; border-left:1px solid #cbd5e1; border-bottom:1px solid #cbd5e1; width:8px; height:8px; margin-right:4px; margin-bottom:4px;"></span>
+                              \${i + 1}
+                            </td>
+                            <td>\${escHtml(r.item_name || '')}</td>
+                            <td>\${r.quantity || ''} \${escHtml(r.unit || '')}</td>
+                            <td>\${formatCurrency(r.unit_price)}</td>
+                            <td style="font-weight:600;">\${formatCurrency(r.total_price)}</td>
+                            <td>
+                              <div style="display:flex;gap:8px;flex-direction:column;">
+                                <select id="res-type-\${r.id}" class="form-control" style="font-size:0.85rem;" onchange="toggleResComment('\${r.id}')">
+                                  <option value="เห็นชอบ" \${r.resolution_type==='เห็นชอบ'?'selected':''}>เห็นชอบ</option>
+                                  <option value="ไม่เห็นชอบ" \${r.resolution_type==='ไม่เห็นชอบ'?'selected':''}>ไม่เห็นชอบ</option>
+                                  <option value="เห็นชอบโดยมีเงื่อนไข" \${r.resolution_type==='เห็นชอบโดยมีเงื่อนไข'?'selected':''}>เห็นชอบโดยมีเงื่อนไข</option>
+                                </select>
+                                <input id="res-comment-\${r.id}" type="text" class="form-control \${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="font-size:0.85rem;" placeholder="ความเห็น/เหตุผล..." value="\${escHtml(r.resolution_comment||'')}">
+                              </div>
+                            </td>
+                          </tr>
+                        \`).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              \`
+            }).join('')
+        }
+      </div>
+    </div>
+
+    <!-- Agenda 5 -->
+    <div class="card mb-4">
+      <div class="card-header">ระเบียบวาระที่ ๕ เรื่องเสนออื่น ๆ</div>
+      <div class="card-body">
+        <div class="alert alert-info" style="margin-bottom:0;">
+          <strong>วาระที่ ๕ เรื่องเสนออื่น ๆ (ไม่มี)</strong><br>
+          <span style="font-size:0.85rem;"><em>*รายงานการประชุมจะแสดงเป็น (ไม่มี) เป็นค่าเริ่มต้น</em></span>
+        </div>
+      </div>
+    </div>
   `
 }
 
