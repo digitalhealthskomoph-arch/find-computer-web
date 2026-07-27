@@ -36,7 +36,7 @@ a:hover { text-decoration: underline; }
 /* Navbar */
 .navbar {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-  color: #fff; padding: 12px 24px; min-height: 60px;
+  color: #fff; padding: max(12px, env(safe-area-inset-top)) 24px 12px; min-height: 60px;
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
   position: sticky; top: 0; z-index: 100;
   box-shadow: 0 2px 8px rgba(30,58,138,0.3);
@@ -71,6 +71,8 @@ a:hover { text-decoration: underline; }
 .btn:active { transform: none; }
 .btn-primary { background: var(--primary); color: #fff; }
 .btn-primary:hover { background: var(--primary-dark); }
+.btn-accent { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 2px 4px rgba(16,185,129,0.3); border: none; }
+.btn-accent:hover { opacity: 0.9; transform: translateY(-1px); }
 .btn-secondary { background: var(--secondary); color: #fff; }
 .btn-secondary:hover { background: #0f5a52; }
 .btn-danger { background: var(--danger); color: #fff; }

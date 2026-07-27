@@ -65,8 +65,8 @@ function renderStats(meetings, records) {
   let countMatch = 0, countNoSpec = 0, countNotMatch = 0
   ;(records || []).forEach(r => {
     const char = (r.characteristics || '').trim()
-    if (char === 'ตรงตามเกณฑ์') countMatch++
-    else if (char === 'ไม่มีในเกณฑ์') countNoSpec++
+    if (char.includes('ตรงเกณฑ์')) countMatch++
+    else if (char.includes('ไม่มี')) countNoSpec++
     else if (char) countNotMatch++
   })
 
@@ -138,45 +138,71 @@ function renderMeetings(meetings, records) {
         <div class="meeting-card-body hidden" id="meeting-detail-${m.id}">
           ${mRecs.length === 0
             ? '<p class="text-muted text-center">ยังไม่มีรายการในรอบนี้</p>'
-            : renderMeetingTable(mRecs)}
+            : renderMeetingTable(mRecs, m.id)}
         </div>
       </div>`
   }).join('')
 }
 
-function renderMeetingTable(recs) {
-  return `
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>อำเภอ</th>
-            <th>หน่วยงาน</th>
-            <th>รายการ</th>
-            <th>จำนวน</th>
-            <th>ราคา/หน่วย</th>
-            <th>รวม (บาท)</th>
-            <th>แหล่งเงิน</th>
-            <th>มติ</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${recs.map((r, i) => `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${escHtml(r.district || '')}</td>
-              <td>${escHtml(r.agency || '')}</td>
-              <td>${escHtml(r.item_name || '')}</td>
-              <td>${r.quantity || ''} ${escHtml(r.unit || '')}</td>
-              <td>${formatCurrency(r.unit_price)}</td>
-              <td style="font-weight:600;">${formatCurrency(r.total_price)}</td>
-              <td>${escHtml(r.funding_source || '')}</td>
-              <td>${resolutionBadge(r.resolution_type || r.resolution || 'เห็นชอบ')}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`
+function renderMeetingTable(recs, mId) {
+  const grouped = {}
+  recs.forEach(r => {
+    const key = `${r.agency || 'ไม่ระบุ'} (${r.district || 'ไม่ระบุ'})`
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(r)
+  })
+
+  return Object.entries(grouped).map(([agencyKey, items], idx) => {
+    const total = items.reduce((s, r) => s + (parseFloat(r.total_price) || 0), 0)
+    const agencyId = `agency-${mId}-${idx}`
+    return `
+      <div style="border:1px solid var(--border); border-radius:6px; margin-bottom:8px; overflow:hidden;">
+        <div style="background:#f8fafc; padding:12px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; flex-wrap:wrap;" onclick="toggleAgency('${agencyId}')">
+          <span id="chev-${agencyId}" style="color:var(--text-muted); font-size:0.8rem; width:16px;">▼</span>
+          <span style="font-weight:700; color:var(--text); font-size:1rem;">${escHtml(agencyKey)}</span>
+          <span class="badge badge-blue">${items.length} รายการ</span>
+          <span class="badge badge-green">รวม ${formatCurrency(total)} บาท</span>
+        </div>
+        <div id="detail-${agencyId}" class="table-wrap">
+          <table style="margin:0; border-top:1px solid var(--border);">
+            <thead>
+              <tr>
+                <th style="width:50px;text-align:center;">ลำดับ</th>
+                <th>รายการครุภัณฑ์</th>
+                <th>จำนวน/หน่วย</th>
+                <th>ราคากลาง</th>
+                <th>ราคาต่อหน่วย</th>
+                <th>วงเงินรวม</th>
+                <th>คุณลักษณะ</th>
+                <th>แหล่งเงิน</th>
+                <th>วิธีจัดหา</th>
+                <th>มติความเห็นชอบ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map((r, i) => `
+                <tr>
+                  <td style="color:var(--text-muted); text-align:center;">
+                    <span style="display:inline-block; border-left:1px solid #cbd5e1; border-bottom:1px solid #cbd5e1; width:8px; height:8px; margin-right:4px; margin-bottom:4px;"></span>
+                    ${i + 1}
+                  </td>
+                  <td>${escHtml(r.item_name || '')}</td>
+                  <td>${r.quantity || ''} ${escHtml(r.unit || '')}</td>
+                  <td>${formatCurrency(r.standard_price)}</td>
+                  <td>${formatCurrency(r.unit_price)}</td>
+                  <td style="font-weight:600;">${formatCurrency(r.total_price)}</td>
+                  <td><span class="badge" style="background:#dcfce7;color:#15803d;font-weight:500;">${escHtml(r.characteristics || '')}</span></td>
+                  <td>${escHtml(r.funding_source || '')}</td>
+                  <td>${escHtml(r.procurement_method || '')}</td>
+                  <td>${resolutionBadge(r.resolution_type || r.resolution || 'เห็นชอบ')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `
+  }).join('')
 }
 
 function resolutionBadge(val) {
@@ -192,6 +218,15 @@ window.toggleMeeting = function(id) {
   if (body) {
     body.classList.toggle('hidden')
     if (chev) chev.textContent = body.classList.contains('hidden') ? '▼' : '▲'
+  }
+}
+
+window.toggleAgency = function(id) {
+  const detail = document.getElementById('detail-' + id)
+  const chev = document.getElementById('chev-' + id)
+  if (detail) {
+    detail.classList.toggle('hidden')
+    if (chev) chev.textContent = detail.classList.contains('hidden') ? '▶' : '▼'
   }
 }
 

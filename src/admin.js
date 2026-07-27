@@ -335,14 +335,14 @@ function renderRecords(el) {
         <h2 style="font-size:1.1rem;font-weight:700;">กรอกข้อมูล: ${escHtml(state.currentMeeting.name)}</h2>
         <p class="text-muted text-sm">📅 ${state.currentMeeting.meeting_date ? toThaiDate(state.currentMeeting.meeting_date) : 'ยังไม่ระบุวันประชุม'}</p>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="showPdfUpload()">📄 อ่าน PDF ด้วย AI</button>
-      </div>
     </div>
 
     <!-- Entry Form -->
     <div class="card mb-4">
-      <div class="card-header">เพิ่มรายการครุภัณฑ์</div>
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>เพิ่มรายการครุภัณฑ์</span>
+        <button class="btn btn-accent btn-sm" onclick="showPdfUpload()" style="font-weight:600;">✨ สแกนไฟล์ PDF อัตโนมัติด้วย AI</button>
+      </div>
       <div class="card-body">
         <div class="grid-2">
           <div class="form-group">
