@@ -707,6 +707,23 @@ function renderResolution(el) {
     grouped[key].push(r)
   })
 
+  // Calculate Agenda 1 stats
+  const totalAgencies = new Set(state.records.map(r => r.agency)).size
+  let countMatch = 0, countNotMatch = 0, countNoSpec = 0
+  state.records.forEach(r => {
+    const char = (r.characteristics || '').trim()
+    if (char.includes('ไม่ตรงเกณฑ์') || char.includes('ไม่ตรงตามเกณฑ์')) countNotMatch++
+    else if (char.includes('ตรงเกณฑ์') || char.includes('ตรงตามเกณฑ์')) countMatch++
+    else if (char.includes('ไม่มี')) countNoSpec++
+    else if (char) countNotMatch++
+  })
+
+  const agenda1Text = `การประชุมครั้งนี้เพื่อพิจารณารายงานการบริหารและจัดหาระบบคอมพิวเตอร์ภาครัฐของหน่วยงานในสังกัดทั้งหมด ${totalAgencies} แห่ง ` +
+    `รวมเป็นรายการที่ตรงตามเกณฑ์คุณลักษณะราคากลาง ${countMatch} รายการ, ` +
+    `ไม่ตรงตามเกณฑ์คุณลักษณะราคากลาง ${countNotMatch} รายการ ` +
+    `และไม่มีในเกณฑ์ราคากลาง ${countNoSpec} รายการ ` +
+    `รวมทั้งสิ้น ${state.records.length} รายการ`
+
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <h2 style="font-size:1.1rem;font-weight:700;">บันทึกมติ: ${escHtml(state.currentMeeting.name)}</h2>
@@ -719,8 +736,9 @@ function renderResolution(el) {
       <div class="card-body">
         <div class="alert alert-info" style="margin-bottom:0;">
           <strong>วาระที่ ๑ เรื่องที่ประธานแจ้งให้ที่ประชุมทราบ</strong><br>
-          <span style="font-size:0.85rem;"><em>*ข้อมูลวาระนี้จะถูกสร้างอัตโนมัติในหน้ารายงานการประชุม</em></span>
-          <br><br>
+          <div style="margin-top:4px; margin-bottom:12px; font-size:0.9rem; padding:8px; background:rgba(255,255,255,0.5); border-radius:4px;">
+            ${escHtml(agenda1Text)}
+          </div>
           <strong>วาระที่ ๒ เรื่องรับรองรายงานการประชุม</strong><br>
           <textarea id="res-agenda2" class="form-control" style="margin-top:8px;font-size:0.85rem;" rows="2" placeholder="พิมพ์ข้อความวาระที่ 2 รับรองรายงานการประชุมที่นี่..." onchange="if(state.currentMeeting) state.currentMeeting.agenda2_text = this.value; const m = document.getElementById('min-agenda2'); if(m) m.value = this.value;">${escHtml(state.currentMeeting?.agenda2_text || '')}</textarea>
         </div>
