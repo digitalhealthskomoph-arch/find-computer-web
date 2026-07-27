@@ -50,7 +50,12 @@ async function loadDashboard() {
 
     if (mErr) throw mErr
 
-    const { data: records } = await supabase.from('records').select('*')
+    let { data: records } = await supabase.from('records').select('*')
+    records = (records || []).map(r => {
+      if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+      return r
+    })
 
     renderStats(meetings, records)
     renderMeetings(meetings, records)

@@ -301,8 +301,12 @@ window.selectMeeting = async (id) => {
   state.currentMeeting = state.meetings.find(m => m.id === id) || null
   state.activeTab = 'records'
   if (state.currentMeeting) {
-    const { data } = await supabase.from('records').select('*').eq('meeting_id', id).order('created_at')
-    state.records = data || []
+    let { data } = await supabase.from('records').select('*').eq('meeting_id', id).order('created_at')
+    state.records = (data || []).map(r => {
+      if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+      return r
+    })
     const { data: a3 } = await supabase.from('agenda3_items').select('*').eq('meeting_id', id).order('order_num')
     state.agenda3Items = a3 || []
   }
@@ -511,12 +515,24 @@ window.onItemSelect = (id) => {
 }
 
 window.calcTotal = (id) => {
-  const qty = parseFloat(document.getElementById('qty-' + id).value) || 0
-  const price = parseFloat(document.getElementById('price-' + id).value) || 0
-  const stdPrice = parseFloat(document.getElementById('stdprice-' + id).value) || 0
-  document.getElementById('total-' + id).value = formatCurrency(qty * price)
-  if (stdPrice > 0) {
-    document.getElementById('char-' + id).value = price <= stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+  const qtyInput = document.getElementById('qty-' + id)?.value || '0'
+  const priceInput = document.getElementById('price-' + id)?.value || '0'
+  const stdInput = document.getElementById('stdprice-' + id)?.value || '0'
+  
+  const qty = parseFloat(qtyInput.replace(/,/g, '')) || 0
+  const price = parseFloat(priceInput.replace(/,/g, '')) || 0
+  const stdPrice = parseFloat(stdInput.replace(/,/g, '')) || 0
+  
+  const totalEl = document.getElementById('total-' + id)
+  if (totalEl) totalEl.value = formatCurrency(qty * price)
+  
+  const charEl = document.getElementById('char-' + id)
+  if (charEl) {
+    if (stdPrice > 0) {
+      charEl.value = price <= stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    } else {
+      charEl.value = 'ไม่มีในเกณฑ์ราคากลาง'
+    }
   }
 }
 
@@ -552,17 +568,27 @@ window.saveRecords = async () => {
     let fund = document.getElementById('fund-' + id)?.value || ''
     if (fund === 'อื่นๆ') fund = document.getElementById('fund-other-' + id)?.value || 'อื่นๆ'
 
+    const stdPrice = parseFloat(String(document.getElementById('stdprice-' + id)?.value || '0').replace(/,/g, '')) || 0
+    const unitPrice = parseFloat(String(document.getElementById('price-' + id)?.value || '0').replace(/,/g, '')) || 0
+    
+    let char = ''
+    if (stdPrice > 0) {
+      char = unitPrice <= stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    } else {
+      char = 'ไม่มีในเกณฑ์ราคากลาง'
+    }
+
     rows.push({
       meeting_id: state.currentMeeting.id,
       district,
       agency,
       item_name: itemName,
-      quantity: parseInt(document.getElementById('qty-' + id)?.value) || 1,
+      quantity: parseInt(String(document.getElementById('qty-' + id)?.value || '1').replace(/,/g, '')) || 1,
       unit: document.getElementById('unit-' + id)?.value || '',
-      standard_price: parseFloat(document.getElementById('stdprice-' + id)?.value) || 0,
-      unit_price: parseFloat(document.getElementById('price-' + id)?.value) || 0,
+      standard_price: stdPrice,
+      unit_price: unitPrice,
       total_price: parseFloat(String(document.getElementById('total-' + id)?.value || '0').replace(/,/g, '')) || 0,
-      characteristics: document.getElementById('char-' + id)?.value || '',
+      characteristics: char,
       funding_source: fund,
       procurement_method: document.getElementById('method-' + id)?.value || 'จัดหาใหม่',
       replacement_num: document.getElementById('replace-' + id)?.value || '',
@@ -581,8 +607,12 @@ window.saveRecords = async () => {
 
 window.refreshRecords = async () => {
   if (!state.currentMeeting) return
-  const { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id).order('created_at')
-  state.records = data || []
+  let { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id).order('created_at')
+  state.records = (data || []).map(r => {
+    if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+    return r
+  })
   const listEl = document.getElementById('records-list')
   if (listEl) listEl.innerHTML = renderExistingRecords()
   const header = document.querySelector('.card-header span')
@@ -899,7 +929,12 @@ window.saveAllResolutions = async () => {
   showNotification('บันทึกมติและข้อมูลวาระเรียบร้อยแล้ว')
   
   // Reload records
-  const { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id)
+  let { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id)
+  data = (data || []).map(r => {
+    if (r.standard_price > 0) r.characteristics = r.unit_price <= r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+    return r
+  })
   state.records = data || []
 }
 
