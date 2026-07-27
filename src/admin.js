@@ -818,9 +818,9 @@ function renderResolution(el) {
                                 <select id="res-type-${r.id}" class="form-control" style="font-size:0.85rem;" onchange="toggleResComment('${r.id}')">
                                   <option value="เห็นชอบ" ${r.resolution_type==='เห็นชอบ'?'selected':''}>เห็นชอบ</option>
                                   <option value="ไม่เห็นชอบ" ${r.resolution_type==='ไม่เห็นชอบ'?'selected':''}>ไม่เห็นชอบ</option>
-                                  <option value="เห็นชอบโดยมีเงื่อนไข" ${r.resolution_type==='เห็นชอบโดยมีเงื่อนไข'?'selected':''}>เห็นชอบโดยมีเงื่อนไข</option>
+                                  <option value="อื่นๆ" ${r.resolution_type==='อื่นๆ'?'selected':''}>อื่นๆ</option>
                                 </select>
-                                <input id="res-comment-${r.id}" type="text" class="form-control ${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="font-size:0.85rem;" placeholder="ความเห็น/เหตุผล..." value="${escHtml(r.resolution_comment||'')}">
+                                <input id="res-comment-${r.id}" type="text" class="form-control ${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="font-size:0.85rem;" placeholder="เหตุผล..." value="${escHtml(r.resolution_comment||'')}">
                               </div>
                             </td>
                           </tr>
@@ -865,6 +865,7 @@ window.toggleResComment = (id) => {
 }
 
 window.saveAllResolutions = async () => {
+  // Save resolutions
   const updates = state.records.map(r => {
     const type = document.getElementById('res-type-' + r.id)?.value || 'เห็นชอบ'
     const comment = document.getElementById('res-comment-' + r.id)?.value || ''
@@ -873,7 +874,19 @@ window.saveAllResolutions = async () => {
   for (const u of updates) {
     await supabase.from('records').update({ resolution_type: u.resolution_type, resolution: u.resolution, resolution_comment: u.resolution_comment }).eq('id', u.id)
   }
-  showNotification('บันทึกมติทั้งหมดเรียบร้อยแล้ว')
+
+  // Save meeting details
+  if (state.currentMeeting) {
+    await supabase.from('meetings').update({
+      agenda2_text: state.currentMeeting.agenda2_text || null,
+      agenda5_text: state.currentMeeting.agenda5_text || null,
+      absent_ids: state.currentMeeting.absent_ids || []
+    }).eq('id', state.currentMeeting.id)
+  }
+
+  showNotification('บันทึกมติและข้อมูลวาระเรียบร้อยแล้ว')
+  
+  // Reload records
   const { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id)
   state.records = data || []
 }
@@ -1003,7 +1016,7 @@ window.previewMinutes = async () => {
 
   preview.innerHTML = `
     <div id="print-minutes-container" style="padding:20px;">
-      <style>@media print{@page{size:A4 portrait;margin:2.5cm 2cm 2cm 3cm;} #print-minutes-container{font-family:'TH Sarabun PSK','TH Sarabun New',Sarabun,sans-serif !important;} .no-print{display:none !important;}}</style>
+      <style>@media print{@page{size:A4 portrait;margin:2.5cm 2cm 2cm 3cm;} #print-minutes-container{font-family:'TH Sarabun PSK','TH Sarabun New',Sarabun,sans-serif !important;} .no-print{display:none !important;} .print-black{color:#000!important;}}</style>
       ${html}
     </div>`
 }

@@ -73,7 +73,7 @@ export function buildMinutesHTML(opts) {
         agRecs.forEach(r => {
           agTotal += parseFloat(r.total_price || r.totalPrice) || 0
           const rType = (r.resolution_type || r.resolutionType || r.resolution || 'เห็นชอบ').trim()
-          if (rType === 'เห็นชอบโดยมีเงื่อนไข') condCount++
+          if (rType === 'อื่นๆ') condCount++
           else if (rType === 'เห็นชอบ' || rType.indexOf('เห็นชอบ') === 0) appCount++
           else if (rType === 'ไม่เห็นชอบ' || rType.indexOf('ไม่เห็นชอบ') === 0) rejCount++
         })
@@ -86,20 +86,20 @@ export function buildMinutesHTML(opts) {
           if (appCount > 0) {
             const appItems = agRecs.map((r, idx) => {
               const rT = (r.resolution_type || r.resolutionType || r.resolution || 'เห็นชอบ').trim()
-              return (rT === 'เห็นชอบ' || (rT.indexOf('เห็นชอบ') === 0 && rT !== 'เห็นชอบโดยมีเงื่อนไข')) ? 'รายการที่ ' + toThaiNumeral(idx + 1) : null
+              return (rT === 'เห็นชอบ' || (rT.indexOf('เห็นชอบ') === 0 && rT !== 'อื่นๆ')) ? 'รายการที่ ' + toThaiNumeral(idx + 1) : null
             }).filter(Boolean).join(', ')
             resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;">- <span style="font-weight:bold;">เห็นชอบให้ดำเนินการ</span> จำนวน ' + toThaiNumeral(appCount) + ' รายการ (' + appItems + ')</div>'
           }
           if (condCount > 0) {
             const condDetails = agRecs.map((r, idx) => {
               const rT = (r.resolution_type || r.resolutionType || r.resolution || 'เห็นชอบ').trim()
-              if (rT === 'เห็นชอบโดยมีเงื่อนไข') {
+              if (rT === 'อื่นๆ') {
                 const comm = r.resolution_comment || r.resolutionComment || ''
-                return 'รายการที่ ' + toThaiNumeral(idx + 1) + ' (' + (r.item_name || r.itemName || 'ไม่ระบุ') + ')' + (comm ? ' ข้อเสนอแนะ: ' + comm : '')
+                return 'รายการที่ ' + toThaiNumeral(idx + 1) + ' (' + (r.item_name || r.itemName || 'ไม่ระบุ') + ')' + (comm ? ' เหตุผล: ' + comm : '')
               }
               return null
             }).filter(Boolean).join('; ')
-            resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;color:#f57c00;">- <span style="font-weight:bold;">เห็นชอบโดยมีเงื่อนไข</span> จำนวน ' + toThaiNumeral(condCount) + ' รายการ ได้แก่ ' + condDetails + '</div>'
+            resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;color:#f57c00;" class="print-black">- <span style="font-weight:bold;">อื่นๆ</span> จำนวน ' + toThaiNumeral(condCount) + ' รายการ ได้แก่ ' + condDetails + '</div>'
           }
           if (rejCount > 0) {
             const rejDetails = agRecs.map((r, idx) => {
@@ -110,7 +110,7 @@ export function buildMinutesHTML(opts) {
               }
               return null
             }).filter(Boolean).join('; ')
-            resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;color:#d32f2f;">- <span style="font-weight:bold;">ไม่เห็นชอบ</span> จำนวน ' + toThaiNumeral(rejCount) + ' รายการ ได้แก่ ' + rejDetails + '</div>'
+            resTextHTML += '<div style="text-indent:4.5cm;margin-bottom:4px;color:#d32f2f;" class="print-black">- <span style="font-weight:bold;">ไม่เห็นชอบ</span> จำนวน ' + toThaiNumeral(rejCount) + ' รายการ ได้แก่ ' + rejDetails + '</div>'
           }
         }
 
@@ -214,7 +214,7 @@ export function exportToWord(htmlContent, filename, landscape = false) {
 
   const h1 = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
   const h2 = '<head><meta charset="utf-8"><title>' + filename + '</title>'
-  const h3 = '<style>@page Section1 { ' + pageSize + ' ' + margin + ' mso-header-margin:35.4pt;mso-footer-margin:35.4pt;mso-paper-source:0; } div.Section1 { page:Section1; } body { font-family:"TH Sarabun PSK","TH Sarabun New","Sarabun",sans-serif;font-size:16pt;line-height:1.5;color:#000; } table { width:100%;border-collapse:collapse; } th,td { border:1pt solid black;padding:4pt 6pt;vertical-align:top; }</style></head><body><div class="Section1">'
+  const h3 = '<style>@page Section1 { ' + pageSize + ' ' + margin + ' mso-header-margin:35.4pt;mso-footer-margin:35.4pt;mso-paper-source:0; } div.Section1 { page:Section1; } body { font-family:"TH Sarabun PSK","TH Sarabun New","Sarabun",sans-serif;font-size:16pt;line-height:1.5;color:#000; } table { width:100%;border-collapse:collapse; } th,td { border:1pt solid black;padding:4pt 6pt;vertical-align:top; } .print-black { color: #000 !important; }</style></head><body><div class="Section1">'
   const footer = '</div></body></html>'
   const sourceHTML = h1 + h2 + h3 + htmlContent + footer
 
