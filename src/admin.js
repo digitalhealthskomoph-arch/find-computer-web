@@ -2,6 +2,7 @@ import './style.css'
 import { supabase, GEMINI_KEY } from './lib/supabase.js'
 import { toThaiDate, toThaiNumeral, thaiCurrency, formatCurrency, showNotification } from './lib/utils.js'
 import { buildMinutesHTML, exportToWord } from './lib/minutes.js'
+import { buildSummaryHTML, exportSummaryToWord } from './lib/summary.js'
 import QRCode from 'qrcode'
 
 // ==========================================
@@ -134,6 +135,10 @@ function renderAdmin() {
         <button class="sidebar-item ${state.activeTab==='minutes'?'active':''}" onclick="switchTab('minutes')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           รายงานการประชุม
+        </button>
+        <button class="sidebar-item ${state.activeTab==='summary'?'active':''}" onclick="switchTab('summary')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+          แบบสรุปการจัดหา
         </button>` : ''}
         <div class="sidebar-section">ข้อมูลหลัก</div>
         <button class="sidebar-item ${state.activeTab==='units'?'active':''}" onclick="switchTab('units')">
@@ -197,6 +202,7 @@ function renderTab() {
     case 'records': renderRecords(el); break
     case 'resolution': renderResolution(el); break
     case 'minutes': renderMinutes(el); break
+    case 'summary': renderSummary(el); break
     case 'units': renderUnits(el); break
     case 'items': renderItems(el); break
     case 'committees': renderCommittees(el); break
@@ -947,6 +953,27 @@ function renderAgenda3List() {
       <input class="form-control" id="a3-res-${item.id}" value="${escHtml(item.resolution||'รับทราบ')}" placeholder="มติ" style="width:150px;font-size:0.85rem;">
       <button class="btn btn-danger btn-sm" onclick="deleteAgenda3('${item.id}')">✕</button>
     </div>`).join('')
+}
+
+window.exportWord = () => {
+  const container = document.getElementById('print-minutes-container')
+  if (!container) return
+  const html = container.innerHTML
+  const filename = `รายงานการประชุม_${state.currentMeeting?.name || 'meeting'}`
+  exportToWord(html, filename)
+}
+
+function renderSummary(el) {
+  if (!state.currentMeeting) { el.innerHTML = '<div class="alert alert-warning">กรุณาเลือกรอบประชุมก่อน</div>'; return }
+  el.innerHTML = buildSummaryHTML(state.currentMeeting, state.records)
+}
+
+window.exportSummaryWord = () => {
+  const container = document.getElementById('print-summary-container')
+  if (!container) return
+  const html = container.innerHTML
+  const filename = `แบบสรุปการจัดหา_${state.currentMeeting?.name || 'meeting'}`
+  exportSummaryToWord(html, filename)
 }
 
 window.addAgenda3 = async () => {
