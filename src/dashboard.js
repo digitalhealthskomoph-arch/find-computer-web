@@ -26,6 +26,12 @@ function renderLayout() {
     <div class="hero">
       <h1>ระบบบริหารและจัดหาระบบคอมพิวเตอร์ภาครัฐ</h1>
       <p>สำนักงานสาธารณสุขจังหวัดสระแก้ว</p>
+      <div style="margin-top: 20px;">
+        <a href="https://notebook.google.com/notebook/031dcd5c-b335-4d4a-b20f-7b93e5504050/preview" target="_blank" class="btn" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.4); font-weight:600; border-radius:8px; padding:10px 20px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          สอบถามข้อมูลเกณฑ์การจัดหาฯ (AI Assistant)
+        </a>
+      </div>
     </div>
 
     <div class="container" style="padding-top:24px; padding-bottom:40px;">
