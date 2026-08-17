@@ -423,7 +423,7 @@ function renderRecords(el) {
 function renderExistingRecords() {
   if (state.records.length === 0) return '<p class="text-muted text-center">ยังไม่มีรายการ</p>'
   return `<div class="table-wrap"><table>
-    <thead><tr><th>#</th><th>อำเภอ</th><th>หน่วยงาน</th><th>รายการ</th><th>จำนวน</th><th>รวม (บาท)</th><th>แหล่งเงิน</th><th>มติ</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>อำเภอ</th><th>หน่วยงาน</th><th>รายการ</th><th>จำนวน</th><th>รวม (บาท)</th><th>วิธีจัดหา</th><th>แหล่งเงิน</th><th>มติ</th><th></th></tr></thead>
     <tbody>
       ${state.records.map((r, i) => `<tr>
         <td>${i + 1}</td>
@@ -432,6 +432,7 @@ function renderExistingRecords() {
         <td>${escHtml(r.item_name || '')}</td>
         <td>${r.quantity || ''} ${escHtml(r.unit || '')}</td>
         <td>${formatCurrency(r.total_price)}</td>
+        <td>${escHtml(r.procurement_method || '')}</td>
         <td>${escHtml(r.funding_source || '')}</td>
         <td>${resBadge(r.resolution_type || r.resolution)}</td>
         <td><button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">🗑</button></td>
@@ -832,6 +833,7 @@ function renderResolution(el) {
                           <th>ราคา/หน่วย</th>
                           <th>ราคากลาง</th>
                           <th>วงเงินรวม</th>
+                          <th>วิธีจัดหา</th>
                           <th>เกณฑ์</th>
                           <th style="min-width:280px;">มติความเห็นชอบ</th>
                         </tr>
@@ -848,6 +850,7 @@ function renderResolution(el) {
                             <td>${formatCurrency(r.unit_price)}</td>
                             <td>${formatCurrency(r.standard_price)}</td>
                             <td style="font-weight:600;">${formatCurrency(r.total_price)}</td>
+                            <td>${escHtml(r.procurement_method || '')}</td>
                             <td>${charBadge(r.characteristics)}</td>
                             <td>
                               <div style="display:flex;gap:8px;flex-direction:column;">
