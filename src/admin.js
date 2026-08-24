@@ -442,7 +442,8 @@ function renderExistingRecords() {
 }
 
 function resBadge(val) {
-  if (!val || val === 'เห็นชอบ') return '<span class="badge badge-green">เห็นชอบ</span>'
+  if (!val || val === 'รอการเลือก') return '<span class="badge" style="background:#e2e8f0;color:#475569;">รอการเลือก</span>'
+  if (val === 'เห็นชอบ') return '<span class="badge badge-green">เห็นชอบ</span>'
   if (val.includes('ไม่เห็นชอบ')) return '<span class="badge badge-red">ไม่เห็นชอบ</span>'
   return '<span class="badge badge-orange">' + escHtml(val) + '</span>'
 }
@@ -599,8 +600,8 @@ window.saveRecords = async () => {
       funding_source: fund,
       procurement_method: document.getElementById('method-' + id)?.value || 'จัดหาใหม่',
       replacement_num: document.getElementById('replace-' + id)?.value || '',
-      resolution: 'เห็นชอบ',
-      resolution_type: 'เห็นชอบ',
+      resolution: 'รอการเลือก',
+      resolution_type: 'รอการเลือก',
     })
   })
 
@@ -663,6 +664,7 @@ window.extractPdf = async () => {
   const reader = new FileReader()
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1]
+    const mimeType = file.type || (file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg')
     try {
       const itemNames = state.items.map(i => i.name)
       const prompt = `จงดึงข้อมูลจากเอกสารคำขอจัดหาคอมพิวเตอร์นี้และส่งกลับมาในรูปแบบ JSON Array เท่านั้น ไม่ต้องมีข้อความอื่น:\n[{"itemName":"ชื่อรายการ","quantity":1,"unit":"เครื่อง","unitPrice":20000,"fundingSource":"งบเงินบำรุง","procurementMethod":"จัดหาใหม่","replacementNum":""}]\nถ้ามีหลายรายการสร้าง object เพิ่ม รายชื่อครุภัณฑ์ในระบบ:\n- ${itemNames.join('\n- ')}`
@@ -670,11 +672,19 @@ window.extractPdf = async () => {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: file.type, data: base64 } }] }] })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: mimeType, data: base64 } }] }] })
       })
       const json = await res.json()
+      if (json.error) throw new Error(json.error.message || JSON.stringify(json.error))
+      
       let text = json.candidates?.[0]?.content?.parts?.[0]?.text || ''
-      text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+      const match = text.match(/\[.*\]/s)
+      if (match) {
+        text = match[0]
+      } else {
+        text = text.replace(/```json/gi, '').replace(/```/g, '').trim()
+      }
+      
       const extracted = JSON.parse(text)
 
       resultEl.innerHTML = `<div class="alert alert-success">พบ ${extracted.length} รายการ กดปุ่มด้านล่างเพื่อเพิ่มเข้าตาราง</div>
@@ -687,6 +697,7 @@ window.extractPdf = async () => {
       footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">ปิด</button>
         <button class="btn btn-primary" onclick="applyExtracted()">✅ เพิ่มรายการเข้าตาราง</button>`
     } catch (err) {
+      console.error(err)
       resultEl.innerHTML = `<div class="alert alert-danger">วิเคราะห์ไม่สำเร็จ: ${err.message}</div>`
     }
   }
@@ -855,11 +866,12 @@ function renderResolution(el) {
                             <td>
                               <div style="display:flex;gap:8px;flex-direction:column;">
                                 <select id="res-type-${r.id}" class="form-control" style="font-size:0.85rem;" onchange="toggleResComment('${r.id}')">
+                                  <option value="รอการเลือก" ${!r.resolution_type || r.resolution_type==='รอการเลือก'?'selected':''}>รอการเลือก</option>
                                   <option value="เห็นชอบ" ${r.resolution_type==='เห็นชอบ'?'selected':''}>เห็นชอบ</option>
                                   <option value="ไม่เห็นชอบ" ${r.resolution_type==='ไม่เห็นชอบ'?'selected':''}>ไม่เห็นชอบ</option>
                                   <option value="อื่นๆ" ${r.resolution_type==='อื่นๆ'?'selected':''}>อื่นๆ</option>
                                 </select>
-                                <input id="res-comment-${r.id}" type="text" class="form-control ${r.resolution_type==='เห็นชอบ'?'hidden':''}" style="font-size:0.85rem;" placeholder="เหตุผล..." value="${escHtml(r.resolution_comment||'')}">
+                                <input id="res-comment-${r.id}" type="text" class="form-control ${(!r.resolution_type || r.resolution_type==='เห็นชอบ' || r.resolution_type==='รอการเลือก')?'hidden':''}" style="font-size:0.85rem;" placeholder="เหตุผล..." value="${escHtml(r.resolution_comment||'')}">
                               </div>
                             </td>
                           </tr>
@@ -904,13 +916,13 @@ window.toggleAttendance = (id, isChecked) => {
 window.toggleResComment = (id) => {
   const type = document.getElementById('res-type-' + id)?.value
   const comment = document.getElementById('res-comment-' + id)
-  if (comment) comment.classList.toggle('hidden', type === 'เห็นชอบ')
+  if (comment) comment.classList.toggle('hidden', type === 'เห็นชอบ' || type === 'รอการเลือก')
 }
 
 window.saveAllResolutions = async () => {
   // Save resolutions
   const updates = state.records.map(r => {
-    const type = document.getElementById('res-type-' + r.id)?.value || 'เห็นชอบ'
+    const type = document.getElementById('res-type-' + r.id)?.value || 'รอการเลือก'
     const comment = document.getElementById('res-comment-' + r.id)?.value || ''
     return { id: r.id, resolution_type: type, resolution: type, resolution_comment: comment }
   })

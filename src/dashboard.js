@@ -176,10 +176,22 @@ function renderMeetingTable(recs, mId) {
           <span class="badge badge-green">รวม ${formatCurrency(total)} บาท</span>
         </div>
         <div id="detail-${agencyId}" class="table-wrap">
-          <table style="margin:0; border-top:1px solid var(--border);">
+          <table style="margin:0; border-top:1px solid var(--border); table-layout: fixed; width: 100%;">
+            <colgroup>
+              <col style="width: 5%;">
+              <col style="width: 23%;">
+              <col style="width: 8%;">
+              <col style="width: 8%;">
+              <col style="width: 8%;">
+              <col style="width: 8%;">
+              <col style="width: 10%;">
+              <col style="width: 10%;">
+              <col style="width: 10%;">
+              <col style="width: 10%;">
+            </colgroup>
             <thead>
               <tr>
-                <th style="width:50px;text-align:center;">ลำดับ</th>
+                <th style="text-align:center;">ลำดับ</th>
                 <th>รายการครุภัณฑ์</th>
                 <th>จำนวน/หน่วย</th>
                 <th>ราคากลาง</th>
@@ -218,7 +230,7 @@ function renderMeetingTable(recs, mId) {
 }
 
 function resolutionBadge(val, comment) {
-  if (!val) return ''
+  if (!val || val === 'รอการเลือก') return '<span class="badge" style="background:#e2e8f0;color:#475569;">รอการเลือก</span>'
   let out = ''
   if (val.includes('เห็นชอบ') && !val.includes('ไม่')) out = '<span class="badge badge-green">เห็นชอบ</span>'
   else if (val.includes('ไม่เห็นชอบ')) out = '<span class="badge badge-red">ไม่เห็นชอบ</span>'
