@@ -648,38 +648,38 @@ window.editRecord = (id) => {
     <div class="modal-header"><span>แก้ไขรายการ</span><button class="modal-close" onclick="closeModal()">✕</button></div>
     <div class="modal-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div><label class="form-label">อำเภอ</label><input type="text" id="edit-dist" class="form-control" value="\${escHtml(r.district||'')}"></div>
-        <div><label class="form-label">หน่วยงาน</label><input type="text" id="edit-agency" class="form-control" value="\${escHtml(r.agency||'')}"></div>
+        <div><label class="form-label">อำเภอ</label><input type="text" id="edit-dist" class="form-control" value="${escHtml(r.district||'')}"></div>
+        <div><label class="form-label">หน่วยงาน</label><input type="text" id="edit-agency" class="form-control" value="${escHtml(r.agency||'')}"></div>
       </div>
       <div class="form-group">
         <label class="form-label">รายการครุภัณฑ์</label>
-        <input type="text" id="edit-item" class="form-control" value="\${escHtml(r.item_name||'')}">
+        <input type="text" id="edit-item" class="form-control" value="${escHtml(r.item_name||'')}">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div><label class="form-label">จำนวน</label><input type="number" id="edit-qty" class="form-control" value="\${r.quantity||''}" oninput="calcEditTotal()"></div>
-        <div><label class="form-label">หน่วยนับ</label><input type="text" id="edit-unit" class="form-control" value="\${escHtml(r.unit||'')}"></div>
+        <div><label class="form-label">จำนวน</label><input type="number" id="edit-qty" class="form-control" value="${r.quantity||''}" oninput="calcEditTotal()"></div>
+        <div><label class="form-label">หน่วยนับ</label><input type="text" id="edit-unit" class="form-control" value="${escHtml(r.unit||'')}"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div><label class="form-label">ราคาต่อหน่วย</label><input type="number" id="edit-price" class="form-control" value="\${r.unit_price||''}" oninput="calcEditTotal()"></div>
-        <div><label class="form-label">ราคากลาง</label><input type="number" id="edit-std" class="form-control" value="\${r.standard_price||''}"></div>
-        <div><label class="form-label">รวม (บาท)</label><input type="number" id="edit-total" class="form-control" value="\${r.total_price||''}" readonly style="background:#f1f5f9;"></div>
+        <div><label class="form-label">ราคาต่อหน่วย</label><input type="number" id="edit-price" class="form-control" value="${r.unit_price||''}" oninput="calcEditTotal()"></div>
+        <div><label class="form-label">ราคากลาง</label><input type="number" id="edit-std" class="form-control" value="${r.standard_price||''}"></div>
+        <div><label class="form-label">รวม (บาท)</label><input type="number" id="edit-total" class="form-control" value="${r.total_price||''}" readonly style="background:#f1f5f9;"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
         <div>
           <label class="form-label">วิธีจัดหา</label>
           <select id="edit-method" class="form-control">
-            <option value="จัดหาใหม่" \${r.procurement_method==='จัดหาใหม่'?'selected':''}>จัดหาใหม่</option>
-            <option value="ทดแทน" \${r.procurement_method==='ทดแทน'?'selected':''}>ทดแทน</option>
-            <option value="เช่า" \${r.procurement_method==='เช่า'?'selected':''}>เช่า</option>
-            <option value="รับบริจาค" \${r.procurement_method==='รับบริจาค'?'selected':''}>รับบริจาค</option>
+            <option value="จัดหาใหม่" ${r.procurement_method==='จัดหาใหม่'?'selected':''}>จัดหาใหม่</option>
+            <option value="ทดแทน" ${r.procurement_method==='ทดแทน'?'selected':''}>ทดแทน</option>
+            <option value="เช่า" ${r.procurement_method==='เช่า'?'selected':''}>เช่า</option>
+            <option value="รับบริจาค" ${r.procurement_method==='รับบริจาค'?'selected':''}>รับบริจาค</option>
           </select>
         </div>
-        <div><label class="form-label">แหล่งเงิน</label><input type="text" id="edit-fund" class="form-control" value="\${escHtml(r.funding_source||'')}"></div>
+        <div><label class="form-label">แหล่งเงิน</label><input type="text" id="edit-fund" class="form-control" value="${escHtml(r.funding_source||'')}"></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="saveEditedRecord('\${r.id}')">💾 บันทึก</button>
+      <button class="btn btn-primary" onclick="saveEditedRecord('${r.id}')">💾 บันทึก</button>
     </div>
   `)
 }
@@ -1307,17 +1307,17 @@ window.editAgency = (oldDist, oldAgency) => {
       </div>
       <div class="form-group">
         <label class="form-label">อำเภอ (เพิ่มใหม่หรือเลือกที่มีอยู่)</label>
-        <input id="edit-u-dist" list="edit-dist-list" class="form-control" value="\${escHtml(oldDist)}">
-        <datalist id="edit-dist-list">\${districtNames.map(d => \`<option value="\${escHtml(d)}">\`).join('')}</datalist>
+        <input id="edit-u-dist" list="edit-dist-list" class="form-control" value="${escHtml(oldDist)}">
+        <datalist id="edit-dist-list">${districtNames.map(d => `<option value="${escHtml(d)}">`).join('')}</datalist>
       </div>
       <div class="form-group">
         <label class="form-label">ชื่อหน่วยงาน</label>
-        <input id="edit-u-agency" class="form-control" value="\${escHtml(oldAgency)}">
+        <input id="edit-u-agency" class="form-control" value="${escHtml(oldAgency)}">
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="saveEditedAgency('\${escHtml(oldDist)}', '\${escHtml(oldAgency)}')">💾 บันทึกการแก้ไข</button>
+      <button class="btn btn-primary" onclick="saveEditedAgency('${escHtml(oldDist)}', '${escHtml(oldAgency)}')">💾 บันทึกการแก้ไข</button>
     </div>
   `)
 }
