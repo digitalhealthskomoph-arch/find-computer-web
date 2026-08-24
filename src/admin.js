@@ -1236,7 +1236,12 @@ function renderUnits(el) {
                   <td class="text-muted">${di+1}.${ai+1}</td>
                   <td>${escHtml(d)}</td>
                   <td>${escHtml(a)}</td>
-                  <td><button class="btn btn-danger btn-sm" onclick="deleteAgency('${escHtml(d)}','${escHtml(a)}')">🗑 ลบ</button></td>
+                  <td>
+                    <div style="display:flex;gap:4px;">
+                      <button class="btn btn-sm" style="background:#e2e8f0;border:1px solid #cbd5e1;cursor:pointer;" onclick="editAgency('${escHtml(d)}', '${escHtml(a)}')">✏️</button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteAgency('${escHtml(d)}','${escHtml(a)}')">🗑 ลบ</button>
+                    </div>
+                  </td>
                 </tr>`)
             ).join('')}
           </tbody>
@@ -1289,6 +1294,55 @@ window.deleteAgency = async (district, agency) => {
   if (!d) return
   await supabase.from('agencies').delete().eq('district_id', d.id).eq('name', agency)
   showNotification('ลบหน่วยงานเรียบร้อยแล้ว')
+  await loadData()
+}
+
+window.editAgency = (oldDist, oldAgency) => {
+  const districtNames = Object.keys(state.districts).sort()
+  showModal(`
+    <div class="modal-header"><span>แก้ไขหน่วยงาน</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="font-size:0.85rem;">
+        การแก้ไขชื่อจะส่งผลต่อรายการครุภัณฑ์ที่เคยบันทึกไว้ด้วยชื่อเก่าให้เปลี่ยนเป็นชื่อใหม่โดยอัตโนมัติ
+      </div>
+      <div class="form-group">
+        <label class="form-label">อำเภอ (เพิ่มใหม่หรือเลือกที่มีอยู่)</label>
+        <input id="edit-u-dist" list="edit-dist-list" class="form-control" value="\${escHtml(oldDist)}">
+        <datalist id="edit-dist-list">\${districtNames.map(d => \`<option value="\${escHtml(d)}">\`).join('')}</datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อหน่วยงาน</label>
+        <input id="edit-u-agency" class="form-control" value="\${escHtml(oldAgency)}">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveEditedAgency('\${escHtml(oldDist)}', '\${escHtml(oldAgency)}')">💾 บันทึกการแก้ไข</button>
+    </div>
+  `)
+}
+
+window.saveEditedAgency = async (oldDist, oldAgency) => {
+  const newDist = document.getElementById('edit-u-dist').value.trim()
+  const newAgency = document.getElementById('edit-u-agency').value.trim()
+  
+  if (!newDist || !newAgency) { showNotification('กรุณากรอกข้อมูลให้ครบ', 'error'); return }
+  
+  const { data: oldD } = await supabase.from('districts').select('id').eq('name', oldDist).single()
+  if (!oldD) return
+  
+  const { data: dData } = await supabase.from('districts').upsert({ name: newDist }, { onConflict: 'name' }).select().single()
+  const newDistId = dData?.id
+  if (!newDistId) { showNotification('เกิดข้อผิดพลาดในการดึงรหัสอำเภอ', 'error'); return }
+  
+  const { error: updErr } = await supabase.from('agencies').update({ name: newAgency, district_id: newDistId }).eq('district_id', oldD.id).eq('name', oldAgency)
+  if (updErr) { showNotification('เกิดข้อผิดพลาด: ' + updErr.message, 'error'); return }
+  
+  const { error: recErr } = await supabase.from('records').update({ district: newDist, agency: newAgency }).eq('district', oldDist).eq('agency', oldAgency)
+  if (recErr) console.error("Error updating records:", recErr)
+  
+  showNotification('แก้ไขข้อมูลหน่วยงานและอัปเดตรายการเดิมเรียบร้อยแล้ว')
+  closeModal()
   await loadData()
 }
 
