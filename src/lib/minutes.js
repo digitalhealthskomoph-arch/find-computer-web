@@ -61,6 +61,10 @@ export function buildMinutesHTML(opts) {
     Object.keys(reportData).forEach(district => {
       districtNum++
       const districtThai = toThaiNumeral(districtNum)
+      
+      // Add District Heading
+      agenda4Body += '<div style="text-indent:2cm;margin-bottom:4px;font-weight:bold;">๔.' + districtThai + ' อำเภอ' + district + '</div>'
+      
       const agencies = reportData[district]
       let agencyNum = 0
       Object.keys(agencies).forEach(agency => {
