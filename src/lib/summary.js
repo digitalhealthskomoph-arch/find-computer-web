@@ -25,7 +25,10 @@ export function buildSummaryHTML(meeting, records) {
     `
     for (const agency in grouped[district]) {
       const items = grouped[district][agency]
+      let agencyTotal = 0
+      
       items.forEach((item, index) => {
+        agencyTotal += parseFloat(item.total_price) || 0
         const isFirst = index === 0
         
         let charOk = '', charNotOk = '', charNone = ''
@@ -44,7 +47,7 @@ export function buildSummaryHTML(meeting, records) {
 
         tableBody += `
           <tr>
-            ${isFirst ? `<td rowspan="${items.length}" style="border:1px solid black; padding:4px; vertical-align:top;">${escHtml(agency)}</td>` : ''}
+            ${isFirst ? `<td rowspan="${items.length + 1}" style="border:1px solid black; padding:4px; vertical-align:top;">${escHtml(agency)}</td>` : ''}
             <td style="border:1px solid black; padding:4px; text-align:center;">${index + 1}</td>
             <td style="border:1px solid black; padding:4px;">${escHtml(item.item_name || '')}</td>
             <td style="border:1px solid black; padding:4px; text-align:center;">${item.quantity || ''}</td>
@@ -61,6 +64,14 @@ export function buildSummaryHTML(meeting, records) {
           </tr>
         `
       })
+      
+      tableBody += `
+        <tr>
+          <td colspan="6" style="border:1px solid black; padding:4px; text-align:right; font-weight:bold;">รวมเป็นเงิน (${escHtml(agency)})</td>
+          <td style="border:1px solid black; padding:4px; text-align:right; font-weight:bold;">${formatCurrency(agencyTotal)}</td>
+          <td colspan="6" style="border:1px solid black; padding:4px; background:#f8fafc;"></td>
+        </tr>
+      `
     }
   }
 
