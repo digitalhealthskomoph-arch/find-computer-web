@@ -435,7 +435,12 @@ function renderExistingRecords() {
         <td>${escHtml(r.procurement_method || '')}</td>
         <td>${escHtml(r.funding_source || '')}</td>
         <td>${resBadge(r.resolution_type || r.resolution)}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">🗑</button></td>
+        <td>
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-sm" style="background:#e2e8f0;border:1px solid #cbd5e1;cursor:pointer;" onclick="editRecord('${r.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">🗑</button>
+          </div>
+        </td>
       </tr>`).join('')}
     </tbody>
   </table></div>`
@@ -632,6 +637,81 @@ window.deleteRecord = async (id) => {
   if (!confirm('ลบรายการนี้?')) return
   await supabase.from('records').delete().eq('id', id)
   showNotification('ลบรายการเรียบร้อยแล้ว')
+  await refreshRecords()
+}
+
+window.editRecord = (id) => {
+  const r = state.records.find(x => x.id === id)
+  if (!r) return
+  
+  showModal(`
+    <div class="modal-header"><span>แก้ไขรายการ</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">อำเภอ</label><input type="text" id="edit-dist" class="form-control" value="\${escHtml(r.district||'')}"></div>
+        <div><label class="form-label">หน่วยงาน</label><input type="text" id="edit-agency" class="form-control" value="\${escHtml(r.agency||'')}"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รายการครุภัณฑ์</label>
+        <input type="text" id="edit-item" class="form-control" value="\${escHtml(r.item_name||'')}">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">จำนวน</label><input type="number" id="edit-qty" class="form-control" value="\${r.quantity||''}" oninput="calcEditTotal()"></div>
+        <div><label class="form-label">หน่วยนับ</label><input type="text" id="edit-unit" class="form-control" value="\${escHtml(r.unit||'')}"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">ราคาต่อหน่วย</label><input type="number" id="edit-price" class="form-control" value="\${r.unit_price||''}" oninput="calcEditTotal()"></div>
+        <div><label class="form-label">ราคากลาง</label><input type="number" id="edit-std" class="form-control" value="\${r.standard_price||''}"></div>
+        <div><label class="form-label">รวม (บาท)</label><input type="number" id="edit-total" class="form-control" value="\${r.total_price||''}" readonly style="background:#f1f5f9;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label class="form-label">วิธีจัดหา</label>
+          <select id="edit-method" class="form-control">
+            <option value="จัดหาใหม่" \${r.procurement_method==='จัดหาใหม่'?'selected':''}>จัดหาใหม่</option>
+            <option value="ทดแทน" \${r.procurement_method==='ทดแทน'?'selected':''}>ทดแทน</option>
+            <option value="เช่า" \${r.procurement_method==='เช่า'?'selected':''}>เช่า</option>
+            <option value="รับบริจาค" \${r.procurement_method==='รับบริจาค'?'selected':''}>รับบริจาค</option>
+          </select>
+        </div>
+        <div><label class="form-label">แหล่งเงิน</label><input type="text" id="edit-fund" class="form-control" value="\${escHtml(r.funding_source||'')}"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveEditedRecord('\${r.id}')">💾 บันทึก</button>
+    </div>
+  `)
+}
+
+window.calcEditTotal = () => {
+  const qty = parseFloat(document.getElementById('edit-qty').value) || 0
+  const price = parseFloat(document.getElementById('edit-price').value) || 0
+  document.getElementById('edit-total').value = qty * price
+}
+
+window.saveEditedRecord = async (id) => {
+  const updates = {
+    district: document.getElementById('edit-dist').value,
+    agency: document.getElementById('edit-agency').value,
+    item_name: document.getElementById('edit-item').value,
+    quantity: parseFloat(document.getElementById('edit-qty').value) || 0,
+    unit: document.getElementById('edit-unit').value,
+    unit_price: parseFloat(document.getElementById('edit-price').value) || 0,
+    standard_price: parseFloat(document.getElementById('edit-std').value) || 0,
+    total_price: parseFloat(document.getElementById('edit-total').value) || 0,
+    procurement_method: document.getElementById('edit-method').value,
+    funding_source: document.getElementById('edit-fund').value,
+  }
+  
+  const { error } = await supabase.from('records').update(updates).eq('id', id)
+  if (error) {
+    showNotification('เกิดข้อผิดพลาด: ' + error.message, 'error')
+    return
+  }
+  
+  showNotification('บันทึกการแก้ไขเรียบร้อยแล้ว')
+  closeModal()
   await refreshRecords()
 }
 
