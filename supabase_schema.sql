@@ -37,16 +37,12 @@ CREATE TABLE IF NOT EXISTS public.ropa_records (
 -- เปิดใช้งาน Row Level Security (RLS)
 ALTER TABLE public.ropa_records ENABLE ROW LEVEL SECURITY;
 
--- นโยบาย RLS: อนุญาตให้อ่านข้อมูลได้ทุกคน
-DO 3687 
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ropa_records' AND policyname = 'Allow public read on ropa_records') THEN
-    CREATE POLICY "Allow public read on ropa_records" ON public.ropa_records FOR SELECT USING (true);
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'ropa_records' AND policyname = 'Allow public insert and update on ropa_records') THEN
-    CREATE POLICY "Allow public insert and update on ropa_records" ON public.ropa_records FOR ALL USING (true) WITH CHECK (true);
-  END IF;
-END 3687;
+-- นโยบาย RLS (Row Level Security)
+DROP POLICY IF EXISTS "Allow public read on ropa_records" ON public.ropa_records;
+CREATE POLICY "Allow public read on ropa_records" ON public.ropa_records FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert and update on ropa_records" ON public.ropa_records;
+CREATE POLICY "Allow public insert and update on ropa_records" ON public.ropa_records FOR ALL USING (true) WITH CHECK (true);
 
 -- =======================================================
 -- ข้อมูลตั้งต้นที่ Migrate มาจาก ROPA System.xlsx (26 รายการ)
