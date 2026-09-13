@@ -52,12 +52,38 @@ export const DATA_CATEGORIES = [
   'ข้อมูลภาพบันทึกจากกล้องวงจรปิด (CCTV)'
 ]
 
-export const DATA_OWNERS = [
-  'ผู้รับบริการ / ผู้ป่วย / ประชาชนทั่วไป',
-  'ข้าราชการ / พนักงานราชการ / ลูกจ้าง สสจ.',
-  'อาสาสมัครสาธารณสุขประจำหมู่บ้าน (อสม.)',
-  'คู่สัญญา / ผู้ให้บริการภายนอก (Vendor)'
+export const PHYSICAL_STORAGE_OPTIONS = [
+  'ตู้เอกสาร/ห้องเอกสาร',
+  'เข้าแฟ้ม',
+  'โต๊ะทำงาน',
+  'คลังเอกสาร',
+  'ห้องมั่นคง',
+  'อื่นๆ'
 ]
+
+export const ELECTRONIC_STORAGE_OPTIONS = [
+  'ระบบฐานข้อมูล',
+  'เครื่องคอมพิวเตอร์',
+  'External Harddisk',
+  'Share Drive',
+  'HRM',
+  'CRM',
+  'อื่นๆ'
+]
+
+export const TRANSFER_METHODS = [
+  'กระดาษ',
+  'อิเล็กทรอนิกส์',
+  'ทั้งสองรูปแบบ'
+]
+
+export const DISPOSAL_METHODS = [
+  'เครื่องหั่นทำลายเอกสาร',
+  'มาตรฐาน DOD 522.22 M',
+  'ทุบหรือบดให้เสียหาย',
+  'ลบจากฐานข้อมูลถาวร'
+]
+
 
 export const DEFAULT_ROPA_RECORDS = [
   {
