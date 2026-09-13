@@ -3,12 +3,15 @@ import { supabase, GEMINI_KEY } from './lib/supabase.js'
 import { toThaiDate, toThaiNumeral, thaiCurrency, formatCurrency, showNotification } from './lib/utils.js'
 import { buildMinutesHTML, exportToWord } from './lib/minutes.js'
 import { buildSummaryHTML, exportSummaryToWord } from './lib/summary.js'
+import { renderCyberModule } from './modules/cyber/index.js'
+import { renderPdpaModule } from './modules/pdpa/index.js'
 import QRCode from 'qrcode'
 
 // ==========================================
 // State
 // ==========================================
 let state = {
+  currentModule: 'procurement', // 'procurement' | 'cyber' | 'pdpa'
   user: null,
   meetings: [],
   currentMeeting: null,
@@ -103,21 +106,43 @@ function renderLogin() {
 // ==========================================
 function renderAdmin() {
   app.innerHTML = `
-    <nav class="navbar no-print">
-      <div class="navbar-brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-        </svg>
-        Admin | ระบบจัดหาคอมพิวเตอร์
+    <nav class="navbar no-print" style="padding:10px 24px;">
+      <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div class="navbar-brand" style="font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;color:#60a5fa;">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+          S.K.O. Digital Governance
+        </div>
+
+        <!-- Portal Module Switcher -->
+        <div class="portal-nav">
+          <button class="portal-nav-btn ${state.currentModule==='procurement'?'active':''}" onclick="switchModule('procurement')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            1. จัดหาคอมพิวเตอร์
+          </button>
+          <button class="portal-nav-btn ${state.currentModule==='cyber'?'active':''}" onclick="switchModule('cyber')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            2. พรบ.ไซเบอร์ & CII
+          </button>
+          <button class="portal-nav-btn ${state.currentModule==='pdpa'?'active':''}" onclick="switchModule('pdpa')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            3. ธรรมาภิบาลข้อมูล & PDPA
+          </button>
+        </div>
       </div>
-      <div class="navbar-links">
+
+      <div class="navbar-links" style="display:flex; align-items:center; gap:12px;">
         <span style="color:rgba(255,255,255,0.7);font-size:0.8rem;">${state.user?.email || ''}</span>
-        <button onclick="logout()">ออกจากระบบ</button>
-        <a href="/">ดู Dashboard</a>
+        <button onclick="logout()" class="btn" style="background:rgba(255,255,255,0.15);color:#fff;padding:6px 12px;font-size:0.8rem;border:none;border-radius:6px;cursor:pointer;">ออกจากระบบ</button>
+        <a href="/" target="_blank" style="color:#93c5fd;font-size:0.82rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+          ดู Dashboard หน้าแรก ↗
+        </a>
       </div>
     </nav>
     <div class="admin-layout">
-      <aside class="sidebar no-print">
+      <!-- Procurement Sidebar (Only shown when module is procurement) -->
+      <aside class="sidebar no-print" id="procurement-sidebar" style="${state.currentModule==='procurement'?'':'display:none;'}">
         <div class="sidebar-section">การประชุม</div>
         <button class="sidebar-item ${state.activeTab==='meetings'?'active':''}" onclick="switchTab('meetings')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -164,6 +189,18 @@ function renderAdmin() {
 
 window.logout = async () => { await supabase.auth.signOut() }
 window.switchTab = (tab) => { state.activeTab = tab; renderTab() }
+window.switchModule = (mod) => {
+  state.currentModule = mod
+  renderAdmin()
+  const el = document.getElementById('main-content')
+  if (mod === 'procurement') {
+    renderTab()
+  } else if (mod === 'cyber') {
+    renderCyberModule(el)
+  } else if (mod === 'pdpa') {
+    renderPdpaModule(el)
+  }
+}
 
 // ==========================================
 // Load All Data
@@ -182,12 +219,30 @@ async function loadData() {
   ;(dRes.data || []).forEach(d => {
     state.districts[d.name] = (d.agencies || []).map(a => a.name)
   })
-  renderTab()
+  
+  const el = document.getElementById('main-content')
+  if (state.currentModule === 'procurement') {
+    renderTab()
+  } else if (state.currentModule === 'cyber') {
+    renderCyberModule(el)
+  } else if (state.currentModule === 'pdpa') {
+    renderPdpaModule(el)
+  }
 }
 
 function renderTab() {
   const el = document.getElementById('main-content')
   if (!el) return
+
+  if (state.currentModule === 'cyber') {
+    renderCyberModule(el)
+    return
+  }
+  if (state.currentModule === 'pdpa') {
+    renderPdpaModule(el)
+    return
+  }
+
   // Re-render sidebar to update active + meeting-specific items
   const sidebar = document.querySelector('.sidebar')
   if (sidebar) {

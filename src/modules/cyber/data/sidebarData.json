@@ -1,0 +1,471 @@
+[
+  {
+    "title": "Dashboard",
+    "href": "/",
+    "icon": "LayoutDashboard"
+  },
+  {
+    "title": "แบบประเมิน CII Self Assessment",
+    "href": "/cii-assessment",
+    "icon": "FileText"
+  },
+  {
+    "title": "ประมวลแนวทางปฏิบัติ",
+    "icon": "FileText",
+    "defaultOpen": true,
+    "children": [
+      {
+        "title": "แผนการตรวจสอบ (Cybersecurity Audit Plan) ด้านการรักษาความมั่นคงปลอดภัยไซเบอร์",
+        "children": [
+          {
+            "title": "1.1 Audit Plan Procedure",
+            "href": "/docs/1.1%20Audit%20Plan%20Procedure"
+          },
+          {
+            "title": "1.2 Audit Plan",
+            "href": "/docs/1.2%20Audit%20Plan"
+          },
+          {
+            "title": "1.3 Audit Programme",
+            "href": "/docs/1.3%20Audit%20Programme"
+          },
+          {
+            "title": "1.4 Audit Report",
+            "href": "/docs/1.4%20Audit%20Report"
+          }
+        ]
+      },
+      {
+        "title": "การประเมินความเสี่ยงด้านการรักษาความมั่นคงปลอดภัยไซเบอร์ (Risk Assessment)",
+        "children": [
+          {
+            "title": "2.1 Risk Management Policy",
+            "href": "/docs/2.1%20Risk%20Management%20Policy"
+          },
+          {
+            "title": "2.2 Risk Assessment Procedure",
+            "href": "/docs/2.2%20Risk%20Assessment%20Procedure"
+          },
+          {
+            "title": "2.3 Risk Assessment and Treatment - Risk Matrix",
+            "href": "/docs/2.3%20Risk%20Assessment%20and%20Treatment%20-%20Risk%20Matrix"
+          },
+          {
+            "title": "2.4 Risk Report",
+            "href": "/docs/2.4%20Risk%20Report"
+          },
+          {
+            "title": "2.5 KRI Document",
+            "href": "/docs/2.5%20KRI%20Document"
+          }
+        ]
+      },
+      {
+        "title": "แผนการรับมือภัยคุกคามไซเบอร์ (IR Plan)",
+        "children": [
+          {
+            "title": "3.1 IR Plan Procedure / IR Plan Manual",
+            "href": "/docs/3.1%20IR%20Plan%20Procedure%20/%20IR%20Plan%20Manual"
+          },
+          {
+            "title": "3.2 รายงานการแจ้งเหตุการณ์",
+            "href": "/docs/3.2%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C"
+          },
+          {
+            "title": "3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์",
+            "href": "/docs/3.2.1%20%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9F%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%84%E0%B8%B8%E0%B8%81%E0%B8%84%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B9%84%E0%B8%8B%E0%B9%80%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C"
+          },
+          {
+            "title": "3.2.2 แบบฟอร์มรายงานละเมิดข้อมูลส่วนบุคคล",
+            "href": "/docs/3.2.2%20%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9F%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%94%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5"
+          }
+        ]
+      },
+      {
+        "title": "เอกสารเพิ่มเติมของประมวลแนวทางปฏิบัติ",
+        "children": [
+          {
+            "title": "ORG Chart - 3 Line of Defence",
+            "href": "/docs/ORG%20Chart%20-%203%20Line%20of%20Defence"
+          },
+          {
+            "title": "หนังสือแจ้งรายชื่อเจ้าหน้าที่ระดับบริหารและระดับปฏิบัติการให้ สสจ, สป, สกมช รับทราบ",
+            "href": "/docs/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%B2%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%9A%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%AB%E0%B9%89%20%E0%B8%AA%E0%B8%AA%E0%B8%88%2C%20%E0%B8%AA%E0%B8%9B%2C%20%E0%B8%AA%E0%B8%81%E0%B8%A1%E0%B8%8A%20%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%97%E0%B8%A3%E0%B8%B2%E0%B8%9A"
+          },
+          {
+            "title": "หนังสือแจ้งการจัดตั้ง, วัตถุประสงค์พร้อมรายชื่อ Sectoral CSIRT ไปให้ สสจ, สป, สกมช รับทราบ",
+            "href": "/docs/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B8%AD%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%2C%20%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%AA%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20Sectoral%20CSIRT%20%E0%B9%84%E0%B8%9B%E0%B9%83%E0%B8%AB%E0%B9%89%20%E0%B8%AA%E0%B8%AA%E0%B8%88%2C%20%E0%B8%AA%E0%B8%9B%2C%20%E0%B8%AA%E0%B8%81%E0%B8%A1%E0%B8%8A%20%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%97%E0%B8%A3%E0%B8%B2%E0%B8%9A"
+          },
+          {
+            "title": "คำสั่งแต่งตั้ง",
+            "href": "/docs/%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B9%81%E0%B8%95%E0%B9%88%E0%B8%87%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "กรอบมาตรฐาน",
+    "icon": "ShieldCheck",
+    "defaultOpen": true,
+    "children": [
+      {
+        "title": "Govern",
+        "children": [
+          {
+            "title": "1.Cybersecurity Management System Policy",
+            "href": "/docs/1.Cybersecurity%20Management%20System%20Policy"
+          },
+          {
+            "title": "2.Cybersecurity Risk Management Policy",
+            "href": "/docs/2.Cybersecurity%20Risk%20Management%20Policy"
+          },
+          {
+            "title": "3.Security Baseline Configuration STD Policy",
+            "href": "/docs/3.Security%20Baseline%20Configuration%20STD%20Policy"
+          },
+          {
+            "title": "4.Remote Connection Policy",
+            "href": "/docs/4.Remote%20Connection%20Policy"
+          },
+          {
+            "title": "5.Removable Storage Media Policy",
+            "href": "/docs/5.Removable%20Storage%20Media%20Policy"
+          },
+          {
+            "title": "6.Information Sharing Policy",
+            "href": "/docs/6.Information%20Sharing%20Policy"
+          },
+          {
+            "title": "7.PDPA Policy",
+            "href": "/docs/7.PDPA%20Policy"
+          }
+        ]
+      },
+      {
+        "title": "Identify",
+        "children": [
+          {
+            "title": "1.Asset Management",
+            "children": [
+              {
+                "title": "1.1 Asset Management Procedure",
+                "href": "/docs/1.1%20Asset%20Management%20Procedure"
+              },
+              {
+                "title": "1.2 Asset Inventory List (IT Asset/Devices Inventory (including Portable and Mobile))",
+                "href": "/docs/1.2%20Asset%20Inventory%20List%20%28IT%20Asset/Devices%20Inventory%20%28including%20Portable%20and%20Mobile%29%29"
+              },
+              {
+                "title": "1.3 Asset Register - ทะเบียนทรัพย์สิน",
+                "href": "/docs/1.3%20Asset%20Register%20-%20%E0%B8%97%E0%B8%B0%E0%B9%80%E0%B8%9A%E0%B8%B5%E0%B8%A2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99"
+              },
+              {
+                "title": "1.4 Risk Assessment of Asset - ประเมินความเสี่ยง",
+                "href": "/docs/1.4%20Risk%20Assessment%20of%20Asset%20-%20%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%87"
+              },
+              {
+                "title": "1.5 BIA Procedure",
+                "href": "/docs/1.5%20BIA%20Procedure"
+              },
+              {
+                "title": "1.6 BIA Evident การวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA)",
+                "href": "/docs/1.6%20BIA%20Evident%20%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%9C%E0%B8%A5%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%9A%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B4%E0%B8%88%20%28Business%20Impact%20Analysis%20-%20BIA%29"
+              },
+              {
+                "title": "1.7 BIA Report",
+                "href": "/docs/1.7%20BIA%20Report"
+              }
+            ]
+          },
+          {
+            "title": "2.Risk Assessment and Risk Management Strategy",
+            "children": [
+              {
+                "title": "2.1 Risk Assessment and Risk Management Strategy Procedure",
+                "href": "/docs/2.1%20Risk%20Assessment%20and%20Risk%20Management%20Strategy%20Procedure"
+              },
+              {
+                "title": "2.2 Risk Register - ทะเบียนความเสี่ยง",
+                "href": "/docs/2.2%20Risk%20Register%20-%20%E0%B8%97%E0%B8%B0%E0%B9%80%E0%B8%9A%E0%B8%B5%E0%B8%A2%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%87"
+              }
+            ]
+          },
+          {
+            "title": "3.Vulnerability Assessment and Penetration Testing",
+            "children": [
+              {
+                "title": "3.1 Vulnerability Assessment and Penetration Testing Procedure",
+                "href": "/docs/3.1%20Vulnerability%20Assessment%20and%20Penetration%20Testing%20Procedure"
+              },
+              {
+                "title": "3.2 เอกสารที่แสดงการประเมินช่องโหว่ โดยแยกตาม IT และ ICS  (Host, Network, Architecture)",
+                "href": "/docs/3.2%20%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%8A%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%AB%E0%B8%A7%E0%B9%88%20%E0%B9%82%E0%B8%94%E0%B8%A2%E0%B9%81%E0%B8%A2%E0%B8%81%E0%B8%95%E0%B8%B2%E0%B8%A1%20IT%20%E0%B9%81%E0%B8%A5%E0%B8%B0%20ICS%20%20%28Host%2C%20Network%2C%20Architecture%29"
+              },
+              {
+                "title": "3.3 เอกสารขั้นตอนการทดสอบเจาะระบบ (Pentest Procedure)",
+                "href": "/docs/3.3%20%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B9%80%E0%B8%88%E0%B8%B2%E0%B8%B0%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20%28Pentest%20Procedure%29"
+              },
+              {
+                "title": "3.4 รายงานสรุปผลการทดสอบเจาะระบบ",
+                "href": "/docs/3.4%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AA%E0%B8%A3%E0%B8%B8%E0%B8%9B%E0%B8%9C%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B9%80%E0%B8%88%E0%B8%B2%E0%B8%B0%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A"
+              },
+              {
+                "title": "3.5 VA Evident",
+                "href": "/docs/3.5%20VA%20Evident"
+              },
+              {
+                "title": "3.6 PT Evident",
+                "href": "/docs/3.6%20PT%20Evident"
+              }
+            ]
+          },
+          {
+            "title": "4.Third Party Management",
+            "children": [
+              {
+                "title": "4.1 Third Part Management Procedure",
+                "href": "/docs/4.1%20Third%20Part%20Management%20Procedure"
+              },
+              {
+                "title": "4.2 กำหนดข้อกำหนดด้านความมั่นคงปลอดภัยไซเบอร์",
+                "href": "/docs/4.2%20%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%94%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A1%E0%B8%B1%E0%B9%88%E0%B8%99%E0%B8%84%E0%B8%87%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%8B%E0%B9%80%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C"
+              },
+              {
+                "title": "4.3 ข้อตกลงระดับการให้บริการ (SLA)",
+                "href": "/docs/4.3%20%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%95%E0%B8%81%E0%B8%A5%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%20%28SLA%29"
+              },
+              {
+                "title": "4.4 เงื่อนไขของสัญญากับผู้ให้บริการภายนอก",
+                "href": "/docs/4.4%20%E0%B9%80%E0%B8%87%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%99%E0%B9%84%E0%B8%82%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%AA%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2%E0%B8%81%E0%B8%B1%E0%B8%9A%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A0%E0%B8%B2%E0%B8%A2%E0%B8%99%E0%B8%AD%E0%B8%81"
+              },
+              {
+                "title": "4.4.1 Risk Assessment for services",
+                "href": "/docs/4.4.1%20Risk%20Assessment%20for%20services"
+              },
+              {
+                "title": "4.5 การประเมินความเสี่ยงที่เกี่ยวข้องกับบริการและห่วงโซ่อุปทานผลิตภัณฑ์ (Risk Assessment for services and product supply chain)",
+                "href": "/docs/4.5%20%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%87%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B9%80%E0%B8%81%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%A7%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B1%E0%B8%9A%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AB%E0%B9%88%E0%B8%A7%E0%B8%87%E0%B9%82%E0%B8%8B%E0%B9%88%E0%B8%AD%E0%B8%B8%E0%B8%9B%E0%B8%97%E0%B8%B2%E0%B8%99%E0%B8%9C%E0%B8%A5%E0%B8%B4%E0%B8%95%E0%B8%A0%E0%B8%B1%E0%B8%93%E0%B8%91%E0%B9%8C%20%28Risk%20Assessment%20for%20services%20and%20product%20supply%20chain%29"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Protect",
+        "children": [
+          {
+            "title": "1.กระบวนการการควบคุมการเข้าถึง (Access Control)",
+            "children": [
+              {
+                "title": "1.1 Access Control Procedure",
+                "href": "/docs/1.1%20Access%20Control%20Procedure"
+              },
+              {
+                "title": "1.2 Logs of all access",
+                "href": "/docs/1.2%20Logs%20of%20all%20access"
+              },
+              {
+                "title": "1.3 User Permission Matrix/Review",
+                "href": "/docs/1.3%20User%20Permission%20Matrix/Review"
+              }
+            ]
+          },
+          {
+            "title": "2.กระบวนการการทำให้ระบบมีความแข็งแกร่ง (System Hardening)",
+            "children": [
+              {
+                "title": "2.1 System Hardening Procedure",
+                "href": "/docs/2.1%20System%20Hardening%20Procedure"
+              },
+              {
+                "title": "2.2 มาตรฐานการกำหนดค่าขั้นต่ำด้านความมั่นคงปลอดภัย (Security Baseline Configuration Standards) สำหรับระบบปฏิบัติการ แอปพลิเคชัน และอุปกรณ์เครือข่ายทั้งหมดของบริการที่สำคัญ",
+                "href": "/docs/2.2%20%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B9%88%E0%B8%B3%E0%B8%94%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A1%E0%B8%B1%E0%B9%88%E0%B8%99%E0%B8%84%E0%B8%87%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%20%28Security%20Baseline%20Configuration%20Standards%29%20%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%9A%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%20%E0%B9%81%E0%B8%AD%E0%B8%9B%E0%B8%9E%E0%B8%A5%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%8A%E0%B8%B1%E0%B8%99%20%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AD%E0%B8%B8%E0%B8%9B%E0%B8%81%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B8%AD%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%AB%E0%B8%A1%E0%B8%94%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%AA%E0%B8%B3%E0%B8%84%E0%B8%B1%E0%B8%8D"
+              },
+              {
+                "title": "2.3 กระบวนการจัดการเปลี่ยนแปลง (Change Management Process Procedure)",
+                "href": "/docs/2.3%20%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%A7%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%9B%E0%B8%A5%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%99%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%20%28Change%20Management%20Process%20Procedure%29"
+              },
+              {
+                "title": "2.3.1 แบบฟอร์มการขอเปลี่ยนแปลงระบบแอปพลิเคชั่น \n(Application Change Request Form)",
+                "href": "/docs/2.3.1%20%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9F%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%A1%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B8%AD%E0%B9%80%E0%B8%9B%E0%B8%A5%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%99%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%AD%E0%B8%9B%E0%B8%9E%E0%B8%A5%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%8A%E0%B8%B1%E0%B9%88%E0%B8%99%20%0A%28Application%20Change%20Request%20Form%29"
+              },
+              {
+                "title": "2.3.2 ใบร้องขอดำเนินการด้านเอกสารในระบบมาตรฐาน",
+                "href": "/docs/2.3.2%20%E0%B9%83%E0%B8%9A%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B8%AD%E0%B8%94%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B4%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%94%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99"
+              }
+            ]
+          },
+          {
+            "title": "3.กระบวนการการเชื่อมต่อระยะไกล (Remote Connection)",
+            "children": [
+              {
+                "title": "3.1 Remote Connection Procedure",
+                "href": "/docs/3.1%20Remote%20Connection%20Procedure"
+              },
+              {
+                "title": "3.1.1 NDA – Non Disclosure Agreement",
+                "href": "/docs/3.1.1%20NDA%20%E2%80%93%20Non%20Disclosure%20Agreement"
+              }
+            ]
+          },
+          {
+            "title": "4.กระบวนการการใช้สื่อเก็บข้อมูลแบบถอดได้ (Removable Storage Media)",
+            "children": [
+              {
+                "title": "4.1 Removable Storage Media Procedure",
+                "href": "/docs/4.1%20Removable%20Storage%20Media%20Procedure"
+              }
+            ]
+          },
+          {
+            "title": "5.กระบวนการการสร้างความตระหนักรู้ด้านความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Awareness)",
+            "children": [
+              {
+                "title": "5.1 Cybersecurity Awareness Procedure",
+                "href": "/docs/5.1%20Cybersecurity%20Awareness%20Procedure"
+              },
+              {
+                "title": "5.2 แผนงานในการสร้างตระหนักรู้ด้านความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Awareness) และกฎหมาย สำหรับพนักงาน ผู้รับเหมา และผู้ให้บริการภายนอกบุคคลที่สาม",
+                "href": "/docs/5.2%20%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%83%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%95%E0%B8%A3%E0%B8%B0%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%B9%E0%B9%89%E0%B8%94%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A1%E0%B8%B1%E0%B9%88%E0%B8%99%E0%B8%84%E0%B8%87%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%8B%E0%B9%80%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%20%28Cybersecurity%20Awareness%29%20%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%8E%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%20%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%87%E0%B8%B2%E0%B8%99%20%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%AB%E0%B8%A1%E0%B8%B2%20%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A0%E0%B8%B2%E0%B8%A2%E0%B8%99%E0%B8%AD%E0%B8%81%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%AA%E0%B8%B2%E0%B8%A1"
+              }
+            ]
+          },
+          {
+            "title": "6.กระบวนการการแบ่งปันข้อมูล (Information Sharing)",
+            "children": [
+              {
+                "title": "6.1 Information Sharing Procedure",
+                "href": "/docs/6.1%20Information%20Sharing%20Procedure"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Detect",
+        "children": [
+          {
+            "title": "1.กระบวนการการตรวจสอบและเฝ้าระวังภัยคุกคามทางไซเบอร์ (Cyber Threat Detection and Monitoring)",
+            "children": [
+              {
+                "title": "1.1 Cyber Threat Detection and Monitoring Procedure",
+                "href": "/docs/1.1%20Cyber%20Threat%20Detection%20and%20Monitoring%20Procedure"
+              },
+              {
+                "title": "1.2 แผนการตรวจสอบและเฝ้าระวังภัยคุกคามไซเบอร์",
+                "href": "/docs/1.2%20%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%84%E0%B8%B8%E0%B8%81%E0%B8%84%E0%B8%B2%E0%B8%A1%E0%B9%84%E0%B8%8B%E0%B9%80%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C"
+              },
+              {
+                "title": "1.3 รายงานการตรวจจับเหตุการณ์ (SIEM Report)",
+                "href": "/docs/1.3%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%88%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%20%28SIEM%20Report%29"
+              },
+              {
+                "title": "1.4 SIEM Evident",
+                "href": "/docs/1.4%20SIEM%20Evident"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Respond",
+        "children": [
+          {
+            "title": "1.กระบวนการแผนการรับมือภัยคุกคามทางไซเบอร์   (Cybersecurity Incident Response Plan)",
+            "children": [
+              {
+                "title": "1.1 Cybersecurity Incident Response Plan Procedure",
+                "href": "/docs/1.1%20Cybersecurity%20Incident%20Response%20Plan%20Procedure"
+              },
+              {
+                "title": "1.2 แผนการรับมือภัยคุกคามทางไซเบอร์",
+                "href": "/docs/1.2%20%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%84%E0%B8%B8%E0%B8%81%E0%B8%84%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B9%84%E0%B8%8B%E0%B9%80%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C"
+              },
+              {
+                "title": "1.3 รายงานการแจ้งเหตุการณ์ภัยคุกคามทางไซเบอร์",
+                "href": "/docs/1.3%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%84%E0%B8%B8%E0%B8%81%E0%B8%84%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B9%84%E0%B8%8B%E0%B9%80%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C"
+              }
+            ]
+          },
+          {
+            "title": "2.กระบวนการแผนการสื่อสารในภาวะวิกฤต (Crisis Communication Plan)",
+            "children": [
+              {
+                "title": "2.1 Crisis Communication Plan Procedure",
+                "href": "/docs/2.1%20Crisis%20Communication%20Plan%20Procedure"
+              },
+              {
+                "title": "2.2 Crisis Communication Plan(แผนการสื่อสารในภาวะวิกฤต)",
+                "href": "/docs/2.2%20Crisis%20Communication%20Plan%28%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%A7%E0%B8%B0%E0%B8%A7%E0%B8%B4%E0%B8%81%E0%B8%A4%E0%B8%95%29"
+              },
+              {
+                "title": "2.3 กระบวนการฝึกซ้อม",
+                "href": "/docs/2.3%20%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%A7%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%8B%E0%B9%89%E0%B8%AD%E0%B8%A1"
+              }
+            ]
+          },
+          {
+            "title": "3.กระบวนการการฝึกซ้อมความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Exercise)",
+            "children": [
+              {
+                "title": "3.1 Cybersecurity Exercise Procedure",
+                "href": "/docs/3.1%20Cybersecurity%20Exercise%20Procedure"
+              },
+              {
+                "title": "3.2 Cybersecurity Exercise Plan.docx",
+                "href": "/docs/3.2%20Cybersecurity%20Exercise%20Plan.docx"
+              },
+              {
+                "title": "3.3 Cybersecurity Exercise Report",
+                "href": "/docs/3.3%20Cybersecurity%20Exercise%20Report"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Recover",
+        "children": [
+          {
+            "title": "1.กระบวนการการรักษาและฟื้นฟูความเสียหายที่เกิดจากภัยคุกคามทางไซเบอร์ (Cybersecurity Resilience and Recovery)",
+            "children": [
+              {
+                "title": "1.1 Cybersecurity Resilience and Recovery Procedure",
+                "href": "/docs/1.1%20Cybersecurity%20Resilience%20and%20Recovery%20Procedure"
+              },
+              {
+                "title": "1.2 คู่มือแผนความต่อเนื่องทางธุรกิจ (Business Continuity Plan : BCP Manual)",
+                "href": "/docs/1.2%20%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%99%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B4%E0%B8%88%20%28Business%20Continuity%20Plan%20%3A%20BCP%20Manual%29"
+              },
+              {
+                "title": "1.3 รายงานการฝึกซ้อม BCP อย่างน้อย ปีละ 1 ครั้ง",
+                "href": "/docs/1.3%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%8B%E0%B9%89%E0%B8%AD%E0%B8%A1%20BCP%20%E0%B8%AD%E0%B8%A2%E0%B9%88%E0%B8%B2%E0%B8%87%E0%B8%99%E0%B9%89%E0%B8%AD%E0%B8%A2%20%E0%B8%9B%E0%B8%B5%E0%B8%A5%E0%B8%B0%201%20%E0%B8%84%E0%B8%A3%E0%B8%B1%E0%B9%89%E0%B8%87"
+              },
+              {
+                "title": "1.4 รายงานแผนความต่อเนื่องทางธุรกิจ (BCP Report)",
+                "href": "/docs/1.4%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%99%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B4%E0%B8%88%20%28BCP%20Report%29"
+              },
+              {
+                "title": "1.5 คู่มือ Backup and Restore",
+                "href": "/docs/1.5%20%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%20Backup%20and%20Restore"
+              },
+              {
+                "title": "1.6 คู่มือ Disaster and Recovery",
+                "href": "/docs/1.6%20%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%20Disaster%20and%20Recovery"
+              },
+              {
+                "title": "1.7 คู่มือ การติดตั้งระบบต่างๆ",
+                "href": "/docs/1.7%20%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%20%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B9%88%E0%B8%B2%E0%B8%87%E0%B9%86"
+              },
+              {
+                "title": "1.8 รายงานการทดสอบระบบต่างๆ ตามที่กำหนด",
+                "href": "/docs/1.8%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B9%88%E0%B8%B2%E0%B8%87%E0%B9%86%20%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

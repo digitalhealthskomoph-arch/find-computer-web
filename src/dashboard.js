@@ -1,28 +1,96 @@
 import './style.css'
 import { supabase } from './lib/supabase.js'
 import { toThaiDate, formatCurrency } from './lib/utils.js'
+import { renderPublicRopa } from './modules/pdpa/publicRopa.js'
 
 const app = document.getElementById('app')
+let currentPublicTab = 'procurement' // 'procurement' | 'ropa'
 
 async function init() {
   renderLayout()
-  await loadDashboard()
+  if (currentPublicTab === 'procurement') {
+    await loadProcurementDashboard()
+  } else {
+    renderPublicRopa(document.getElementById('public-main-content'))
+  }
 }
 
 function renderLayout() {
   app.innerHTML = `
-    <nav class="navbar no-print">
-      <div class="navbar-brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-        </svg>
-        ระบบจัดหาคอมพิวเตอร์ภาครัฐ | สสจ.สระแก้ว
+    <nav class="navbar no-print" style="padding:10px 24px;">
+      <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div class="navbar-brand" style="font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;color:#60a5fa;">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+          ศูนย์บริการข้อมูลดิจิทัล สสจ.สระแก้ว
+        </div>
+
+        <!-- Public Tab Switcher -->
+        <div class="portal-nav">
+          <button class="portal-nav-btn ${currentPublicTab==='procurement'?'active':''}" id="public-tab-procurement">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            1. แดชบอร์ดจัดหาคอมพิวเตอร์
+          </button>
+          <button class="portal-nav-btn ${currentPublicTab==='ropa'?'active':''}" id="public-tab-ropa">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            2. ทะเบียน ROPA (สำหรับบุคลากร)
+          </button>
+        </div>
       </div>
+
       <div class="navbar-links">
-        <a href="/admin.html">เข้าสู่ระบบ Admin</a>
+        <a href="/admin.html" class="btn" style="background:#2563eb; color:#fff; padding:7px 14px; border-radius:6px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; box-shadow:0 2px 4px rgba(0,0,0,0.15);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          เข้าสู่ระบบ Admin
+        </a>
       </div>
     </nav>
 
+    <div id="public-main-content"></div>
+  `
+
+  bindNavEvents()
+}
+
+function bindNavEvents() {
+  const procBtn = document.getElementById('public-tab-procurement')
+  const ropaBtn = document.getElementById('public-tab-ropa')
+
+  if (procBtn) {
+    procBtn.addEventListener('click', async () => {
+      if (currentPublicTab === 'procurement') return
+      currentPublicTab = 'procurement'
+      updateNavButtons()
+      await loadProcurementDashboard()
+    })
+  }
+
+  if (ropaBtn) {
+    ropaBtn.addEventListener('click', () => {
+      if (currentPublicTab === 'ropa') return
+      currentPublicTab = 'ropa'
+      updateNavButtons()
+      const contentEl = document.getElementById('public-main-content')
+      renderPublicRopa(contentEl)
+    })
+  }
+}
+
+function updateNavButtons() {
+  const procBtn = document.getElementById('public-tab-procurement')
+  const ropaBtn = document.getElementById('public-tab-ropa')
+
+  if (procBtn) procBtn.classList.toggle('active', currentPublicTab === 'procurement')
+  if (ropaBtn) ropaBtn.classList.toggle('active', currentPublicTab === 'ropa')
+}
+
+// ==========================================
+// Procurement Dashboard Section
+// ==========================================
+async function loadProcurementDashboard() {
+  const contentEl = document.getElementById('public-main-content')
+  contentEl.innerHTML = `
     <div class="hero">
       <h1>ระบบบริหารและจัดหาระบบคอมพิวเตอร์ภาครัฐ</h1>
       <p>สำนักงานสาธารณสุขจังหวัดสระแก้ว</p>
@@ -45,9 +113,7 @@ function renderLayout() {
       </div>
     </div>
   `
-}
 
-async function loadDashboard() {
   try {
     const { data: meetings, error: mErr } = await supabase
       .from('meetings')
@@ -72,7 +138,6 @@ async function loadDashboard() {
 
 function renderStats(meetings, records) {
   const totalBudget = (records || []).reduce((s, r) => s + (parseFloat(r.total_price) || 0), 0)
-  const totalAgencies = new Set((records || []).map(r => r.agency)).size
   let countMatch = 0, countNoSpec = 0, countNotMatch = 0
   ;(records || []).forEach(r => {
     const char = (r.characteristics || '').trim()
@@ -125,7 +190,6 @@ function renderMeetings(meetings, records) {
   listEl.innerHTML = meetings.map(m => {
     const mRecs = (records || []).filter(r => r.meeting_id === m.id)
     const total = mRecs.reduce((s, r) => s + (parseFloat(r.total_price) || 0), 0)
-    const agencies = new Set(mRecs.map(r => r.agency)).size
     return `
       <div class="meeting-card">
         <div class="meeting-card-header" onclick="toggleMeeting('${m.id}')">
