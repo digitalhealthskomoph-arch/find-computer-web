@@ -1,16 +1,18 @@
 import ciiData from './data/ciiData.json'
 import policyFrameworkData from './data/policyFrameworkData.json'
-import { showNotification } from '../../lib/utils.js'
+import { showNotification, toThaiDate } from '../../lib/utils.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
 const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
+const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
 
 let cyberState = {
   activeTab: 'assessment', // 'assessment' | 'docs' | 'incidents'
   assessmentSubTab: 'assessment', // 'log' | 'instructions' | 'assessment'
   selectedDomainIndex: 0,
   rounds: [],
+  updateLogs: [],
   selectedDoc: {
     category: 'ประมวลแนวทางปฏิบัติ',
     domain: 'แผนการตรวจสอบ (Cybersecurity Audit Plan) ด้านการรักษาความมั่นคงปลอดภัยไซเบอร์',
@@ -101,6 +103,33 @@ function initData() {
   } catch (e) {
     cyberState.docLinks = {}
   }
+
+  // 4. Update Logs
+  try {
+    const savedLogs = localStorage.getItem(LOCAL_STORAGE_LOGS_KEY)
+    if (savedLogs) {
+      cyberState.updateLogs = JSON.parse(savedLogs)
+    } else {
+      cyberState.updateLogs = [
+        {
+          id: 'log_1',
+          date: '2026-02-26',
+          displayDate: '26 กุมภาพันธ์ 2569',
+          content: 'ทำการประเมินสถานภาพอีกครั้ง เพื่อประเมินความพร้อมก่อนการ Audit (ครั้งล่าสุด)',
+          author: 'นายธนกฤต นิธิตันติปัญญา'
+        },
+        {
+          id: 'log_2',
+          date: '2026-02-23',
+          displayDate: '23 กุมภาพันธ์ 2569',
+          content: 'เริ่มดำเนินการสร้าง Template จนแล้วเสร็จและทำการประเมิน (ครั้งที่ 1)',
+          author: 'นายธนกฤต นิธิตันติปัญญา'
+        }
+      ]
+    }
+  } catch (e) {
+    cyberState.updateLogs = []
+  }
 }
 
 initData()
@@ -108,6 +137,12 @@ initData()
 function saveRounds() {
   try {
     localStorage.setItem(LOCAL_STORAGE_ROUNDS_KEY, JSON.stringify(cyberState.rounds))
+  } catch (e) {}
+}
+
+function saveUpdateLogs() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_LOGS_KEY, JSON.stringify(cyberState.updateLogs))
   } catch (e) {}
 }
 
@@ -226,7 +261,10 @@ function bindNavEvents(container) {
   // Save Data
   document.getElementById('cyber-save-data-btn')?.addEventListener('click', () => {
     saveRounds()
-    showNotification('บันทึกข้อมูลการประเมิน CII เรียบร้อยแล้ว', 'success')
+    saveUpdateLogs()
+    saveDocs()
+    saveIncidents()
+    showNotification('บันทึกข้อมูลการประเมิน CII และประวัติการปรับปรุงเรียบร้อยแล้ว', 'success')
   })
 }
 
@@ -302,38 +340,238 @@ function renderCiiAssessmentMainTab(el, container) {
 
 // Subtab 1: Update Log
 function renderUpdateLogSubTab(el) {
+  const logs = cyberState.updateLogs || []
+  const rowsHtml = logs.map((log, idx) => {
+    const displayDate = log.displayDate || (log.date ? toThaiDate(log.date) : '-')
+    const author = log.author || 'เจ้าหน้าที่ผู้รับผิดชอบ'
+    const content = log.content || ''
+    return `
+      <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+        <td style="padding:14px 16px; font-weight:700; color:#1e293b; white-space:nowrap; vertical-align:middle; width:220px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#eff6ff; color:#2563eb; font-size:12px; font-weight:800; border:1px solid #bfdbfe;">
+              ${logs.length - idx}
+            </span>
+            <span>${displayDate}</span>
+          </div>
+        </td>
+        <td style="padding:14px 16px; color:#334155; line-height:1.6; vertical-align:middle;">
+          ${content}
+        </td>
+        <td style="padding:14px 16px; color:#64748b; font-size:13px; white-space:nowrap; vertical-align:middle; width:200px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>${author}</span>
+          </div>
+        </td>
+        <td style="padding:14px 16px; white-space:nowrap; vertical-align:middle; text-align:right; width:160px;">
+          <div style="display:inline-flex; gap:8px; justify-content:flex-end;">
+            <button class="edit-cii-log-btn btn" data-id="${log.id}" style="padding:6px 12px; font-size:12.5px; font-weight:600; background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              แก้ไข
+            </button>
+            <button class="delete-cii-log-btn btn" data-id="${log.id}" style="padding:6px 12px; font-size:12.5px; font-weight:600; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              ลบ
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
+  }).join('')
+
   el.innerHTML = `
     <div style="padding:28px;">
-      <h2 style="font-size:1.25rem; font-weight:700; color:#1e293b; margin-bottom:16px;">
-        ประวัติการปรับปรุง (Update Log)
-      </h2>
-      <div style="overflow-x:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="font-size:1.25rem; font-weight:800; color:#1e293b; margin:0 0 4px 0; display:flex; align-items:center; gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ประวัติการปรับปรุง (Update Log)
+          </h2>
+          <p style="color:#64748b; font-size:0.875rem; margin:0;">
+            บันทึกประวัติการทบทวน แก้ไข และประเมินสถานภาพความมั่นคงปลอดภัยไซเบอร์
+          </p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button id="add-cii-log-btn" class="btn btn-primary" style="background:#2563eb; border-color:#2563eb; font-weight:700; font-size:13px; padding:8px 16px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + เพิ่มประวัติการปรับปรุง
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="border:1px solid #e2e8f0; border-radius:10px; overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px;">
-          <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0; color:#475569;">
+          <thead style="background:#f8fafc; border-bottom:2px solid #e2e8f0; color:#475569;">
             <tr>
-              <th style="padding:12px 16px; font-weight:600; width:240px;">วันที่ปรับปรุง</th>
-              <th style="padding:12px 16px; font-weight:600;">สิ่งที่ปรับปรุง / แก้ไข</th>
+              <th style="padding:12px 16px; font-weight:700; width:220px;">วันที่ปรับปรุง</th>
+              <th style="padding:12px 16px; font-weight:700;">สิ่งที่ปรับปรุง / แก้ไข</th>
+              <th style="padding:12px 16px; font-weight:700; width:200px;">ผู้บันทึก</th>
+              <th style="padding:12px 16px; font-weight:700; width:160px; text-align:right;">จัดการ</th>
             </tr>
           </thead>
           <tbody style="color:#334155;">
-            <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:14px 16px; font-weight:600; color:#1e293b;">26 กุมภาพันธ์ 2569</td>
-              <td style="padding:14px 16px;">ทำการประเมินสถานภาพอีกครั้ง เพื่อประเมินความพร้อมก่อนการ Audit (ครั้งล่าสุด)</td>
-            </tr>
-            <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:14px 16px; font-weight:600; color:#1e293b;">23 กุมภาพันธ์ 2569</td>
-              <td style="padding:14px 16px;">เริ่มดำเนินการสร้าง Template จนแล้วเสร็จและทำการประเมิน (ครั้งที่ 1)</td>
-            </tr>
+            ${rowsHtml || `
+              <tr>
+                <td colspan="4" style="padding:36px; text-align:center; color:#94a3b8;">
+                  <p style="margin:0 0 8px 0; font-weight:600; font-size:15px;">ยังไม่มีประวัติการปรับปรุง</p>
+                  <p style="margin:0; font-size:13px;">กดปุ่ม <strong>+ เพิ่มประวัติการปรับปรุง</strong> ด้านบน เพื่อเริ่มบันทึกรายการแรก</p>
+                </td>
+              </tr>
+            `}
           </tbody>
         </table>
       </div>
     </div>
   `
+
+  // Event listener: Add
+  document.getElementById('add-cii-log-btn')?.addEventListener('click', () => {
+    openUpdateLogModal(null, () => renderUpdateLogSubTab(el))
+  })
+
+  // Event listener: Edit
+  el.querySelectorAll('.edit-cii-log-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id
+      const targetLog = cyberState.updateLogs.find(l => l.id === id)
+      if (targetLog) {
+        openUpdateLogModal(targetLog, () => renderUpdateLogSubTab(el))
+      }
+    })
+  })
+
+  // Event listener: Delete
+  el.querySelectorAll('.delete-cii-log-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id
+      const targetLog = cyberState.updateLogs.find(l => l.id === id)
+      if (!targetLog) return
+      const targetName = targetLog.displayDate || targetLog.date || 'รายการนี้'
+      if (confirm(`ยืนยันการลบประวัติการปรับปรุง "${targetName}" ใช่หรือไม่?`)) {
+        cyberState.updateLogs = cyberState.updateLogs.filter(l => l.id !== id)
+        saveUpdateLogs()
+        showNotification('ลบประวัติการปรับปรุงเรียบร้อยแล้ว', 'success')
+        renderUpdateLogSubTab(el)
+      }
+    })
+  })
+}
+
+function openUpdateLogModal(logToEdit = null, onSaved = null) {
+  const modalContainer = document.getElementById('cyber-modal-container')
+  if (!modalContainer) return
+
+  const isEditing = !!logToEdit
+  const todayISO = new Date().toISOString().split('T')[0]
+  const defaultDate = isEditing ? (logToEdit.date || todayISO) : todayISO
+  const defaultDisplayDate = isEditing 
+    ? (logToEdit.displayDate || toThaiDate(defaultDate))
+    : toThaiDate(defaultDate)
+  const defaultAuthor = isEditing ? (logToEdit.author || '') : 'นายธนกฤต นิธิตันติปัญญา'
+  const defaultContent = isEditing ? (logToEdit.content || '') : ''
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+      <div class="modal" style="background:#fff; border-radius:12px; width:100%; max-width:580px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+        <div class="modal-header" style="background:#1e293b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+            ${isEditing ? '✏️ แก้ไขประวัติการปรับปรุง (Update Log)' : '➕ เพิ่มประวัติการปรับปรุงใหม่ (Update Log)'}
+          </h3>
+          <button id="close-log-modal" style="background:none; border:none; font-size:24px; color:#fff; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <form id="cii-log-form" style="padding:22px; display:flex; flex-direction:column; gap:16px; font-size:14px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">เลือกวันที่ (ค.ศ.) *</label>
+              <input type="date" id="log-date" class="form-control" value="${defaultDate}" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">วันที่แสดงผล (พ.ศ.) *</label>
+              <input type="text" id="log-display-date" class="form-control" value="${defaultDisplayDate}" required placeholder="เช่น 26 กุมภาพันธ์ 2569" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ผู้ทำการปรับปรุง / ผู้บันทึก</label>
+            <input type="text" id="log-author" class="form-control" value="${defaultAuthor}" placeholder="เช่น นายธนกฤต นิธิตันติปัญญา" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">สิ่งที่ปรับปรุง / แก้ไข *</label>
+            <textarea id="log-content" class="form-control" rows="4" required placeholder="ระบุรายละเอียด เช่น ทำการประเมินสถานภาพอีกครั้ง เพื่อประเมินความพร้อมก่อนการ Audit..." style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; line-height:1.5; resize:vertical; box-sizing:border-box;">${defaultContent}</textarea>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px; border-top:1px solid #e2e8f0; padding-top:16px;">
+            <button type="button" id="cancel-log-btn" class="btn" style="background:#f1f5f9; color:#475569; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1;">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="background:#2563eb; border-color:#2563eb; font-weight:700; padding:8px 18px; border-radius:6px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:#fff;">
+              💾 บันทึกข้อมูล
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+
+  const close = () => { modalContainer.innerHTML = '' }
+  document.getElementById('close-log-modal')?.addEventListener('click', close)
+  document.getElementById('cancel-log-btn')?.addEventListener('click', close)
+
+  // Auto update display date when picking date
+  const dateInput = document.getElementById('log-date')
+  const displayDateInput = document.getElementById('log-display-date')
+  dateInput?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      displayDateInput.value = toThaiDate(e.target.value)
+    }
+  })
+
+  document.getElementById('cii-log-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const dateVal = dateInput.value
+    const displayDateVal = displayDateInput.value.trim()
+    const authorVal = document.getElementById('log-author')?.value.trim() || 'เจ้าหน้าที่ผู้รับผิดชอบ'
+    const contentVal = document.getElementById('log-content')?.value.trim()
+
+    if (!contentVal) return
+
+    if (isEditing) {
+      const idx = cyberState.updateLogs.findIndex(l => l.id === logToEdit.id)
+      if (idx !== -1) {
+        cyberState.updateLogs[idx] = {
+          ...cyberState.updateLogs[idx],
+          date: dateVal,
+          displayDate: displayDateVal || toThaiDate(dateVal),
+          author: authorVal,
+          content: contentVal
+        }
+      }
+    } else {
+      const newLog = {
+        id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        date: dateVal,
+        displayDate: displayDateVal || toThaiDate(dateVal),
+        author: authorVal,
+        content: contentVal
+      }
+      cyberState.updateLogs.unshift(newLog)
+    }
+
+    saveUpdateLogs()
+    close()
+    showNotification(isEditing ? 'แก้ไขประวัติการปรับปรุงเรียบร้อยแล้ว' : 'เพิ่มประวัติการปรับปรุงเรียบร้อยแล้ว', 'success')
+    if (typeof onSaved === 'function') {
+      onSaved()
+    }
+  })
 }
 
 // Subtab 2: Instructions & Criteria
 function renderInstructionsSubTab(el) {
-  const latestDate = cyberState.rounds.length > 0 ? cyberState.rounds[cyberState.rounds.length - 1].date : '26 กุมภาพันธ์ 2569'
+  const latestDate = (cyberState.updateLogs && cyberState.updateLogs.length > 0 && cyberState.updateLogs[0].displayDate)
+    ? cyberState.updateLogs[0].displayDate
+    : (cyberState.rounds.length > 0 ? toThaiDate(cyberState.rounds[cyberState.rounds.length - 1].date) : '26 กุมภาพันธ์ 2569')
+
+  const latestAuthor = (cyberState.updateLogs && cyberState.updateLogs.length > 0 && cyberState.updateLogs[0].author)
+    ? cyberState.updateLogs[0].author
+    : 'นายธนกฤต นิธิตันติปัญญา'
 
   el.innerHTML = `
     <div style="padding:28px; display:flex; flex-direction:column; gap:28px; font-size:14px; color:#334155;">
@@ -345,7 +583,7 @@ function renderInstructionsSubTab(el) {
           <p style="margin:0;"><strong style="color:#1e293b;">สถานะของหน่วยงาน:</strong> หน่วยงาน CII (โครงสร้างพื้นฐานสำคัญทางสารสนเทศ)</p>
         </div>
         <div>
-          <p style="margin:0 0 8px 0;"><strong style="color:#1e293b;">ชื่อผู้ทำการประเมิน:</strong> นายธนกฤต นิธิตันติปัญญา</p>
+          <p style="margin:0 0 8px 0;"><strong style="color:#1e293b;">ชื่อผู้ทำการประเมิน:</strong> ${latestAuthor}</p>
           <p style="margin:0;"><strong style="color:#1e293b;">วันที่ทำการประเมินล่าสุด:</strong> ${latestDate}</p>
         </div>
       </div>
