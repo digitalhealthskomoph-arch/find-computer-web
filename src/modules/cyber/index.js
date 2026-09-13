@@ -350,7 +350,7 @@ function renderUpdateLogSubTab(el) {
         <td style="padding:14px 16px; font-weight:700; color:#1e293b; white-space:nowrap; vertical-align:middle; width:220px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#eff6ff; color:#2563eb; font-size:12px; font-weight:800; border:1px solid #bfdbfe;">
-              ${logs.length - idx}
+              ${idx + 1}
             </span>
             <span>${displayDate}</span>
           </div>
@@ -358,20 +358,26 @@ function renderUpdateLogSubTab(el) {
         <td style="padding:14px 16px; color:#334155; line-height:1.6; vertical-align:middle;">
           ${content}
         </td>
-        <td style="padding:14px 16px; color:#64748b; font-size:13px; white-space:nowrap; vertical-align:middle; width:200px;">
+        <td style="padding:14px 16px; color:#64748b; font-size:13px; white-space:nowrap; vertical-align:middle; width:180px;">
           <div style="display:flex; align-items:center; gap:6px;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>${author}</span>
           </div>
         </td>
-        <td style="padding:14px 16px; white-space:nowrap; vertical-align:middle; text-align:right; width:160px;">
-          <div style="display:inline-flex; gap:8px; justify-content:flex-end;">
-            <button class="edit-cii-log-btn btn" data-id="${log.id}" style="padding:6px 12px; font-size:12.5px; font-weight:600; background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <td style="padding:14px 16px; white-space:nowrap; vertical-align:middle; text-align:right; width:210px;">
+          <div style="display:inline-flex; gap:6px; justify-content:flex-end; align-items:center;">
+            <button class="move-up-cii-log-btn btn" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} style="padding:5px 8px; font-size:12px; font-weight:600; background:#f8fafc; color:${idx === 0 ? '#cbd5e1' : '#334155'}; border:1px solid #cbd5e1; border-radius:6px; cursor:${idx === 0 ? 'not-allowed' : 'pointer'}; display:inline-flex; align-items:center;" title="เลื่อนขึ้น">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+            </button>
+            <button class="move-down-cii-log-btn btn" data-idx="${idx}" ${idx === logs.length - 1 ? 'disabled' : ''} style="padding:5px 8px; font-size:12px; font-weight:600; background:#f8fafc; color:${idx === logs.length - 1 ? '#cbd5e1' : '#334155'}; border:1px solid #cbd5e1; border-radius:6px; cursor:${idx === logs.length - 1 ? 'not-allowed' : 'pointer'}; display:inline-flex; align-items:center;" title="เลื่อนลง">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <button class="edit-cii-log-btn btn" data-id="${log.id}" style="padding:5px 10px; font-size:12.5px; font-weight:600; background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               แก้ไข
             </button>
-            <button class="delete-cii-log-btn btn" data-id="${log.id}" style="padding:6px 12px; font-size:12.5px; font-weight:600; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <button class="delete-cii-log-btn btn" data-id="${log.id}" style="padding:5px 10px; font-size:12.5px; font-weight:600; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               ลบ
             </button>
           </div>
@@ -406,8 +412,8 @@ function renderUpdateLogSubTab(el) {
             <tr>
               <th style="padding:12px 16px; font-weight:700; width:220px;">วันที่ปรับปรุง</th>
               <th style="padding:12px 16px; font-weight:700;">สิ่งที่ปรับปรุง / แก้ไข</th>
-              <th style="padding:12px 16px; font-weight:700; width:200px;">ผู้บันทึก</th>
-              <th style="padding:12px 16px; font-weight:700; width:160px; text-align:right;">จัดการ</th>
+              <th style="padding:12px 16px; font-weight:700; width:180px;">ผู้บันทึก</th>
+              <th style="padding:12px 16px; font-weight:700; width:210px; text-align:right;">จัดการ</th>
             </tr>
           </thead>
           <tbody style="color:#334155;">
@@ -428,6 +434,34 @@ function renderUpdateLogSubTab(el) {
   // Event listener: Add
   document.getElementById('add-cii-log-btn')?.addEventListener('click', () => {
     openUpdateLogModal(null, () => renderUpdateLogSubTab(el))
+  })
+
+  // Event listener: Move Up
+  el.querySelectorAll('.move-up-cii-log-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx, 10)
+      if (idx > 0 && idx < cyberState.updateLogs.length) {
+        const temp = cyberState.updateLogs[idx]
+        cyberState.updateLogs[idx] = cyberState.updateLogs[idx - 1]
+        cyberState.updateLogs[idx - 1] = temp
+        saveUpdateLogs()
+        renderUpdateLogSubTab(el)
+      }
+    })
+  })
+
+  // Event listener: Move Down
+  el.querySelectorAll('.move-down-cii-log-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx, 10)
+      if (idx >= 0 && idx < cyberState.updateLogs.length - 1) {
+        const temp = cyberState.updateLogs[idx]
+        cyberState.updateLogs[idx] = cyberState.updateLogs[idx + 1]
+        cyberState.updateLogs[idx + 1] = temp
+        saveUpdateLogs()
+        renderUpdateLogSubTab(el)
+      }
+    })
   })
 
   // Event listener: Edit
