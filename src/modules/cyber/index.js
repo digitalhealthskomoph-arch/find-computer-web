@@ -1,5 +1,5 @@
 import ciiData from './data/ciiData.json'
-import sidebarData from './data/sidebarData.json'
+import policyFrameworkData from './data/policyFrameworkData.json'
 import { showNotification } from '../../lib/utils.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
@@ -7,15 +7,57 @@ const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
 const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
 
 let cyberState = {
-  activeTab: 'assessment', // 'log' | 'instructions' | 'assessment' | 'docs' | 'incidents'
+  activeTab: 'assessment', // 'assessment' | 'docs' | 'incidents'
+  assessmentSubTab: 'assessment', // 'log' | 'instructions' | 'assessment'
   selectedDomainIndex: 0,
   rounds: [],
-  selectedDocPath: '1.1 Audit Plan Procedure',
+  selectedDoc: {
+    category: 'ประมวลแนวทางปฏิบัติ',
+    domain: 'แผนการตรวจสอบ (Cybersecurity Audit Plan) ด้านการรักษาความมั่นคงปลอดภัยไซเบอร์',
+    major: '',
+    title: '1.1 Audit Plan Procedure',
+    key: '1.1 Audit Plan Procedure'
+  },
+  docSearchKeyword: '',
   docLinks: {},
-  incidents: []
+  incidents: [],
+  expandedNodes: {
+    'ประมวลแนวทางปฏิบัติ': true,
+    'กรอบมาตรฐาน': true,
+    'แผนการตรวจสอบ (Cybersecurity Audit Plan) ด้านการรักษาความมั่นคงปลอดภัยไซเบอร์': true,
+    'Govern': true,
+    'Identify': true,
+    '1.Asset Management': true
+  }
 }
 
-// Initialize cyber data
+// Flatten all selectable documents for search and selection
+const allFlatDocs = []
+function extractDocs(items, cat = '', domain = '', major = '') {
+  items.forEach(item => {
+    if (item.children && item.children.length > 0) {
+      if (!cat) {
+        extractDocs(item.children, item.title, '', '')
+      } else if (!domain) {
+        extractDocs(item.children, cat, item.title, '')
+      } else {
+        extractDocs(item.children, cat, domain, item.title)
+      }
+    } else {
+      allFlatDocs.push({
+        category: cat,
+        domain: domain,
+        major: major,
+        title: item.title,
+        key: item.title,
+        href: item.href || ''
+      })
+    }
+  })
+}
+extractDocs(policyFrameworkData)
+
+// Initialize data
 function initData() {
   // 1. Assessment rounds
   try {
@@ -81,7 +123,7 @@ function saveDocs() {
   } catch (e) {}
 }
 
-// Helpers for calculations
+// Calculations
 function getAverage(scoresArray) {
   const validScores = scoresArray.filter(s => s > 0)
   if (validScores.length === 0) return '0.00'
@@ -114,18 +156,18 @@ export function renderCyberModule(container) {
   container.innerHTML = `
     <div class="module-wrapper" style="max-width:100%; margin:0 auto; padding:0 4px;">
       
-      <!-- Cyber Module Header directly matching Cyber_sec_sko_moph -->
+      <!-- Top Header -->
       <div style="border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
         <div>
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <span class="badge" style="background:#2563eb; color:#fff; font-size:12px; font-weight:700; padding:3px 8px; border-radius:4px;">CII Framework</span>
-            <span style="color:#64748b; font-size:13px;">สสจ.สระแก้ว ตาม พ.ร.บ. ไซเบอร์ 2562</span>
+            <span class="badge" style="background:#2563eb; color:#fff; font-size:12px; font-weight:700; padding:3px 8px; border-radius:4px;">CII Compliance</span>
+            <span style="color:#64748b; font-size:13px;">สำนักงานสาธารณสุขจังหวัดสระแก้ว ตาม พ.ร.บ. ไซเบอร์ 2562</span>
           </div>
           <h1 style="font-size:1.6rem; font-weight:800; color:#1e293b; margin:0; line-height:1.3;">
-            แบบประเมินสถานภาพการดำเนินงาน (CII Self Assessment)
+            ระบบบริหารจัดการความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity System)
           </h1>
           <p style="color:#64748b; font-size:0.9rem; margin-top:4px; margin-bottom:0;">
-            ประเมินคะแนนเฉลี่ยราย Domain และราย Control (อ้างอิงจากฐานข้อมูลเกณฑ์ สกมช.)
+            การประเมินสถานภาพ CII, ประมวลแนวทางปฏิบัติ, กรอบมาตรฐาน และการรับมือภัยคุกคามสารสนเทศ
           </p>
         </div>
 
@@ -141,32 +183,25 @@ export function renderCyberModule(container) {
         </div>
       </div>
 
-      <!-- 5 Tabs Nav matching Next.js app -->
+      <!-- 3 Primary Tabs (Merged as requested: 1. CII Assessment [Log, Criteria, Assessment], 2. Policy & Standards, 3. Incident Report) -->
       <div style="background:#f1f5f9; padding:4px; border-radius:8px; display:inline-flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; max-width:100%;">
-        <button class="cyber-tab-btn ${cyberState.activeTab === 'log' ? 'active' : ''}" data-tab="log" style="border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.activeTab === 'log' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Update Log
+        <button class="cyber-main-tab-btn ${cyberState.activeTab === 'assessment' ? 'active' : ''}" data-tab="assessment" style="border:none; padding:9px 18px; font-size:14px; font-weight:700; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; ${cyberState.activeTab === 'assessment' ? 'background:#2563eb; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.15);' : 'background:transparent; color:#64748b;'}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          1. แบบประเมิน CII Self Assessment
         </button>
-        <button class="cyber-tab-btn ${cyberState.activeTab === 'instructions' ? 'active' : ''}" data-tab="instructions" style="border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.activeTab === 'instructions' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          คำอธิบายและเกณฑ์
+        <button class="cyber-main-tab-btn ${cyberState.activeTab === 'docs' ? 'active' : ''}" data-tab="docs" style="border:none; padding:9px 18px; font-size:14px; font-weight:700; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; ${cyberState.activeTab === 'docs' ? 'background:#2563eb; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.15);' : 'background:transparent; color:#64748b;'}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          2. ประมวลแนวทางปฏิบัติ และกรอบมาตรฐาน
+          <span style="background:rgba(255,255,255,0.25); color:${cyberState.activeTab === 'docs' ? '#fff' : '#64748b'}; font-size:11px; padding:1px 6px; border-radius:10px;">80 หัวข้อ</span>
         </button>
-        <button class="cyber-tab-btn ${cyberState.activeTab === 'assessment' ? 'active' : ''}" data-tab="assessment" style="border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.activeTab === 'assessment' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          แบบประเมิน (Self Assessment)
-        </button>
-        <button class="cyber-tab-btn ${cyberState.activeTab === 'docs' ? 'active' : ''}" data-tab="docs" style="border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.activeTab === 'docs' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          ประมวลแนวทางปฏิบัติ
-        </button>
-        <button class="cyber-tab-btn ${cyberState.activeTab === 'incidents' ? 'active' : ''}" data-tab="incidents" style="border:none; padding:8px 16px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.activeTab === 'incidents' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          รายงานเหตุภัยคุกคาม
+        <button class="cyber-main-tab-btn ${cyberState.activeTab === 'incidents' ? 'active' : ''}" data-tab="incidents" style="border:none; padding:9px 18px; font-size:14px; font-weight:700; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; ${cyberState.activeTab === 'incidents' ? 'background:#2563eb; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.15);' : 'background:transparent; color:#64748b;'}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          3. รายงานเหตุภัยคุกคามไซเบอร์
         </button>
       </div>
 
-      <!-- Tab Content Area -->
-      <div id="cyber-content-container" class="card" style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; min-height:600px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04);"></div>
+      <!-- Main Content Area -->
+      <div id="cyber-content-container" class="card" style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; min-height:650px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04);"></div>
 
       <!-- Incident Modal Container -->
       <div id="cyber-modal-container"></div>
@@ -178,7 +213,7 @@ export function renderCyberModule(container) {
 }
 
 function bindNavEvents(container) {
-  container.querySelectorAll('.cyber-tab-btn').forEach(btn => {
+  container.querySelectorAll('.cyber-main-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       cyberState.activeTab = btn.dataset.tab
       renderCyberModule(container)
@@ -200,17 +235,11 @@ function renderActiveTab(container) {
   if (!contentEl) return
 
   switch (cyberState.activeTab) {
-    case 'log':
-      renderUpdateLogTab(contentEl)
-      break
-    case 'instructions':
-      renderInstructionsTab(contentEl)
-      break
     case 'assessment':
-      renderAssessmentTab(contentEl, container)
+      renderCiiAssessmentMainTab(contentEl, container)
       break
     case 'docs':
-      renderDocsTab(contentEl)
+      renderPolicyAndFrameworkTab(contentEl)
       break
     case 'incidents':
       renderIncidentsTab(contentEl)
@@ -218,12 +247,63 @@ function renderActiveTab(container) {
   }
 }
 
-// ==========================================
-// Tab 1: Update Log
-// ==========================================
-function renderUpdateLogTab(el) {
+// =========================================================================
+// 1. CII Assessment Main Tab (Contains 3 Sub-tabs: Update Log, Criteria, Assessment)
+// =========================================================================
+function renderCiiAssessmentMainTab(el, container) {
   el.innerHTML = `
-    <div style="padding:24px;">
+    <div style="display:flex; flex-direction:column; height:100%;">
+      <!-- Sub-tabs navigation directly matching Cyber_sec_sko_moph/frontend/src/app/cii-assessment/page.tsx -->
+      <div style="padding:16px 20px; border-bottom:1px solid #e2e8f0; background:#f8fafc; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="background:#e2e8f0; padding:3px; border-radius:8px; display:inline-flex; gap:3px;">
+          <button class="cii-subtab-btn ${cyberState.assessmentSubTab === 'log' ? 'active' : ''}" data-subtab="log" style="border:none; padding:6px 14px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.assessmentSubTab === 'log' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 2px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Update Log
+          </button>
+          <button class="cii-subtab-btn ${cyberState.assessmentSubTab === 'instructions' ? 'active' : ''}" data-subtab="instructions" style="border:none; padding:6px 14px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.assessmentSubTab === 'instructions' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 2px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            คำอธิบายและเกณฑ์
+          </button>
+          <button class="cii-subtab-btn ${cyberState.assessmentSubTab === 'assessment' ? 'active' : ''}" data-subtab="assessment" style="border:none; padding:6px 14px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; ${cyberState.assessmentSubTab === 'assessment' ? 'background:#fff; color:#1d4ed8; box-shadow:0 1px 2px rgba(0,0,0,0.1);' : 'background:transparent; color:#64748b;'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            แบบประเมิน (Self Assessment)
+          </button>
+        </div>
+
+        <div style="font-size:12px; color:#64748b;">
+          อ้างอิงเกณฑ์ตามประกาศ สกมช. ด้านสาธารณสุข
+        </div>
+      </div>
+
+      <!-- Subtab Container -->
+      <div id="cii-subtab-container" style="flex:1;"></div>
+    </div>
+  `
+
+  // Bind subtab buttons
+  el.querySelectorAll('.cii-subtab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cyberState.assessmentSubTab = btn.dataset.subtab
+      renderCiiAssessmentMainTab(el, container)
+    })
+  })
+
+  const subContainer = document.getElementById('cii-subtab-container')
+  if (!subContainer) return
+
+  if (cyberState.assessmentSubTab === 'log') {
+    renderUpdateLogSubTab(subContainer)
+  } else if (cyberState.assessmentSubTab === 'instructions') {
+    renderInstructionsSubTab(subContainer)
+  } else {
+    renderAssessmentTableSubTab(subContainer, container)
+  }
+}
+
+// Subtab 1: Update Log
+function renderUpdateLogSubTab(el) {
+  el.innerHTML = `
+    <div style="padding:28px;">
       <h2 style="font-size:1.25rem; font-weight:700; color:#1e293b; margin-bottom:16px;">
         ประวัติการปรับปรุง (Update Log)
       </h2>
@@ -231,11 +311,11 @@ function renderUpdateLogTab(el) {
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px;">
           <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0; color:#475569;">
             <tr>
-              <th style="padding:12px 16px; font-weight:600; width:220px;">วันที่ปรับปรุง</th>
+              <th style="padding:12px 16px; font-weight:600; width:240px;">วันที่ปรับปรุง</th>
               <th style="padding:12px 16px; font-weight:600;">สิ่งที่ปรับปรุง / แก้ไข</th>
             </tr>
           </thead>
-          <tbody style="divide-y divide-slate-100; color:#334155;">
+          <tbody style="color:#334155;">
             <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:14px 16px; font-weight:600; color:#1e293b;">26 กุมภาพันธ์ 2569</td>
               <td style="padding:14px 16px;">ทำการประเมินสถานภาพอีกครั้ง เพื่อประเมินความพร้อมก่อนการ Audit (ครั้งล่าสุด)</td>
@@ -251,10 +331,8 @@ function renderUpdateLogTab(el) {
   `
 }
 
-// ==========================================
-// Tab 2: Instructions & Criteria
-// ==========================================
-function renderInstructionsTab(el) {
+// Subtab 2: Instructions & Criteria
+function renderInstructionsSubTab(el) {
   const latestDate = cyberState.rounds.length > 0 ? cyberState.rounds[cyberState.rounds.length - 1].date : '26 กุมภาพันธ์ 2569'
 
   el.innerHTML = `
@@ -337,10 +415,8 @@ function renderInstructionsTab(el) {
   `
 }
 
-// ==========================================
-// Tab 3: Self Assessment (Dynamic Rounds & Average Calculations)
-// ==========================================
-function renderAssessmentTab(el, container) {
+// Subtab 3: Assessment Table with Dynamic Rounds & Average Calculations
+function renderAssessmentTableSubTab(el, container) {
   const currentDomain = ciiData[cyberState.selectedDomainIndex] || ciiData[0]
 
   // Calculate Domain Averages for each round
@@ -429,7 +505,7 @@ function renderAssessmentTab(el, container) {
   })
 
   el.innerHTML = `
-    <div style="display:flex; flex-direction:column; height:800px;">
+    <div style="display:flex; flex-direction:column; height:750px;">
       <!-- Header Controls: Domain Selector & Add Round Button -->
       <div style="padding:14px 20px; border-bottom:1px solid #e2e8f0; background:#f8fafc; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
         <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:280px;">
@@ -490,7 +566,7 @@ function renderAssessmentTab(el, container) {
   // Bind Domain dropdown
   document.getElementById('cyber-domain-select')?.addEventListener('change', (e) => {
     cyberState.selectedDomainIndex = Number(e.target.value)
-    renderAssessmentTab(el, container)
+    renderAssessmentTableSubTab(el, container)
   })
 
   // Bind Add Round button
@@ -507,7 +583,7 @@ function renderAssessmentTab(el, container) {
     cyberState.rounds.push(newRound)
     saveRounds()
     showNotification(`สร้างรอบประเมินที่ ${cyberState.rounds.length} เรียบร้อยแล้ว`, 'success')
-    renderAssessmentTab(el, container)
+    renderAssessmentTableSubTab(el, container)
   })
 
   // Bind date pickers
@@ -540,76 +616,66 @@ function renderAssessmentTab(el, container) {
           delete targetRound.scores[key]
         }
         saveRounds()
-        // Re-render to instantly update averages
-        renderAssessmentTab(el, container)
+        renderAssessmentTableSubTab(el, container)
       }
     })
   })
 }
 
-// ==========================================
-// Tab 4: Policy & Guidelines (Tree & Docs Viewer)
-// ==========================================
-function renderDocsTab(el) {
-  // Collect all leaf documents from sidebarData
-  const docList = []
-  function traverse(items, parentTitle = '') {
-    items.forEach(item => {
-      if (item.children && item.children.length > 0) {
-        traverse(item.children, item.title)
-      } else if (item.href && item.href.startsWith('/docs/')) {
-        docList.push({
-          title: item.title,
-          category: parentTitle || 'ประมวลแนวทางปฏิบัติ',
-          path: decodeURIComponent(item.href.replace('/docs/', ''))
-        })
-      }
-    })
-  }
+// =========================================================================
+// 2. Policy & Standards Library Tab (Full Hierarchy from Excel / 80 Topics)
+// =========================================================================
+function renderPolicyAndFrameworkTab(el) {
+  const q = cyberState.docSearchKeyword.toLowerCase().trim()
+  const filteredDocs = q ? allFlatDocs.filter(d => 
+    d.title.toLowerCase().includes(q) ||
+    d.category.toLowerCase().includes(q) ||
+    d.domain.toLowerCase().includes(q) ||
+    d.major.toLowerCase().includes(q)
+  ) : null
 
-  const policyGroup = sidebarData.find(s => s.title.includes('ประมวลแนวทางปฏิบัติ'))
-  if (policyGroup && policyGroup.children) {
-    traverse(policyGroup.children, policyGroup.title)
-  }
-
-  const currentDoc = docList.find(d => d.title === cyberState.selectedDocPath || d.path === cyberState.selectedDocPath) || docList[0]
-  const currentDocKey = currentDoc?.path || 'default'
-  const savedData = cyberState.docLinks[currentDocKey] || {
+  const currentKey = cyberState.selectedDoc.key || '1.1 Audit Plan Procedure'
+  const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
     pdfLinks: []
   }
 
   el.innerHTML = `
-    <div style="display:flex; height:750px; overflow:hidden;">
-      <!-- Sidebar / Tree of Documents -->
-      <div style="width:320px; border-right:1px solid #e2e8f0; background:#f8fafc; overflow-y:auto; padding:16px; flex-shrink:0;">
-        <div style="font-weight:700; font-size:13px; color:#475569; margin-bottom:12px; text-transform:uppercase;">
-          สารบัญประมวลแนวทางปฏิบัติ
+    <div style="display:flex; height:800px; overflow:hidden;">
+      
+      <!-- Left Sidebar: Complete Hierarchy Tree with Search -->
+      <div style="width:360px; border-right:1px solid #e2e8f0; background:#f8fafc; display:flex; flex-direction:column; flex-shrink:0;">
+        
+        <!-- Search Input -->
+        <div style="padding:14px; border-bottom:1px solid #e2e8f0; background:#fff;">
+          <input type="text" id="doc-tree-search-input" class="form-control" 
+            placeholder="🔍 ค้นหาหัวข้อเอกสาร (80 หัวข้อ)..." 
+            value="${cyberState.docSearchKeyword}" 
+            style="width:100%; font-size:13px; padding:7px 12px;">
         </div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-          ${docList.map(doc => {
-            const isSel = (doc.title === currentDoc?.title)
-            return `
-              <button class="doc-item-btn" data-title="${doc.title}" style="text-align:left; padding:8px 12px; border-radius:6px; font-size:13px; border:none; cursor:pointer; line-height:1.4; transition:all 0.15s; ${isSel ? 'background:#2563eb; color:#fff; font-weight:600;' : 'background:transparent; color:#334155;'}">
-                <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">${doc.category}</div>
-                <div>${doc.title}</div>
-              </button>
-            `
-          }).join('')}
+
+        <!-- Tree View Scrollable -->
+        <div id="doc-tree-scroll-container" style="flex:1; overflow-y:auto; padding:12px 10px;">
+          ${filteredDocs ? renderFlatSearchResults(filteredDocs) : renderCompleteTreeHtml()}
         </div>
       </div>
 
-      <!-- Main Doc Viewer -->
+      <!-- Right Main Content: Document Details & Viewer -->
       <div style="flex:1; overflow-y:auto; padding:28px;">
+        
+        <!-- Breadcrumb & Header -->
         <div style="border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:24px;">
-          <span class="badge" style="background:#e0e7ff; color:#3730a3; font-size:12px; font-weight:600; padding:2px 8px; border-radius:4px;">
-            ${currentDoc?.category || 'ประมวลแนวทางปฏิบัติ'}
-          </span>
-          <h2 style="font-size:1.4rem; font-weight:800; color:#1e293b; margin:8px 0 4px 0;">
-            ${currentDoc?.title || 'เอกสารแนวทางปฏิบัติ'}
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; margin-bottom:6px; flex-wrap:wrap;">
+            <span style="font-weight:700; color:#2563eb;">${cyberState.selectedDoc.category || 'ประมวลแนวทางปฏิบัติ'}</span>
+            <span>&gt;</span>
+            <span style="font-weight:600;">${cyberState.selectedDoc.domain || ''}</span>
+            ${cyberState.selectedDoc.major ? `<span>&gt;</span><span>${cyberState.selectedDoc.major}</span>` : ''}
+          </div>
+          <h2 style="font-size:1.35rem; font-weight:800; color:#1e293b; margin:0 0 6px 0; line-height:1.35;">
+            ${cyberState.selectedDoc.title}
           </h2>
           <p style="color:#64748b; font-size:13px; margin:0;">
-            จัดการเอกสารและหลักฐานที่เกี่ยวข้องกับหัวข้อนี้
+            จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ
           </p>
         </div>
 
@@ -623,24 +689,24 @@ function renderDocsTab(el) {
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
               ${savedData.editLinks.map(link => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:32px; height:32px; background:#dbeafe; color:#2563eb; border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:700;">
+                  <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                    <div style="width:34px; height:34px; background:#dbeafe; color:#2563eb; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     </div>
-                    <div>
+                    <div style="min-width:0;">
                       <div style="font-weight:600; color:#1e293b; font-size:13.5px;">${link.label}</div>
-                      <a href="${link.url}" target="_blank" style="font-size:12px; color:#2563eb; text-decoration:none;">${link.url}</a>
+                      <a href="${link.url}" target="_blank" style="font-size:12px; color:#2563eb; text-decoration:none; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</a>
                     </div>
                   </div>
-                  <button class="delete-link-btn" data-id="${link.id}" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; padding:4px 8px;">ลบ</button>
+                  <button class="delete-doc-link-btn" data-id="${link.id}" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; padding:4px 8px; flex-shrink:0;">ลบ</button>
                 </div>
               `).join('')}
             </div>
 
             <!-- Add link input -->
-            <div style="display:flex; gap:10px; border-top:1px dashed #e2e8f0; padding-top:14px;">
-              <input type="text" id="new-doc-label" placeholder="ชื่อเอกสาร (เช่น ต้นฉบับเอกสาร)" class="form-control" style="flex:1; font-size:13px;">
-              <input type="text" id="new-doc-url" placeholder="URL ลิงก์ (https://...)" class="form-control" style="flex:2; font-size:13px;">
+            <div style="display:flex; gap:10px; border-top:1px dashed #e2e8f0; padding-top:14px; flex-wrap:wrap;">
+              <input type="text" id="new-doc-label" placeholder="ชื่อเอกสาร (เช่น ร่างแบบฟอร์มการขอเปลี่ยนแปลง)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
+              <input type="text" id="new-doc-url" placeholder="URL ลิงก์ (https://docs.google.com/...)" class="form-control" style="flex:2; min-width:240px; font-size:13px;">
               <button id="add-doc-link-btn" class="btn btn-primary" style="background:#1e293b; border-color:#1e293b; font-size:13px; font-weight:600; white-space:nowrap;">
                 + เพิ่มลิงก์
               </button>
@@ -652,13 +718,13 @@ function renderDocsTab(el) {
         <div class="card" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
           <div style="background:#f8fafc; padding:12px 20px; border-bottom:1px solid #e2e8f0; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            เอกสาร PDF อ้างอิง (แสดงผลบนเว็บ)
+            เอกสาร PDF อ้างอิง (แสดงผลบนระบบ)
           </div>
           <div style="padding:20px;">
             <!-- Add PDF input -->
-            <div style="display:flex; gap:10px; margin-bottom:16px;">
-              <input type="text" id="new-pdf-label" placeholder="ชื่อไฟล์ PDF (เช่น ประกาศนโยบายฉบับลงนาม)" class="form-control" style="flex:1; font-size:13px;">
-              <input type="text" id="new-pdf-url" placeholder="URL ของไฟล์ PDF" class="form-control" style="flex:2; font-size:13px;">
+            <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+              <input type="text" id="new-pdf-label" placeholder="ชื่อไฟล์ PDF (เช่น นโยบายฉบับอนุมัติลงนาม)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
+              <input type="text" id="new-pdf-url" placeholder="URL ของไฟล์ PDF" class="form-control" style="flex:2; min-width:240px; font-size:13px;">
               <button id="add-pdf-link-btn" class="btn" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; font-size:13px; font-weight:600; white-space:nowrap;">
                 + แนบ PDF
               </button>
@@ -674,7 +740,7 @@ function renderDocsTab(el) {
                   <span style="font-weight:600; color:#1e293b; font-size:13px;">${pdf.label}</span>
                   <button class="delete-pdf-btn" data-id="${pdf.id}" style="background:#fff; border:1px solid #cbd5e1; color:#ef4444; padding:2px 8px; border-radius:4px; font-size:11px; cursor:pointer;">ลบ</button>
                 </div>
-                <div style="height:500px; width:100%;">
+                <div style="height:520px; width:100%;">
                   <iframe src="${pdf.url}#view=FitH" style="width:100%; height:100%; border:none;" title="${pdf.label}"></iframe>
                 </div>
               </div>
@@ -686,13 +752,14 @@ function renderDocsTab(el) {
     </div>
   `
 
-  // Select doc from sidebar
-  el.querySelectorAll('.doc-item-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      cyberState.selectedDocPath = btn.dataset.title
-      renderDocsTab(el)
-    })
+  // Bind Search input
+  document.getElementById('doc-tree-search-input')?.addEventListener('input', (e) => {
+    cyberState.docSearchKeyword = e.target.value
+    renderPolicyAndFrameworkTab(el)
   })
+
+  // Bind tree item clicks & toggle clicks
+  bindTreeEvents(el)
 
   // Add Google Doc link
   document.getElementById('add-doc-link-btn')?.addEventListener('click', () => {
@@ -700,22 +767,22 @@ function renderDocsTab(el) {
     const url = document.getElementById('new-doc-url')?.value.trim()
     if (!label || !url) return
 
-    if (!cyberState.docLinks[currentDocKey]) {
-      cyberState.docLinks[currentDocKey] = { editLinks: [], pdfLinks: [] }
+    if (!cyberState.docLinks[currentKey]) {
+      cyberState.docLinks[currentKey] = { editLinks: [], pdfLinks: [] }
     }
-    cyberState.docLinks[currentDocKey].editLinks.push({ id: Date.now(), label, url })
+    cyberState.docLinks[currentKey].editLinks.push({ id: Date.now(), label, url })
     saveDocs()
-    renderDocsTab(el)
+    renderPolicyAndFrameworkTab(el)
   })
 
   // Delete Doc Link
-  el.querySelectorAll('.delete-link-btn').forEach(btn => {
+  el.querySelectorAll('.delete-doc-link-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id)
-      if (cyberState.docLinks[currentDocKey]) {
-        cyberState.docLinks[currentDocKey].editLinks = cyberState.docLinks[currentDocKey].editLinks.filter(l => l.id !== id)
+      if (cyberState.docLinks[currentKey]) {
+        cyberState.docLinks[currentKey].editLinks = cyberState.docLinks[currentKey].editLinks.filter(l => l.id !== id)
         saveDocs()
-        renderDocsTab(el)
+        renderPolicyAndFrameworkTab(el)
       }
     })
   })
@@ -726,30 +793,155 @@ function renderDocsTab(el) {
     const url = document.getElementById('new-pdf-url')?.value.trim()
     if (!label || !url) return
 
-    if (!cyberState.docLinks[currentDocKey]) {
-      cyberState.docLinks[currentDocKey] = { editLinks: [], pdfLinks: [] }
+    if (!cyberState.docLinks[currentKey]) {
+      cyberState.docLinks[currentKey] = { editLinks: [], pdfLinks: [] }
     }
-    cyberState.docLinks[currentDocKey].pdfLinks.push({ id: Date.now(), label, url })
+    cyberState.docLinks[currentKey].pdfLinks.push({ id: Date.now(), label, url })
     saveDocs()
-    renderDocsTab(el)
+    renderPolicyAndFrameworkTab(el)
   })
 
   // Delete PDF Link
   el.querySelectorAll('.delete-pdf-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id)
-      if (cyberState.docLinks[currentDocKey]) {
-        cyberState.docLinks[currentDocKey].pdfLinks = cyberState.docLinks[currentDocKey].pdfLinks.filter(p => p.id !== id)
+      if (cyberState.docLinks[currentKey]) {
+        cyberState.docLinks[currentKey].pdfLinks = cyberState.docLinks[currentKey].pdfLinks.filter(p => p.id !== id)
         saveDocs()
-        renderDocsTab(el)
+        renderPolicyAndFrameworkTab(el)
       }
     })
   })
 }
 
-// ==========================================
-// Tab 5: Incident Reporting (Real Data / No Mockups)
-// ==========================================
+function renderFlatSearchResults(docs) {
+  if (docs.length === 0) {
+    return `<div style="text-align:center; padding:20px; color:#94a3b8; font-size:13px;">ไม่พบหัวข้อที่ค้นหา</div>`
+  }
+
+  return `
+    <div style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:8px;">
+      ผลการค้นหา (${docs.length} รายการ):
+    </div>
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      ${docs.map(d => {
+        const isSelected = (cyberState.selectedDoc.key === d.key)
+        return `
+          <button class="doc-leaf-btn" data-key="${d.key}" style="text-align:left; padding:8px 10px; border-radius:6px; font-size:12.5px; border:none; cursor:pointer; line-height:1.35; ${isSelected ? 'background:#2563eb; color:#fff; font-weight:600;' : 'background:#fff; border:1px solid #e2e8f0; color:#334155;'}">
+            <div style="font-size:10px; opacity:0.8; margin-bottom:2px;">${d.category} &gt; ${d.domain}</div>
+            <div>${d.title}</div>
+          </button>
+        `
+      }).join('')}
+    </div>
+  `
+}
+
+function renderCompleteTreeHtml() {
+  return policyFrameworkData.map(category => {
+    const isCatExpanded = cyberState.expandedNodes[category.title] !== false
+
+    return `
+      <div style="margin-bottom:14px;">
+        <!-- Category Header -->
+        <div class="tree-toggle-header" data-node-key="${category.title}" style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:#e2e8f0; border-radius:6px; cursor:pointer; font-size:13px; font-weight:700; color:#1e293b;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span>${isCatExpanded ? '▼' : '▶'}</span>
+            <span>${category.title}</span>
+          </div>
+          <span style="font-size:11px; background:#cbd5e1; padding:1px 6px; border-radius:10px; color:#334155;">
+            ${category.children?.length || 0} Domains
+          </span>
+        </div>
+
+        ${isCatExpanded ? `
+          <div style="padding-left:10px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+            ${(category.children || []).map(domain => {
+              const isDomainExpanded = cyberState.expandedNodes[domain.title] !== false
+
+              return `
+                <div style="border-left:2px solid #cbd5e1; padding-left:8px;">
+                  <!-- Domain Header -->
+                  <div class="tree-toggle-header" data-node-key="${domain.title}" style="display:flex; align-items:center; gap:6px; padding:5px 8px; font-size:12.5px; font-weight:600; color:#2563eb; cursor:pointer; border-radius:4px; hover:background:#f1f5f9;">
+                    <span style="font-size:10px;">${isDomainExpanded ? '▼' : '▶'}</span>
+                    <span>${domain.title}</span>
+                  </div>
+
+                  ${isDomainExpanded ? `
+                    <div style="padding-left:10px; margin-top:4px; display:flex; flex-direction:column; gap:4px;">
+                      ${(domain.children || []).map(major => {
+                        // If major has children (minors)
+                        if (major.children && major.children.length > 0) {
+                          const isMajorExpanded = cyberState.expandedNodes[major.title] !== false
+                          return `
+                            <div style="margin-top:2px;">
+                              <div class="tree-toggle-header" data-node-key="${major.title}" style="display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#334155; cursor:pointer; padding:3px 6px;">
+                                <span style="font-size:9px;">${isMajorExpanded ? '▼' : '▶'}</span>
+                                <span>${major.title}</span>
+                              </div>
+                              ${isMajorExpanded ? `
+                                <div style="padding-left:14px; margin-top:2px; display:flex; flex-direction:column; gap:2px;">
+                                  ${major.children.map(minor => {
+                                    const isSel = (cyberState.selectedDoc.key === minor.title)
+                                    return `
+                                      <button class="doc-leaf-btn" data-key="${minor.title}" style="text-align:left; padding:5px 8px; border-radius:4px; font-size:11.5px; border:none; cursor:pointer; line-height:1.3; ${isSel ? 'background:#2563eb; color:#fff; font-weight:600;' : 'background:transparent; color:#475569;'}">
+                                        • ${minor.title}
+                                      </button>
+                                    `
+                                  }).join('')}
+                                </div>
+                              ` : ''}
+                            </div>
+                          `
+                        } else {
+                          // Major is directly a leaf document
+                          const isSel = (cyberState.selectedDoc.key === major.title)
+                          return `
+                            <button class="doc-leaf-btn" data-key="${major.title}" style="text-align:left; padding:5px 8px; border-radius:4px; font-size:12px; border:none; cursor:pointer; line-height:1.3; ${isSel ? 'background:#2563eb; color:#fff; font-weight:600;' : 'background:transparent; color:#334155;'}">
+                              • ${major.title}
+                            </button>
+                          `
+                        }
+                      }).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              `
+            }).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `
+  }).join('')
+}
+
+function bindTreeEvents(el) {
+  // Toggle tree node expand/collapse
+  el.querySelectorAll('.tree-toggle-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const key = header.dataset.nodeKey
+      cyberState.expandedNodes[key] = !cyberState.expandedNodes[key]
+      renderPolicyAndFrameworkTab(el)
+    })
+  })
+
+  // Select document leaf
+  el.querySelectorAll('.doc-leaf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.key
+      const targetDoc = allFlatDocs.find(d => d.key === key)
+      if (targetDoc) {
+        cyberState.selectedDoc = targetDoc
+        renderPolicyAndFrameworkTab(el)
+      }
+    })
+  })
+}
+
+// =========================================================================
+// 3. Incident Reporting Tab (Real Data / No Mockups)
+// =========================================================================
 function renderIncidentsTab(el) {
   const incidentsHtml = cyberState.incidents.map(inc => `
     <tr style="border-bottom:1px solid #e2e8f0; font-size:14px;">
@@ -772,7 +964,7 @@ function renderIncidentsTab(el) {
   `).join('')
 
   el.innerHTML = `
-    <div style="padding:24px;">
+    <div style="padding:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
         <div>
           <h2 style="font-size:1.25rem; font-weight:800; color:#1e293b; margin:0 0 4px 0;">

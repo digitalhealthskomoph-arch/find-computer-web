@@ -1,0 +1,457 @@
+[
+  {
+    "title": "ประมวลแนวทางปฏิบัติ",
+    "children": [
+      {
+        "title": "แผนการตรวจสอบ (Cybersecurity Audit Plan) ด้านการรักษาความมั่นคงปลอดภัยไซเบอร์",
+        "children": [
+          {
+            "title": "1.1 Audit Plan Procedure",
+            "href": "/docs/1.1 Audit Plan Procedure"
+          },
+          {
+            "title": "1.2 Audit Plan",
+            "href": "/docs/1.2 Audit Plan"
+          },
+          {
+            "title": "1.3 Audit Programme",
+            "href": "/docs/1.3 Audit Programme"
+          },
+          {
+            "title": "1.4 Audit Report",
+            "href": "/docs/1.4 Audit Report"
+          }
+        ]
+      },
+      {
+        "title": "การประเมินความเสี่ยงด้านการรักษาความมั่นคงปลอดภัยไซเบอร์ (Risk Assessment)",
+        "children": [
+          {
+            "title": "2.1 Risk Management Policy",
+            "href": "/docs/2.1 Risk Management Policy"
+          },
+          {
+            "title": "2.2 Risk Assessment Procedure",
+            "href": "/docs/2.2 Risk Assessment Procedure"
+          },
+          {
+            "title": "2.3 Risk Assessment and Treatment - Risk Matrix",
+            "href": "/docs/2.3 Risk Assessment and Treatment - Risk Matrix"
+          },
+          {
+            "title": "2.4 Risk Report",
+            "href": "/docs/2.4 Risk Report"
+          },
+          {
+            "title": "2.5 KRI Document",
+            "href": "/docs/2.5 KRI Document"
+          }
+        ]
+      },
+      {
+        "title": "แผนการรับมือภัยคุกคามไซเบอร์ (IR Plan)",
+        "children": [
+          {
+            "title": "3.1 IR Plan Procedure / IR Plan Manual",
+            "href": "/docs/3.1 IR Plan Procedure / IR Plan Manual"
+          },
+          {
+            "title": "3.2 รายงานการแจ้งเหตุการณ์",
+            "href": "/docs/3.2 รายงานการแจ้งเหตุการณ์"
+          },
+          {
+            "title": "3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์",
+            "href": "/docs/3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์"
+          },
+          {
+            "title": "3.2.2 แบบฟอร์มรายงานละเมิดข้อมูลส่วนบุคคล",
+            "href": "/docs/3.2.2 แบบฟอร์มรายงานละเมิดข้อมูลส่วนบุคคล"
+          }
+        ]
+      },
+      {
+        "title": "เอกสารเพิ่มเติมของประมวลแนวทางปฏิบัติ",
+        "children": [
+          {
+            "title": "ORG Chart - 3 Line of Defence",
+            "href": "/docs/ORG Chart - 3 Line of Defence"
+          },
+          {
+            "title": "หนังสือแจ้งรายชื่อเจ้าหน้าที่ระดับบริหารและระดับปฏิบัติการให้ สสจ, สป, สกมช รับทราบ",
+            "href": "/docs/หนังสือแจ้งรายชื่อเจ้าหน้าที่ระดับบริหารและระดับปฏิบัติการให้ สสจ, สป, สกมช รับทราบ"
+          },
+          {
+            "title": "หนังสือแจ้งการจัดตั้ง, วัตถุประสงค์พร้อมรายชื่อ Sectoral CSIRT ไปให้ สสจ, สป, สกมช รับทราบ",
+            "href": "/docs/หนังสือแจ้งการจัดตั้ง, วัตถุประสงค์พร้อมรายชื่อ Sectoral CSIRT ไปให้ สสจ, สป, สกมช รับทราบ"
+          },
+          {
+            "title": "คำสั่งแต่งตั้ง",
+            "href": "/docs/คำสั่งแต่งตั้ง"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "กรอบมาตรฐาน",
+    "children": [
+      {
+        "title": "Govern",
+        "children": [
+          {
+            "title": "1.Cybersecurity Management System Policy",
+            "href": "/docs/1.Cybersecurity Management System Policy"
+          },
+          {
+            "title": "2.Cybersecurity Risk Management Policy",
+            "href": "/docs/2.Cybersecurity Risk Management Policy"
+          },
+          {
+            "title": "3.Security Baseline Configuration STD Policy",
+            "href": "/docs/3.Security Baseline Configuration STD Policy"
+          },
+          {
+            "title": "4.Remote Connection Policy",
+            "href": "/docs/4.Remote Connection Policy"
+          },
+          {
+            "title": "5.Removable Storage Media Policy",
+            "href": "/docs/5.Removable Storage Media Policy"
+          },
+          {
+            "title": "6.Information Sharing Policy",
+            "href": "/docs/6.Information Sharing Policy"
+          },
+          {
+            "title": "7.PDPA Policy",
+            "href": "/docs/7.PDPA Policy"
+          }
+        ]
+      },
+      {
+        "title": "Identify",
+        "children": [
+          {
+            "title": "1.Asset Management",
+            "children": [
+              {
+                "title": "1.1 Asset Management Procedure",
+                "href": "/docs/1.1 Asset Management Procedure"
+              },
+              {
+                "title": "1.2 Asset Inventory List (IT Asset/Devices Inventory (including Portable and Mobile))",
+                "href": "/docs/1.2 Asset Inventory List (IT Asset/Devices Inventory (including Portable and Mobile))"
+              },
+              {
+                "title": "1.3 Asset Register - ทะเบียนทรัพย์สิน",
+                "href": "/docs/1.3 Asset Register - ทะเบียนทรัพย์สิน"
+              },
+              {
+                "title": "1.4 Risk Assessment of Asset - ประเมินความเสี่ยง",
+                "href": "/docs/1.4 Risk Assessment of Asset - ประเมินความเสี่ยง"
+              },
+              {
+                "title": "1.5 BIA Procedure",
+                "href": "/docs/1.5 BIA Procedure"
+              },
+              {
+                "title": "1.6 BIA Evident การวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA)",
+                "href": "/docs/1.6 BIA Evident การวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA)"
+              },
+              {
+                "title": "1.7 BIA Report",
+                "href": "/docs/1.7 BIA Report"
+              }
+            ]
+          },
+          {
+            "title": "2.Risk Assessment and Risk Management Strategy",
+            "children": [
+              {
+                "title": "2.1 Risk Assessment and Risk Management Strategy Procedure",
+                "href": "/docs/2.1 Risk Assessment and Risk Management Strategy Procedure"
+              },
+              {
+                "title": "2.2 Risk Register - ทะเบียนความเสี่ยง",
+                "href": "/docs/2.2 Risk Register - ทะเบียนความเสี่ยง"
+              }
+            ]
+          },
+          {
+            "title": "3.Vulnerability Assessment and Penetration Testing",
+            "children": [
+              {
+                "title": "3.1 Vulnerability Assessment and Penetration Testing Procedure",
+                "href": "/docs/3.1 Vulnerability Assessment and Penetration Testing Procedure"
+              },
+              {
+                "title": "3.2 เอกสารที่แสดงการประเมินช่องโหว่ โดยแยกตาม IT และ ICS  (Host, Network, Architecture)",
+                "href": "/docs/3.2 เอกสารที่แสดงการประเมินช่องโหว่ โดยแยกตาม IT และ ICS  (Host, Network, Architecture)"
+              },
+              {
+                "title": "3.3 เอกสารขั้นตอนการทดสอบเจาะระบบ (Pentest Procedure)",
+                "href": "/docs/3.3 เอกสารขั้นตอนการทดสอบเจาะระบบ (Pentest Procedure)"
+              },
+              {
+                "title": "3.4 รายงานสรุปผลการทดสอบเจาะระบบ",
+                "href": "/docs/3.4 รายงานสรุปผลการทดสอบเจาะระบบ"
+              },
+              {
+                "title": "3.5 VA Evident",
+                "href": "/docs/3.5 VA Evident"
+              },
+              {
+                "title": "3.6 PT Evident",
+                "href": "/docs/3.6 PT Evident"
+              }
+            ]
+          },
+          {
+            "title": "4.Third Party Management",
+            "children": [
+              {
+                "title": "4.1 Third Part Management Procedure",
+                "href": "/docs/4.1 Third Part Management Procedure"
+              },
+              {
+                "title": "4.2 กำหนดข้อกำหนดด้านความมั่นคงปลอดภัยไซเบอร์",
+                "href": "/docs/4.2 กำหนดข้อกำหนดด้านความมั่นคงปลอดภัยไซเบอร์"
+              },
+              {
+                "title": "4.3 ข้อตกลงระดับการให้บริการ (SLA)",
+                "href": "/docs/4.3 ข้อตกลงระดับการให้บริการ (SLA)"
+              },
+              {
+                "title": "4.4 เงื่อนไขของสัญญากับผู้ให้บริการภายนอก",
+                "href": "/docs/4.4 เงื่อนไขของสัญญากับผู้ให้บริการภายนอก"
+              },
+              {
+                "title": "4.4.1 Risk Assessment for services",
+                "href": "/docs/4.4.1 Risk Assessment for services"
+              },
+              {
+                "title": "4.5 การประเมินความเสี่ยงที่เกี่ยวข้องกับบริการและห่วงโซ่อุปทานผลิตภัณฑ์ (Risk Assessment for services and product supply chain)",
+                "href": "/docs/4.5 การประเมินความเสี่ยงที่เกี่ยวข้องกับบริการและห่วงโซ่อุปทานผลิตภัณฑ์ (Risk Assessment for services and product supply chain)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Protect",
+        "children": [
+          {
+            "title": "1.กระบวนการการควบคุมการเข้าถึง (Access Control)",
+            "children": [
+              {
+                "title": "1.1 Access Control Procedure",
+                "href": "/docs/1.1 Access Control Procedure"
+              },
+              {
+                "title": "1.2 Logs of all access",
+                "href": "/docs/1.2 Logs of all access"
+              },
+              {
+                "title": "1.3 User Permission Matrix/Review",
+                "href": "/docs/1.3 User Permission Matrix/Review"
+              }
+            ]
+          },
+          {
+            "title": "2.กระบวนการการทำให้ระบบมีความแข็งแกร่ง (System Hardening)",
+            "children": [
+              {
+                "title": "2.1 System Hardening Procedure",
+                "href": "/docs/2.1 System Hardening Procedure"
+              },
+              {
+                "title": "2.2 มาตรฐานการกำหนดค่าขั้นต่ำด้านความมั่นคงปลอดภัย (Security Baseline Configuration Standards) สำหรับระบบปฏิบัติการ แอปพลิเคชัน และอุปกรณ์เครือข่ายทั้งหมดของบริการที่สำคัญ",
+                "href": "/docs/2.2 มาตรฐานการกำหนดค่าขั้นต่ำด้านความมั่นคงปลอดภัย (Security Baseline Configuration Standards) สำหรับระบบปฏิบัติการ แอปพลิเคชัน และอุปกรณ์เครือข่ายทั้งหมดของบริการที่สำคัญ"
+              },
+              {
+                "title": "2.3 กระบวนการจัดการเปลี่ยนแปลง (Change Management Process Procedure)",
+                "href": "/docs/2.3 กระบวนการจัดการเปลี่ยนแปลง (Change Management Process Procedure)"
+              },
+              {
+                "title": "2.3.1 แบบฟอร์มการขอเปลี่ยนแปลงระบบแอปพลิเคชั่น \n(Application Change Request Form)",
+                "href": "/docs/2.3.1 แบบฟอร์มการขอเปลี่ยนแปลงระบบแอปพลิเคชั่น \n(Application Change Request Form)"
+              },
+              {
+                "title": "2.3.2 ใบร้องขอดำเนินการด้านเอกสารในระบบมาตรฐาน",
+                "href": "/docs/2.3.2 ใบร้องขอดำเนินการด้านเอกสารในระบบมาตรฐาน"
+              }
+            ]
+          },
+          {
+            "title": "3.กระบวนการการเชื่อมต่อระยะไกล (Remote Connection)",
+            "children": [
+              {
+                "title": "3.1 Remote Connection Procedure",
+                "href": "/docs/3.1 Remote Connection Procedure"
+              },
+              {
+                "title": "3.1.1 NDA – Non Disclosure Agreement",
+                "href": "/docs/3.1.1 NDA – Non Disclosure Agreement"
+              }
+            ]
+          },
+          {
+            "title": "4.กระบวนการการใช้สื่อเก็บข้อมูลแบบถอดได้ (Removable Storage Media)",
+            "children": [
+              {
+                "title": "4.1 Removable Storage Media Procedure",
+                "href": "/docs/4.1 Removable Storage Media Procedure"
+              }
+            ]
+          },
+          {
+            "title": "5.กระบวนการการสร้างความตระหนักรู้ด้านความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Awareness)",
+            "children": [
+              {
+                "title": "5.1 Cybersecurity Awareness Procedure",
+                "href": "/docs/5.1 Cybersecurity Awareness Procedure"
+              },
+              {
+                "title": "5.2 แผนงานในการสร้างตระหนักรู้ด้านความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Awareness) และกฎหมาย สำหรับพนักงาน ผู้รับเหมา และผู้ให้บริการภายนอกบุคคลที่สาม",
+                "href": "/docs/5.2 แผนงานในการสร้างตระหนักรู้ด้านความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Awareness) และกฎหมาย สำหรับพนักงาน ผู้รับเหมา และผู้ให้บริการภายนอกบุคคลที่สาม"
+              }
+            ]
+          },
+          {
+            "title": "6.กระบวนการการแบ่งปันข้อมูล (Information Sharing)",
+            "children": [
+              {
+                "title": "6.1 Information Sharing Procedure",
+                "href": "/docs/6.1 Information Sharing Procedure"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Detect",
+        "children": [
+          {
+            "title": "1.กระบวนการการตรวจสอบและเฝ้าระวังภัยคุกคามทางไซเบอร์ (Cyber Threat Detection and Monitoring)",
+            "children": [
+              {
+                "title": "1.1 Cyber Threat Detection and Monitoring Procedure",
+                "href": "/docs/1.1 Cyber Threat Detection and Monitoring Procedure"
+              },
+              {
+                "title": "1.2 แผนการตรวจสอบและเฝ้าระวังภัยคุกคามไซเบอร์",
+                "href": "/docs/1.2 แผนการตรวจสอบและเฝ้าระวังภัยคุกคามไซเบอร์"
+              },
+              {
+                "title": "1.3 รายงานการตรวจจับเหตุการณ์ (SIEM Report)",
+                "href": "/docs/1.3 รายงานการตรวจจับเหตุการณ์ (SIEM Report)"
+              },
+              {
+                "title": "1.4 SIEM Evident",
+                "href": "/docs/1.4 SIEM Evident"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Respond",
+        "children": [
+          {
+            "title": "1.กระบวนการแผนการรับมือภัยคุกคามทางไซเบอร์   (Cybersecurity Incident Response Plan)",
+            "children": [
+              {
+                "title": "1.1 Cybersecurity Incident Response Plan Procedure",
+                "href": "/docs/1.1 Cybersecurity Incident Response Plan Procedure"
+              },
+              {
+                "title": "1.2 แผนการรับมือภัยคุกคามทางไซเบอร์",
+                "href": "/docs/1.2 แผนการรับมือภัยคุกคามทางไซเบอร์"
+              },
+              {
+                "title": "1.3 รายงานการแจ้งเหตุการณ์ภัยคุกคามทางไซเบอร์",
+                "href": "/docs/1.3 รายงานการแจ้งเหตุการณ์ภัยคุกคามทางไซเบอร์"
+              }
+            ]
+          },
+          {
+            "title": "2.กระบวนการแผนการสื่อสารในภาวะวิกฤต (Crisis Communication Plan)",
+            "children": [
+              {
+                "title": "2.1 Crisis Communication Plan Procedure",
+                "href": "/docs/2.1 Crisis Communication Plan Procedure"
+              },
+              {
+                "title": "2.2 Crisis Communication Plan(แผนการสื่อสารในภาวะวิกฤต)",
+                "href": "/docs/2.2 Crisis Communication Plan(แผนการสื่อสารในภาวะวิกฤต)"
+              },
+              {
+                "title": "2.3 กระบวนการฝึกซ้อม",
+                "href": "/docs/2.3 กระบวนการฝึกซ้อม"
+              }
+            ]
+          },
+          {
+            "title": "3.กระบวนการการฝึกซ้อมความมั่นคงปลอดภัยไซเบอร์ (Cybersecurity Exercise)",
+            "children": [
+              {
+                "title": "3.1 Cybersecurity Exercise Procedure",
+                "href": "/docs/3.1 Cybersecurity Exercise Procedure"
+              },
+              {
+                "title": "3.2 Cybersecurity Exercise Plan.docx",
+                "href": "/docs/3.2 Cybersecurity Exercise Plan.docx"
+              },
+              {
+                "title": "3.3 Cybersecurity Exercise Report",
+                "href": "/docs/3.3 Cybersecurity Exercise Report"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Recover",
+        "children": [
+          {
+            "title": "1.กระบวนการการรักษาและฟื้นฟูความเสียหายที่เกิดจากภัยคุกคามทางไซเบอร์ (Cybersecurity Resilience and Recovery)",
+            "children": [
+              {
+                "title": "1.1 Cybersecurity Resilience and Recovery Procedure",
+                "href": "/docs/1.1 Cybersecurity Resilience and Recovery Procedure"
+              },
+              {
+                "title": "1.2 คู่มือแผนความต่อเนื่องทางธุรกิจ (Business Continuity Plan : BCP Manual)",
+                "href": "/docs/1.2 คู่มือแผนความต่อเนื่องทางธุรกิจ (Business Continuity Plan : BCP Manual)"
+              },
+              {
+                "title": "1.3 รายงานการฝึกซ้อม BCP อย่างน้อย ปีละ 1 ครั้ง",
+                "href": "/docs/1.3 รายงานการฝึกซ้อม BCP อย่างน้อย ปีละ 1 ครั้ง"
+              },
+              {
+                "title": "1.4 รายงานแผนความต่อเนื่องทางธุรกิจ (BCP Report)",
+                "href": "/docs/1.4 รายงานแผนความต่อเนื่องทางธุรกิจ (BCP Report)"
+              },
+              {
+                "title": "1.5 คู่มือ Backup and Restore",
+                "href": "/docs/1.5 คู่มือ Backup and Restore"
+              },
+              {
+                "title": "1.6 คู่มือ Disaster and Recovery",
+                "href": "/docs/1.6 คู่มือ Disaster and Recovery"
+              },
+              {
+                "title": "1.7 คู่มือ การติดตั้งระบบต่างๆ",
+                "href": "/docs/1.7 คู่มือ การติดตั้งระบบต่างๆ"
+              },
+              {
+                "title": "1.8 รายงานการทดสอบระบบต่างๆ ตามที่กำหนด",
+                "href": "/docs/1.8 รายงานการทดสอบระบบต่างๆ ตามที่กำหนด"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
