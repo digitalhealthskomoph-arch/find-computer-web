@@ -70,15 +70,36 @@ function initData() {
   } catch (e) {}
 
   if (!cyberState.rounds || cyberState.rounds.length === 0) {
-    const today = new Date().toISOString().split('T')[0]
     cyberState.rounds = [
       {
         id: 'round_1',
-        date: today,
+        date: '2026-02-23',
         scores: {}
       }
     ]
   }
+
+  // Ensure Round 2 exists with date 2026-02-26 and score 3 for all 3 domains
+  let round2 = cyberState.rounds.find(r => r.id === 'round_2' || r.date === '2026-02-26')
+  if (!round2) {
+    round2 = {
+      id: 'round_2',
+      date: '2026-02-26',
+      scores: {}
+    }
+    cyberState.rounds.push(round2)
+  }
+  round2.date = '2026-02-26'
+  // Populate score 3 for all questions across all 3 domains
+  ciiData.forEach((d, dIdx) => {
+    const dNum = dIdx + 1
+    d.controls.forEach(c => {
+      c.evidences.forEach(ev => {
+        round2.scores[`D${dNum}-${c.controlId}-${ev.evidenceId}`] = 3
+      })
+    })
+  })
+  saveRounds()
 
   // 2. Incidents (Real data only, no mockups)
   try {
@@ -836,7 +857,11 @@ function renderAssessmentTableSubTab(el, container) {
                 <th style="padding:8px 8px; border-right:1px solid #cbd5e1; text-align:center; width:120px; background:#eff6ff;">
                   <div style="font-weight:700; color:#1e40af; margin-bottom:4px; font-size:12px;">รอบที่ ${i + 1}</div>
                   <input type="date" class="round-date-picker" data-round-id="${r.id}" value="${r.date}" 
-                    style="width:100%; font-size:11px; padding:3px; border:1px solid #bfdbfe; border-radius:4px; text-align:center; background:#fff; outline:none;">
+                    style="width:100%; font-size:11px; padding:3px; border:1px solid #bfdbfe; border-radius:4px; text-align:center; background:#fff; outline:none; box-sizing:border-box;">
+                  <button type="button" class="quick-fill-3-btn btn" data-round-id="${r.id}" title="ตั้งค่า 3 คะแนนให้ทุกข้อใน Domain นี้" 
+                    style="margin-top:5px; width:100%; padding:2px 4px; font-size:10.5px; font-weight:700; background:#dcfce7; color:#15803d; border:1px solid #86efac; border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:2px;">
+                    ⚡ ให้ 3 ทุกข้อ
+                  </button>
                 </th>
               `).join('')}
             </tr>
@@ -891,6 +916,25 @@ function renderAssessmentTableSubTab(el, container) {
         r.date = e.target.value
         saveRounds()
       }
+    })
+  })
+
+  // Bind quick fill 3 button
+  el.querySelectorAll('.quick-fill-3-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const rId = btn.dataset.roundId
+      const targetRound = cyberState.rounds.find(r => r.id === rId)
+      if (!targetRound) return
+
+      const dNum = cyberState.selectedDomainIndex + 1
+      currentDomain.controls.forEach(c => {
+        c.evidences.forEach(ev => {
+          targetRound.scores[`D${dNum}-${c.controlId}-${ev.evidenceId}`] = 3
+        })
+      })
+      saveRounds()
+      showNotification(`ตั้งค่า 3 คะแนนครบทุกข้อใน ${currentDomain.domain.split(':')[0]} รอบที่ ${cyberState.rounds.findIndex(r => r.id === rId) + 1} เรียบร้อยแล้ว`, 'success')
+      renderAssessmentTableSubTab(el, container)
     })
   })
 
