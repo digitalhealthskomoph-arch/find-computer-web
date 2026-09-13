@@ -689,6 +689,12 @@ function renderInstructionsSubTab(el) {
 
 // Subtab 3: Assessment Table with Dynamic Rounds & Average Calculations
 function renderAssessmentTableSubTab(el, container) {
+  // Preserve scroll positions before rendering
+  const prevScrollEl = document.getElementById('cii-table-scroll-container')
+  const prevScrollTop = prevScrollEl ? prevScrollEl.scrollTop : 0
+  const prevScrollLeft = prevScrollEl ? prevScrollEl.scrollLeft : 0
+  const prevWindowY = window.scrollY
+
   const currentDomain = ciiData[cyberState.selectedDomainIndex] || ciiData[0]
 
   // Calculate Domain Averages for each round
@@ -722,13 +728,13 @@ function renderAssessmentTableSubTab(el, container) {
         <td style="padding:10px 12px; border-right:1px solid #cbd5e1; text-align:center; white-space:nowrap; vertical-align:middle;">
           Control ${control.controlId}
         </td>
-        <td style="padding:10px 14px; border-right:1px solid #cbd5e1;">
+        <td colspan="2" style="padding:10px 14px; border-right:1px solid #cbd5e1;">
           <div style="font-size:14px; color:#0f172a;">${control.controlName}</div>
           <div style="font-size:11px; color:#64748b; font-weight:500; margin-top:2px;">คะแนนเฉลี่ย Control:</div>
         </td>
         ${cyberState.rounds.map((r, i) => `
           <td style="padding:10px 8px; border-right:1px solid #cbd5e1; text-align:center; vertical-align:middle;">
-            <span style="display:inline-block; padding:3px 10px; border-radius:6px; font-size:13px; font-weight:800; min-width:48px; ${getScoreBadgeStyle(controlAverages[i])}">
+            <span id="ctrl-avg-${control.controlId}-${r.id}" class="ctrl-avg-badge" style="display:inline-block; padding:3px 10px; border-radius:6px; font-size:13px; font-weight:800; min-width:48px; ${getScoreBadgeStyle(controlAverages[i])}">
               ${controlAverages[i] !== '0.00' ? controlAverages[i] : '-'}
             </span>
           </td>
@@ -742,6 +748,13 @@ function renderAssessmentTableSubTab(el, container) {
         <tr class="evidence-row" style="border-bottom:1px solid #e2e8f0;">
           <td style="padding:12px; border-right:1px solid #e2e8f0; text-align:center; color:#64748b; font-weight:600; font-size:13px; vertical-align:top;">
             ${control.controlId}.${evidence.evidenceId}
+          </td>
+          <td style="padding:10px 12px; border-right:1px solid #e2e8f0; vertical-align:top; width:180px;">
+            ${evidence.component ? `
+              <span style="display:inline-block; padding:3px 8px; border-radius:6px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:12px; font-weight:600; line-height:1.4;">
+                ${evidence.component}
+              </span>
+            ` : '<span style="color:#94a3b8; font-size:12px;">-</span>'}
           </td>
           <td style="padding:12px 14px; border-right:1px solid #e2e8f0; vertical-align:top;">
             <p style="margin:0; font-size:13.5px; color:#1e293b; line-height:1.5;">${evidence.description}</p>
@@ -796,18 +809,18 @@ function renderAssessmentTableSubTab(el, container) {
       </div>
 
       <!-- Table Container with Sticky Domain Averages -->
-      <div style="flex:1; overflow:auto;">
-        <table style="width:100%; border-collapse:collapse; text-align:left; min-width:850px;">
+      <div id="cii-table-scroll-container" style="flex:1; overflow:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left; min-width:950px;">
           <thead style="position:sticky; top:0; z-index:20; background:#f1f5f9; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
             
             <!-- Sticky Domain Average Row -->
             <tr style="background:#e2e8f0; border-bottom:1px solid #cbd5e1;">
-              <th colspan="2" style="padding:10px 14px; text-align:right; font-weight:800; font-size:13px; color:#1e293b; border-right:1px solid #cbd5e1;">
+              <th colspan="3" style="padding:10px 14px; text-align:right; font-weight:800; font-size:13px; color:#1e293b; border-right:1px solid #cbd5e1;">
                 คะแนนเฉลี่ยรวมของ Domain นี้:
               </th>
               ${cyberState.rounds.map((r, i) => `
                 <th style="padding:10px 8px; text-align:center; border-right:1px solid #cbd5e1; width:120px;">
-                  <span style="display:inline-block; padding:4px 12px; border-radius:6px; font-size:14px; font-weight:800; ${getScoreBadgeStyle(domainAverages[i])}">
+                  <span id="domain-avg-${r.id}" class="domain-avg-badge" style="display:inline-block; padding:4px 12px; border-radius:6px; font-size:14px; font-weight:800; ${getScoreBadgeStyle(domainAverages[i])}">
                     ${domainAverages[i] !== '0.00' ? domainAverages[i] : '-'}
                   </span>
                 </th>
@@ -817,6 +830,7 @@ function renderAssessmentTableSubTab(el, container) {
             <!-- Standard Table Header Row -->
             <tr style="border-bottom:1px solid #cbd5e1; font-size:13px; color:#475569;">
               <th style="padding:10px 12px; border-right:1px solid #cbd5e1; width:90px; text-align:center; font-weight:700;">Control</th>
+              <th style="padding:10px 12px; border-right:1px solid #cbd5e1; width:180px; font-weight:700;">องค์ประกอบ</th>
               <th style="padding:10px 14px; border-right:1px solid #cbd5e1; font-weight:700;">รายละเอียด (Objective / Evident)</th>
               ${cyberState.rounds.map((r, i) => `
                 <th style="padding:8px 8px; border-right:1px solid #cbd5e1; text-align:center; width:120px; background:#eff6ff;">
@@ -834,6 +848,16 @@ function renderAssessmentTableSubTab(el, container) {
       </div>
     </div>
   `
+
+  // Restore scroll positions seamlessly
+  const newScrollEl = document.getElementById('cii-table-scroll-container')
+  if (newScrollEl && prevScrollEl) {
+    newScrollEl.scrollTop = prevScrollTop
+    newScrollEl.scrollLeft = prevScrollLeft
+  }
+  if (prevWindowY > 0) {
+    window.scrollTo({ top: prevWindowY })
+  }
 
   // Bind Domain dropdown
   document.getElementById('cyber-domain-select')?.addEventListener('change', (e) => {
@@ -870,7 +894,7 @@ function renderAssessmentTableSubTab(el, container) {
     })
   })
 
-  // Bind score select dropdowns
+  // Bind score select dropdowns with in-place DOM updates (0 scroll jump!)
   el.querySelectorAll('.cii-score-select').forEach(select => {
     select.addEventListener('change', (e) => {
       const roundId = select.dataset.roundId
@@ -888,7 +912,39 @@ function renderAssessmentTableSubTab(el, container) {
           delete targetRound.scores[key]
         }
         saveRounds()
-        renderAssessmentTableSubTab(el, container)
+
+        // 1. Update select styling in place immediately
+        select.style.cssText = `width:100%; max-width:80px; height:38px; border-radius:6px; text-align:center; font-size:15px; cursor:pointer; outline:none; ${getSelectScoreStyle(val)}`
+
+        // 2. Recalculate Control Average in place
+        const ctrl = currentDomain.controls.find(c => String(c.controlId) === String(cId))
+        if (ctrl) {
+          const ctrlScores = ctrl.evidences.map(ev => targetRound.scores[`D${dIdx + 1}-${cId}-${ev.evidenceId}`] || 0)
+          const newCtrlAvg = getAverage(ctrlScores)
+          const ctrlAvgEl = document.getElementById(`ctrl-avg-${cId}-${roundId}`)
+          if (ctrlAvgEl) {
+            ctrlAvgEl.textContent = newCtrlAvg !== '0.00' ? newCtrlAvg : '-'
+            ctrlAvgEl.style.cssText = `display:inline-block; padding:3px 10px; border-radius:6px; font-size:13px; font-weight:800; min-width:48px; ${getScoreBadgeStyle(newCtrlAvg)}`
+          }
+        }
+
+        // 3. Recalculate Domain Average in place
+        const controlAveragesList = []
+        currentDomain.controls.forEach(c => {
+          const scores = []
+          c.evidences.forEach(ev => {
+            const v = targetRound.scores[`D${dIdx + 1}-${c.controlId}-${ev.evidenceId}`]
+            if (v > 0) scores.push(v)
+          })
+          const cAvg = Number(getAverage(scores))
+          if (cAvg > 0) controlAveragesList.push(cAvg)
+        })
+        const newDomAvg = getAverage(controlAveragesList)
+        const domAvgEl = document.getElementById(`domain-avg-${roundId}`)
+        if (domAvgEl) {
+          domAvgEl.textContent = newDomAvg !== '0.00' ? newDomAvg : '-'
+          domAvgEl.style.cssText = `display:inline-block; padding:4px 12px; border-radius:6px; font-size:14px; font-weight:800; ${getScoreBadgeStyle(newDomAvg)}`
+        }
       }
     })
   })
@@ -1385,7 +1441,7 @@ function openIncidentModal(tabEl) {
 function exportCiiToExcel() {
   let csv = '\uFEFF' // BOM for UTF-8 Excel support
   const roundHeaders = cyberState.rounds.map((r, i) => `"รอบที่ ${i + 1} (${r.date})"`).join(',')
-  csv += `"Domain","Control ID","Control Name","Evidence ID","คำอธิบายเกณฑ์ (Objective / Evident)","กฎหมายอ้างอิง",${roundHeaders}\n`
+  csv += `"Domain","องค์ประกอบ","Control ID","Control Name","Evidence ID","คำอธิบายเกณฑ์ (Objective / Evident)","กฎหมายอ้างอิง",${roundHeaders}\n`
 
   ciiData.forEach((d, dIdx) => {
     d.controls.forEach(c => {
@@ -1399,8 +1455,9 @@ function exportCiiToExcel() {
         const cleanReq = (ev.requirement || '').replace(/"/g, '""')
         const cleanDomain = (d.domain || '').replace(/"/g, '""')
         const cleanCName = (c.controlName || '').replace(/"/g, '""').replace(/\n/g, ' ')
+        const cleanComp = (ev.component || '').replace(/"/g, '""')
 
-        csv += `"${cleanDomain}","Control ${c.controlId}","${cleanCName}","${c.controlId}.${ev.evidenceId}","${cleanDesc}","${cleanReq}",${roundScores}\n`
+        csv += `"${cleanDomain}","${cleanComp}","Control ${c.controlId}","${cleanCName}","${c.controlId}.${ev.evidenceId}","${cleanDesc}","${cleanReq}",${roundScores}\n`
       })
     })
   })
