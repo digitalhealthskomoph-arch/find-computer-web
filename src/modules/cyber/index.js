@@ -997,6 +997,57 @@ function renderAssessmentTableSubTab(el, container) {
 // =========================================================================
 // 2. Policy & Standards Library Tab (Full Hierarchy from Excel / 80 Topics)
 // =========================================================================
+function formatEmbedUrl(url) {
+  if (!url) return ''
+  const cleaned = url.trim()
+
+  // Google Drive File (drive.google.com/file/d/{id}/...)
+  const driveFileMatch = cleaned.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i)
+  if (driveFileMatch) {
+    return `https://drive.google.com/file/d/${driveFileMatch[1]}/preview`
+  }
+
+  // Google Drive Open / UC link (drive.google.com/open?id={id} or drive.google.com/uc?id={id})
+  const driveIdMatch = cleaned.match(/drive\.google\.com\/(?:open|uc)\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i)
+  if (driveIdMatch) {
+    return `https://drive.google.com/file/d/${driveIdMatch[1]}/preview`
+  }
+
+  // Google Docs Document
+  const docsDocMatch = cleaned.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/i)
+  if (docsDocMatch) {
+    return `https://docs.google.com/document/d/${docsDocMatch[1]}/preview`
+  }
+
+  // Google Docs Spreadsheets
+  const docsSheetMatch = cleaned.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/i)
+  if (docsSheetMatch) {
+    return `https://docs.google.com/spreadsheets/d/${docsSheetMatch[1]}/preview`
+  }
+
+  // Google Docs Presentation (Slides)
+  const docsSlideMatch = cleaned.match(/docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]+)/i)
+  if (docsSlideMatch) {
+    return `https://docs.google.com/presentation/d/${docsSlideMatch[1]}/preview`
+  }
+
+  // Dropbox
+  if (cleaned.includes('dropbox.com')) {
+    return cleaned.replace(/[?&]dl=0/, '?raw=1')
+  }
+
+  // Direct PDF without hash
+  if (cleaned.toLowerCase().endsWith('.pdf') && !cleaned.includes('#')) {
+    return `${cleaned}#view=FitH`
+  }
+
+  return cleaned
+}
+
+function isGoogleUrl(url) {
+  return /drive\.google\.com|docs\.google\.com/i.test(url || '')
+}
+
 function renderPolicyAndFrameworkTab(el) {
   const q = cyberState.docSearchKeyword.toLowerCase().trim()
   const filteredDocs = q ? allFlatDocs.filter(d => 
@@ -1093,30 +1144,61 @@ function renderPolicyAndFrameworkTab(el) {
             เอกสาร PDF อ้างอิง (แสดงผลบนระบบ)
           </div>
           <div style="padding:20px;">
+            <!-- Helper Note for Google Drive & PDF links -->
+            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px 16px; margin-bottom:18px; font-size:12.5px; color:#0369a1; display:flex; align-items:flex-start; gap:10px;">
+              <span style="font-size:18px; line-height:1;">💡</span>
+              <div style="line-height:1.5;">
+                <strong>ข้อแนะนำการแนบลิงก์จาก Google Drive:</strong>
+                <div>• ระบบจะแปลงลิงก์ Google Drive เป็นโหมดพรีวิว (Preview) ให้อัตโนมัติเพื่อให้แสดงผลในหน้านี้ได้</div>
+                <div>• ใน Google Drive โปรดตั้งค่าสิทธิ์แชร์เป็น <strong>"ทุกคนที่มีลิงก์มีสิทธิ์ดู (Anyone with the link can view)"</strong> เพื่อป้องกันปัญหาการบล็อกสิทธิ์ 403 Forbidden</div>
+                <div>• หากแสดงผลไม่สมบูรณ์ สามารถกดปุ่ม <strong>"เปิดในแท็บใหม่"</strong> เพื่อเปิดอ่านเอกสารได้โดยตรง</div>
+              </div>
+            </div>
+
             <!-- Add PDF input -->
-            <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
-              <input type="text" id="new-pdf-label" placeholder="ชื่อไฟล์ PDF (เช่น นโยบายฉบับอนุมัติลงนาม)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
-              <input type="text" id="new-pdf-url" placeholder="URL ของไฟล์ PDF" class="form-control" style="flex:2; min-width:240px; font-size:13px;">
-              <button id="add-pdf-link-btn" class="btn" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; font-size:13px; font-weight:600; white-space:nowrap;">
+            <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+              <input type="text" id="new-pdf-label" placeholder="ชื่อไฟล์ PDF (เช่น 1.1 Audit Plan Procedure ฉบับอนุมัติ)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
+              <input type="text" id="new-pdf-url" placeholder="URL ของไฟล์ PDF หรือ ลิงก์แชร์จาก Google Drive" class="form-control" style="flex:2; min-width:260px; font-size:13px;">
+              <button id="add-pdf-link-btn" class="btn" style="background:#ef4444; color:#fff; border:none; font-size:13px; font-weight:600; white-space:nowrap; padding:8px 16px; border-radius:6px; cursor:pointer;">
                 + แนบ PDF
               </button>
             </div>
 
             ${savedData.pdfLinks.length === 0 ? `
               <div style="text-align:center; padding:32px; color:#94a3b8; font-size:13px; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1;">
-                ยังไม่มีเอกสาร PDF แนบในหัวข้อนี้ สามารถกรอก URL ของไฟล์ PDF ด้านบนเพื่อแสดงผล
+                ยังไม่มีเอกสาร PDF แนบในหัวข้อนี้ สามารถกรอก URL ของไฟล์ PDF หรือ Google Drive ด้านบนเพื่อแสดงผล
               </div>
-            ` : savedData.pdfLinks.map(pdf => `
-              <div style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:16px; overflow:hidden;">
-                <div style="padding:10px 16px; background:#f1f5f9; display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; color:#1e293b; font-size:13px;">${pdf.label}</span>
-                  <button class="delete-pdf-btn" data-id="${pdf.id}" style="background:#fff; border:1px solid #cbd5e1; color:#ef4444; padding:2px 8px; border-radius:4px; font-size:11px; cursor:pointer;">ลบ</button>
+            ` : savedData.pdfLinks.map(pdf => {
+              const embedUrl = formatEmbedUrl(pdf.url)
+              const isGoogle = isGoogleUrl(pdf.url)
+              return `
+                <div style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); background:#fff;">
+                  <div style="padding:10px 16px; background:#f8fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div style="width:28px; height:28px; background:#fee2e2; color:#ef4444; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      </div>
+                      <div>
+                        <span style="font-weight:700; color:#1e293b; font-size:13.5px;">${pdf.label}</span>
+                        ${isGoogle ? `<span style="margin-left:6px; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:2px 7px; border-radius:4px; font-size:11px; font-weight:600;">Google Drive</span>` : ''}
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <a href="${pdf.url}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#2563eb; text-decoration:none; background:#fff; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; transition:all 0.15s ease;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        เปิดในแท็บใหม่
+                      </a>
+                      <button class="delete-pdf-btn" data-id="${pdf.id}" style="background:#fff; border:1px solid #fecaca; color:#ef4444; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+                        ลบ
+                      </button>
+                    </div>
+                  </div>
+                  <div style="height:620px; width:100%; background:#f8fafc; position:relative;">
+                    <iframe src="${embedUrl}" style="width:100%; height:100%; border:none;" allow="autoplay" loading="lazy" title="${pdf.label}"></iframe>
+                  </div>
                 </div>
-                <div style="height:520px; width:100%;">
-                  <iframe src="${pdf.url}#view=FitH" style="width:100%; height:100%; border:none;" title="${pdf.label}"></iframe>
-                </div>
-              </div>
-            `).join('')}
+              `
+            }).join('')}
           </div>
         </div>
 
@@ -1135,9 +1217,17 @@ function renderPolicyAndFrameworkTab(el) {
 
   // Add Google Doc link
   document.getElementById('add-doc-link-btn')?.addEventListener('click', () => {
-    const label = document.getElementById('new-doc-label')?.value.trim()
-    const url = document.getElementById('new-doc-url')?.value.trim()
-    if (!label || !url) return
+    const labelInput = document.getElementById('new-doc-label')
+    const urlInput = document.getElementById('new-doc-url')
+    const label = labelInput?.value.trim()
+    let url = urlInput?.value.trim()
+    if (!label || !url) {
+      alert('กรุณากรอกทั้งชื่อเอกสารและ URL ลิงก์')
+      return
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url
+    }
 
     if (!cyberState.docLinks[currentKey]) {
       cyberState.docLinks[currentKey] = { editLinks: [], pdfLinks: [] }
@@ -1161,9 +1251,17 @@ function renderPolicyAndFrameworkTab(el) {
 
   // Add PDF Link
   document.getElementById('add-pdf-link-btn')?.addEventListener('click', () => {
-    const label = document.getElementById('new-pdf-label')?.value.trim()
-    const url = document.getElementById('new-pdf-url')?.value.trim()
-    if (!label || !url) return
+    const labelInput = document.getElementById('new-pdf-label')
+    const urlInput = document.getElementById('new-pdf-url')
+    const label = labelInput?.value.trim()
+    let url = urlInput?.value.trim()
+    if (!label || !url) {
+      alert('กรุณากรอกทั้งชื่อไฟล์ PDF และ URL ลิงก์')
+      return
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url
+    }
 
     if (!cyberState.docLinks[currentKey]) {
       cyberState.docLinks[currentKey] = { editLinks: [], pdfLinks: [] }
