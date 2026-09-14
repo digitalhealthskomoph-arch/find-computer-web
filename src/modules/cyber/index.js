@@ -1160,6 +1160,18 @@ function ensureAuditPrintStyles() {
     const style = document.createElement('style')
     style.id = 'audit-programme-print-style'
     style.innerHTML = `
+      table.audit-programme-table thead th {
+        background-color: #1e3a8a !important;
+        color: #ffffff !important;
+        border: 1px solid #3b82f6 !important;
+        font-weight: 700 !important;
+      }
+      table.audit-programme-table thead tr:nth-child(2) th {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        border: 1px solid #3b82f6 !important;
+        font-weight: 600 !important;
+      }
       @media print {
         body {
           background: #fff !important;
@@ -1293,27 +1305,27 @@ function renderAuditProgrammeHtml() {
         <div style="overflow-x:auto; border:1px solid #cbd5e1; border-radius:8px;">
           <table class="audit-programme-table" style="width:100%; border-collapse:collapse; font-size:12px; background:#fff;">
             <thead>
-              <tr style="background:#1e3a8a; color:#ffffff; font-weight:700; text-align:center;">
-                <th rowspan="2" style="width:42px; padding:10px 4px; border:1px solid #3b82f6; vertical-align:middle;">#</th>
-                <th rowspan="2" style="min-width:220px; padding:10px 12px; border:1px solid #3b82f6; text-align:left; vertical-align:middle;">หน่วยรับตรวจ</th>
-                <th colspan="7" style="padding:8px 4px; border:1px solid #3b82f6; background:#1d4ed8; text-align:center; font-size:12.5px;">ประเภทการตรวจ</th>
-                <th colspan="4" style="padding:8px 4px; border:1px solid #3b82f6; background:#2563eb; text-align:center; font-size:12.5px;">ระยะเวลาการตรวจสอบ</th>
-                <th rowspan="2" style="min-width:135px; padding:10px 8px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">วันที่ออกตรวจ</th>
-                <th rowspan="2" style="min-width:150px; padding:10px 12px; border:1px solid #3b82f6; text-align:left; vertical-align:middle;">หมายเหตุ</th>
-                <th rowspan="2" class="no-print" style="width:48px; padding:10px 4px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">ลบ</th>
+              <tr style="background:#1e3a8a !important; color:#ffffff !important; font-weight:700; text-align:center;">
+                <th rowspan="2" style="background:#1e3a8a !important; color:#ffffff !important; width:42px; padding:10px 4px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">#</th>
+                <th rowspan="2" style="background:#1e3a8a !important; color:#ffffff !important; min-width:220px; padding:10px 12px; border:1px solid #3b82f6; text-align:left; vertical-align:middle;">หน่วยรับตรวจ</th>
+                <th colspan="7" style="background:#1e3a8a !important; color:#ffffff !important; padding:8px 4px; border:1px solid #3b82f6; text-align:center; font-size:12.5px; vertical-align:middle;">ประเภทการตรวจ</th>
+                <th colspan="4" style="background:#1e3a8a !important; color:#ffffff !important; padding:8px 4px; border:1px solid #3b82f6; text-align:center; font-size:12.5px; vertical-align:middle;">ระยะเวลาการตรวจสอบ</th>
+                <th rowspan="2" style="background:#1e3a8a !important; color:#ffffff !important; min-width:135px; padding:10px 8px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">วันที่ออกตรวจ</th>
+                <th rowspan="2" style="background:#1e3a8a !important; color:#ffffff !important; min-width:150px; padding:10px 12px; border:1px solid #3b82f6; text-align:left; vertical-align:middle;">หมายเหตุ</th>
+                <th rowspan="2" class="no-print" style="background:#1e3a8a !important; color:#ffffff !important; width:48px; padding:10px 4px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">ลบ</th>
               </tr>
-              <tr style="background:#2563eb; color:#ffffff; font-weight:600; text-align:center; font-size:11px;">
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:65px; background:#1e40af;">ประมวลแนวทางฯ</th>
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Govern</th>
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Identify</th>
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Protect</th>
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Detect</th>
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Respond</th>
-                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Recover</th>
-                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q1</th>
-                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q2</th>
-                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q3</th>
-                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q4</th>
+              <tr style="background:#2563eb !important; color:#ffffff !important; font-weight:600; text-align:center; font-size:11px;">
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:65px; text-align:center;">ประมวลแนวทางฯ</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:50px; text-align:center;">Govern</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:50px; text-align:center;">Identify</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:50px; text-align:center;">Protect</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:50px; text-align:center;">Detect</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:50px; text-align:center;">Respond</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 2px; border:1px solid #3b82f6; min-width:50px; text-align:center;">Recover</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 4px; border:1px solid #3b82f6; min-width:38px; text-align:center;">Q1</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 4px; border:1px solid #3b82f6; min-width:38px; text-align:center;">Q2</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 4px; border:1px solid #3b82f6; min-width:38px; text-align:center;">Q3</th>
+                <th style="background:#2563eb !important; color:#ffffff !important; padding:6px 4px; border:1px solid #3b82f6; min-width:38px; text-align:center;">Q4</th>
               </tr>
             </thead>
             <tbody>
