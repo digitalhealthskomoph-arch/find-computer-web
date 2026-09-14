@@ -14,9 +14,163 @@ export const AUDIT_AGENCIES = [
   'โรงพยาบาลตาพระยา'
 ]
 
+export const THAI_MONTHS = [
+  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+]
+
+export function formatThaiDateRange(startDateStr, endDateStr) {
+  if (!startDateStr && !endDateStr) return ''
+  if (startDateStr && !endDateStr) {
+    const parts = startDateStr.split('-')
+    if (parts.length === 3) {
+      const d = Number(parts[2])
+      const m = THAI_MONTHS[Number(parts[1]) - 1]
+      const y = Number(parts[0]) + 543
+      return `วันที่ ${d} ${m} ${y}`
+    }
+    return startDateStr
+  }
+  if (!startDateStr && endDateStr) {
+    const parts = endDateStr.split('-')
+    if (parts.length === 3) {
+      const d = Number(parts[2])
+      const m = THAI_MONTHS[Number(parts[1]) - 1]
+      const y = Number(parts[0]) + 543
+      return `วันที่ ${d} ${m} ${y}`
+    }
+    return endDateStr
+  }
+
+  const p1 = startDateStr.split('-')
+  const p2 = endDateStr.split('-')
+  if (p1.length === 3 && p2.length === 3) {
+    const y1 = Number(p1[0]) + 543
+    const y2 = Number(p2[0]) + 543
+    const m1Idx = Number(p1[1]) - 1
+    const m2Idx = Number(p2[1]) - 1
+    const d1 = Number(p1[2])
+    const d2 = Number(p2[2])
+
+    if (y1 === y2 && m1Idx === m2Idx && d1 === d2) {
+      return `วันที่ ${d1} ${THAI_MONTHS[m1Idx]} ${y1}`
+    }
+    if (y1 === y2 && m1Idx === m2Idx) {
+      return `วันที่ ${d1} - ${d2} ${THAI_MONTHS[m1Idx]} ${y1}`
+    }
+    if (y1 === y2) {
+      return `วันที่ ${d1} ${THAI_MONTHS[m1Idx]} - ${d2} ${THAI_MONTHS[m2Idx]} ${y1}`
+    }
+    return `วันที่ ${d1} ${THAI_MONTHS[m1Idx]} ${y1} - ${d2} ${THAI_MONTHS[m2Idx]} ${y2}`
+  }
+
+  return `${startDateStr} - ${endDateStr}`
+}
+
+export function calculateAuditScores(data) {
+  if (!data || !data.tableRows) {
+    return { totalFull: 98, totalScore: 96, percent: '97.96', totalFailed: 2, status: 'ผ่านการประเมินโดยมีข้อสังเกต/ข้อแก้ไข (Pass with NC)' }
+  }
+
+  // 1. Calculate sum of O in sub-items 3.1.1 to 3.2.6
+  let totalOInItem3 = 0
+  data.tableRows.forEach(r => {
+    if (r.isSub) {
+      if (r.resultType === 'O' || (r.result && r.result.startsWith('O'))) {
+        r.resultType = 'O'
+        const count = r.ncCount !== undefined ? Number(r.ncCount) : parseInt(r.result?.match(/\d+/)?.[0] || '1', 10)
+        r.ncCount = isNaN(count) || count <= 0 ? 1 : count
+        r.result = `O (${r.ncCount})`
+        totalOInItem3 += r.ncCount
+      } else {
+        r.resultType = 'S'
+        r.ncCount = 0
+        r.result = 'S'
+      }
+    }
+  })
+
+  // 2. Update Item 3 (Auto calculated from 3.1.1 - 3.2.6)
+  const row3 = data.tableRows.find(r => r.num === '3')
+  if (row3) {
+    row3.fullScore = 73
+    row3.ncCount = totalOInItem3
+    if (totalOInItem3 === 0) {
+      row3.resultType = 'S'
+      row3.result = 'S'
+      row3.score = 73
+    } else {
+      row3.resultType = 'NC'
+      row3.result = `${totalOInItem3} NC`
+      row3.score = Math.max(0, 73 - totalOInItem3)
+    }
+  }
+
+  // 3. Update Item 1 (fullScore = 12)
+  const row1 = data.tableRows.find(r => r.num === '1')
+  if (row1) {
+    row1.fullScore = 12
+    if (row1.resultType === 'NC' || (row1.result && row1.result.includes('NC'))) {
+      row1.resultType = 'NC'
+      const count = row1.ncCount !== undefined ? Number(row1.ncCount) : parseInt(row1.result?.match(/\d+/)?.[0] || '1', 10)
+      row1.ncCount = isNaN(count) || count <= 0 ? 1 : count
+      row1.result = `${row1.ncCount} NC`
+      row1.score = Math.max(0, 12 - row1.ncCount)
+    } else {
+      row1.resultType = 'S'
+      row1.ncCount = 0
+      row1.result = 'S'
+      row1.score = 12
+    }
+  }
+
+  // 4. Update Item 2 (fullScore = 13)
+  const row2 = data.tableRows.find(r => r.num === '2')
+  if (row2) {
+    row2.fullScore = 13
+    if (row2.resultType === 'NC' || (row2.result && row2.result.includes('NC'))) {
+      row2.resultType = 'NC'
+      const count = row2.ncCount !== undefined ? Number(row2.ncCount) : parseInt(row2.result?.match(/\d+/)?.[0] || '1', 10)
+      row2.ncCount = isNaN(count) || count <= 0 ? 1 : count
+      row2.result = `${row2.ncCount} NC`
+      row2.score = Math.max(0, 13 - row2.ncCount)
+    } else {
+      row2.resultType = 'S'
+      row2.ncCount = 0
+      row2.result = 'S'
+      row2.score = 13
+    }
+  }
+
+  // 5. Total Full Score and Total Score
+  const s1 = Number(row1?.score) || 0
+  const s2 = Number(row2?.score) || 0
+  const s3 = Number(row3?.score) || 0
+  const totalFull = 98
+  const totalScore = s1 + s2 + s3
+  const totalFailed = (Number(row1?.ncCount) || 0) + (Number(row2?.ncCount) || 0) + (Number(row3?.ncCount) || 0)
+  const percent = ((totalScore / totalFull) * 100).toFixed(2)
+
+  // 6. Overall Status
+  let status = 'ผ่านการประเมินโดยรวม'
+  if (Number(percent) < 80) {
+    status = 'ไม่ผ่านการประเมิน'
+  } else if (totalFailed > 0) {
+    status = 'ผ่านการประเมินโดยมีข้อสังเกต/ข้อแก้ไข (Pass with NC)'
+  } else {
+    status = 'ผ่านการประเมินโดยรวม'
+  }
+  data.summaryStatus = status
+
+  return { totalFull, totalScore, percent, totalFailed, status }
+}
+
 export const DEFAULT_AUDIT_REPORT_SKO = {
+  id: 'report_default_2569',
   agency: 'สำนักงานสาธารณสุขจังหวัดสระแก้ว',
   agencyType: 'CII | Regulator | Gov',
+  startDate: '2026-02-23',
+  endDate: '2026-02-27',
   auditDate: 'วันที่ 23 - 27 กุมภาพันธ์ 2569',
   auditors: [
     '1.  นายปิยะณัฐ วิเชียร',
@@ -31,22 +185,22 @@ export const DEFAULT_AUDIT_REPORT_SKO = {
   scope: 'สำนักงานสาธารณสุขจังหวัดสระแก้ว',
   criteria: 'พรบ ไซเบอร์ 2562 และกฎหมายลำดับรอง 15 ฉบับ',
   prevAudit: 'ประเมินล่าสุดเมื่อเดือนธันวาคม 2566, อ้างอิงถึงเอกสาร ประเมิน-001 :  รายงานการตรวจสอบด้านความมั่นคงปลอดภัยไซเบอร์ (Audit Report) , ดูเอกสารแนบท้าย',
-  summaryStatus: 'ผ่านการประเมินโดยรวม',
+  summaryStatus: 'ผ่านการประเมินโดยมีข้อสังเกต/ข้อแก้ไข (Pass with NC)',
   tableRows: [
-    { num: '1', title: 'พรบ ไซเบอร์ 2562', fullScore: 12, result: 'S', score: 12, isHeader: false, isSub: false },
-    { num: '2', title: 'นโยบายฯ ไซเบอร์แห่งชาติ (2565-2570)', fullScore: 13, result: 'S', score: 13, isHeader: false, isSub: false },
-    { num: '3', title: 'ประมวลแนวทางปฏิบัติและกรอบมาตรฐาน', fullScore: 73, result: '2 NC', score: 71, isHeader: false, isSub: false },
+    { num: '1', title: 'พรบ ไซเบอร์ 2562', fullScore: 12, resultType: 'S', ncCount: 0, result: 'S', score: 12, isHeader: false, isSub: false },
+    { num: '2', title: 'นโยบายฯ ไซเบอร์แห่งชาติ (2565-2570)', fullScore: 13, resultType: 'S', ncCount: 0, result: 'S', score: 13, isHeader: false, isSub: false },
+    { num: '3', title: 'ประมวลแนวทางปฏิบัติและกรอบมาตรฐาน', fullScore: 73, resultType: 'NC', ncCount: 2, result: '2 NC', score: 71, isHeader: false, isSub: false },
     { num: '3.1', title: 'ประมวลแนวทางปฏิบัติ', fullScore: '', result: '', score: '', isHeader: true, isSub: false },
-    { num: '3.1.1', title: 'แผนการตรวจสอบ', fullScore: '', result: 'O (1)', score: '', isHeader: false, isSub: true },
-    { num: '3.1.2', title: 'การประเมินความเสี่ยง', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
-    { num: '3.1.3', title: 'แผนการรับมือภัยคุกคามทางไซเบอร์', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.1.1', title: 'แผนการตรวจสอบ', fullScore: '', resultType: 'O', ncCount: 1, result: 'O (1)', score: '', isHeader: false, isSub: true },
+    { num: '3.1.2', title: 'การประเมินความเสี่ยง', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.1.3', title: 'แผนการรับมือภัยคุกคามทางไซเบอร์', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
     { num: '3.2', title: 'กรอบมาตรฐาน', fullScore: '', result: '', score: '', isHeader: true, isSub: false },
-    { num: '3.2.1', title: 'Govern', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
-    { num: '3.2.2', title: 'Identify', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
-    { num: '3.2.3', title: 'Protect', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
-    { num: '3.2.4', title: 'Detect', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
-    { num: '3.2.5', title: 'Respond', fullScore: '', result: 'S', score: '', isHeader: false, isSub: true },
-    { num: '3.2.6', title: 'Recover', fullScore: '', result: 'O (1)', score: '', isHeader: false, isSub: true }
+    { num: '3.2.1', title: 'Govern', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.2.2', title: 'Identify', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.2.3', title: 'Protect', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.2.4', title: 'Detect', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.2.5', title: 'Respond', fullScore: '', resultType: 'S', ncCount: 0, result: 'S', score: '', isHeader: false, isSub: true },
+    { num: '3.2.6', title: 'Recover', fullScore: '', resultType: 'O', ncCount: 1, result: 'O (1)', score: '', isHeader: false, isSub: true }
   ],
   strongPoints: '1. หน่วยงานดังกล่าวได้มีการจัดทำเอกสารต่างๆ โดยรวมได้เป็นอย่างดี ตรงตามที่ พรบ ไซเบอร์ ได้กำหนดไว้\n2. โดยส่วนมาก บุคลากรที่ได้รับการสัมภาษณ์มีความรู้ในส่วนที่เกี่ยวข้องได้ดี',
   weakPoints: [
@@ -136,6 +290,9 @@ export function ensureAuditReportStyles() {
         justify-content: space-between;
         align-items: center;
       }
+      .print-only {
+        display: none !important;
+      }
       @media print {
         body {
           background: #fff !important;
@@ -160,6 +317,9 @@ export function ensureAuditReportStyles() {
         }
         .no-print {
           display: none !important;
+        }
+        .print-only {
+          display: inline-block !important;
         }
         .report-input-field, .finding-input, .table-full-score-input, .table-score-input, .table-result-input, textarea, input {
           border: none !important;
@@ -197,20 +357,11 @@ export function ensureAuditReportStyles() {
   style.disabled = false
 }
 
-export function renderAuditReportHtml(agency, reportData) {
+export function renderAuditReportHtml(agency, reportList, activeReportId) {
   ensureAuditReportStyles()
-  const data = reportData || DEFAULT_AUDIT_REPORT_SKO
-
-  // Calculate totals
-  let totalFull = 0
-  let totalScore = 0
-  data.tableRows.forEach(r => {
-    if (r.isHeader || r.isSub) return
-    if (r.fullScore) totalFull += Number(r.fullScore) || 0
-    if (r.score) totalScore += Number(r.score) || 0
-  })
-  const percent = totalFull > 0 ? ((totalScore / totalFull) * 100).toFixed(2) : '0.00'
-  const failedCount = data.weakPoints?.length || 0
+  const list = Array.isArray(reportList) && reportList.length > 0 ? reportList : [DEFAULT_AUDIT_REPORT_SKO]
+  const data = list.find(r => r.id === activeReportId) || list[0]
+  const calc = calculateAuditScores(data)
 
   return `
     <div class="card" style="border:1px solid #cbd5e1; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); background:#fff; overflow:hidden; margin-bottom:24px;">
@@ -224,6 +375,24 @@ export function renderAuditReportHtml(agency, reportData) {
               ${AUDIT_AGENCIES.map(a => `<option value="${a}" ${a === agency ? 'selected' : ''}>${a}</option>`).join('')}
             </select>
           </label>
+
+          <label style="font-weight:700; font-size:13px; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0;">
+            <span>📅 รอบประเมิน:</span>
+            <select id="report-version-select" style="font-weight:600; color:#0f172a; border:1px solid #cbd5e1; padding:6px 10px; border-radius:6px; background:#fff; font-size:12.5px; cursor:pointer; max-width:260px;">
+              ${list.map(r => `<option value="${r.id}" ${r.id === data.id ? 'selected' : ''}>${r.auditDate || 'รอบไม่มีระบุวันที่'}</option>`).join('')}
+            </select>
+          </label>
+
+          <button id="create-report-btn" class="btn" style="background:#fff; border:1px solid #cbd5e1; color:#2563eb; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+            + สร้างรายงานรอบใหม่
+          </button>
+
+          ${list.length > 1 ? `
+            <button id="delete-report-btn" class="btn" data-id="${data.id}" style="background:#fff; border:1px solid #fca5a5; color:#ef4444; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="ลบรายงานรอบนี้">
+              🗑️ ลบรอบนี้
+            </button>
+          ` : ''}
+
           <span style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; color:#16a34a; background:#f0fdf4; padding:4px 9px; border-radius:4px; border:1px solid #bbf7d0;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             บันทึกอัตโนมัติ
@@ -269,10 +438,22 @@ export function renderAuditReportHtml(agency, reportData) {
             <span class="report-field-label">ประเภทของหน่วยงาน :</span>
             <input type="text" id="report-agency-type-input" class="report-input-field form-control form-control-sm" value="${data.agencyType || ''}" style="flex:1; font-size:13.5px;">
           </div>
-          <div class="report-field-row">
-            <span class="report-field-label">วันที่ประเมิน :</span>
-            <input type="text" id="report-date-input" class="report-input-field form-control form-control-sm" value="${data.auditDate || ''}" style="flex:1; font-size:13.5px;">
+
+          <!-- Date range & text input -->
+          <div class="report-field-row" style="align-items:flex-start;">
+            <span class="report-field-label" style="padding-top:4px;">วันที่ประเมิน :</span>
+            <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+              <div class="no-print" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12px; color:#475569; background:#fff; padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1;">
+                <span>จากวันที่:</span>
+                <input type="date" id="report-start-date" value="${data.startDate || ''}" style="border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:12px;">
+                <span>ถึงวันที่:</span>
+                <input type="date" id="report-end-date" value="${data.endDate || ''}" style="border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:12px;">
+                <span style="color:#64748b; font-size:11px;">(ระบบแปลงเป็นช่วงวันที่ภาษาไทยให้อัตโนมัติ)</span>
+              </div>
+              <input type="text" id="report-date-input" class="report-input-field form-control form-control-sm" value="${data.auditDate || ''}" placeholder="เช่น วันที่ 23 - 27 กุมภาพันธ์ 2569" style="font-size:13.5px; font-weight:600;">
+            </div>
           </div>
+
           <div class="report-field-row" style="align-items:flex-start;">
             <span class="report-field-label">ชื่อผู้ตรวจสอบ :</span>
             <div style="flex:1;">
@@ -305,14 +486,14 @@ export function renderAuditReportHtml(agency, reportData) {
             สรุปผลการประเมินโดยภาพรวม (Executive Summary)
           </h2>
           
-          <div style="background:#eff6ff; border-left:4px solid #2563eb; padding:12px 16px; margin-bottom:16px; border-radius:0 6px 6px 0;">
-            <div style="font-weight:700; color:#1e40af; font-size:15px; margin-bottom:4px;">
-              ${data.summaryStatus || 'ผ่านการประเมินโดยรวม'}
+          <div id="executive-summary-box" style="background:${calc.percent < 80 ? '#fef2f2' : calc.totalFailed > 0 ? '#eff6ff' : '#f0fdf4'}; border-left:4px solid ${calc.percent < 80 ? '#dc2626' : calc.totalFailed > 0 ? '#2563eb' : '#16a34a'}; padding:12px 16px; margin-bottom:16px; border-radius:0 6px 6px 0;">
+            <div id="exec-status-title" style="font-weight:700; color:${calc.percent < 80 ? '#b91c1c' : calc.totalFailed > 0 ? '#1e40af' : '#15803d'}; font-size:15px; margin-bottom:4px;">
+              ${calc.status}
             </div>
-            <div style="font-size:13px; color:#334155; line-height:1.5;">
-              • คะแนนรวมที่ได้จากการประเมิน : <strong>${percent} %</strong> (สัดส่วน ${totalScore} / ${totalFull} ข้อ)<br>
-              • จำนวนตัวควบคุมทั้งหมดที่ใช้ในการตรวจประเมิน = <strong>${totalFull} ตัวควบคุม</strong><br>
-              • จำนวนตัวควบคุมที่ไม่ผ่านการประเมิน = <strong style="color:#b91c1c;">${failedCount} ตัวควบคุม</strong>
+            <div id="exec-summary-details" style="font-size:13px; color:#334155; line-height:1.5;">
+              • คะแนนรวมที่ได้จากการประเมิน : <strong>${calc.percent} %</strong> (สัดส่วน ${calc.totalScore} / ${calc.totalFull} ข้อ)<br>
+              • จำนวนตัวควบคุมทั้งหมดที่ใช้ในการตรวจประเมิน = <strong>${calc.totalFull} ตัวควบคุม</strong><br>
+              • จำนวนตัวควบคุมที่ไม่ผ่านการประเมิน = <strong style="color:${calc.totalFailed > 0 ? '#b91c1c' : '#15803d'};">${calc.totalFailed} ตัวควบคุม</strong>
             </div>
           </div>
 
@@ -323,7 +504,7 @@ export function renderAuditReportHtml(agency, reportData) {
                 <th style="width:60px;">ลำดับ</th>
                 <th style="text-align:left;">รายการการตรวจประเมิน</th>
                 <th style="width:160px;">จำนวนตัวควบคุม/ คะแนนเต็ม</th>
-                <th style="width:110px;">ผลการประเมิน</th>
+                <th style="width:150px;">ผลการประเมิน</th>
                 <th style="width:130px;">% Score ที่ได้รับ</th>
               </tr>
             </thead>
@@ -337,33 +518,82 @@ export function renderAuditReportHtml(agency, reportData) {
                     </tr>
                   `
                 }
-                const isSubItem = r.isSub
+
+                // Major Items 1 & 2
+                if (r.num === '1' || r.num === '2') {
+                  const isNC = r.resultType === 'NC'
+                  return `
+                    <tr style="background:#fff; font-weight:700;">
+                      <td style="text-align:center; color:#64748b;">${r.num}</td>
+                      <td style="text-align:left;">${r.title}</td>
+                      <td style="text-align:center;">${r.fullScore}</td>
+                      <td style="text-align:center;">
+                        <div style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                          <select class="table-major-select no-print" data-idx="${idx}" style="font-weight:700; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:12px; cursor:pointer; color:${isNC ? '#b91c1c' : '#15803d'};">
+                            <option value="S" ${!isNC ? 'selected' : ''}>S (ผ่าน)</option>
+                            <option value="NC" ${isNC ? 'selected' : ''}>NC (ไม่ผ่าน)</option>
+                          </select>
+                          ${isNC ? `
+                            <span class="no-print" style="font-size:11px; color:#64748b;">จำนวน:</span>
+                            <input type="number" min="1" max="${r.fullScore}" class="table-major-nc-count no-print" data-idx="${idx}" value="${r.ncCount || 1}" style="width:45px; text-align:center; border:1px solid #f87171; border-radius:4px; padding:2px; font-weight:700; color:#b91c1c;">
+                          ` : ''}
+                          <span class="print-only" style="display:none; font-weight:700; color:${isNC ? '#b91c1c' : '#15803d'};">${r.result}</span>
+                        </div>
+                      </td>
+                      <td style="text-align:center; font-weight:700; color:#1e293b;">${r.score}</td>
+                    </tr>
+                  `
+                }
+
+                // Major Item 3 (Auto calculated from 3.1.1 - 3.2.6)
+                if (r.num === '3') {
+                  const isNC = r.resultType === 'NC' || (r.ncCount > 0)
+                  return `
+                    <tr style="background:#fff; font-weight:700;">
+                      <td style="text-align:center; color:#64748b;">${r.num}</td>
+                      <td style="text-align:left;">
+                        ${r.title}
+                        <span class="no-print" style="font-size:11px; font-weight:normal; color:#64748b; margin-left:6px;">(คำนวณอัตโนมัติจากข้อ 3.1 และ 3.2)</span>
+                      </td>
+                      <td style="text-align:center;">${r.fullScore}</td>
+                      <td style="text-align:center; font-weight:700; color:${isNC ? '#b91c1c' : '#15803d'};">
+                        <span id="row-3-result-badge">${r.result}</span>
+                      </td>
+                      <td style="text-align:center; font-weight:700; color:#1e293b;" id="row-3-score-cell">${r.score}</td>
+                    </tr>
+                  `
+                }
+
+                // Sub items 3.1.1 to 3.2.6
+                const isO = r.resultType === 'O' || (r.result && r.result.startsWith('O'))
                 return `
-                  <tr style="${r.num === '1' || r.num === '2' || r.num === '3' ? 'font-weight:700; background:#fff;' : 'background:#fff;'}">
+                  <tr style="background:#fff;">
                     <td style="text-align:center; color:#64748b;">${r.num}</td>
-                    <td style="text-align:left; ${isSubItem ? 'padding-left:26px;' : ''}">${r.title}</td>
+                    <td style="text-align:left; padding-left:26px;">${r.title}</td>
+                    <td style="text-align:center;">-</td>
                     <td style="text-align:center;">
-                      ${r.fullScore !== '' ? `
-                        <input type="number" class="table-full-score-input" data-idx="${idx}" value="${r.fullScore}" style="width:60px; text-align:center; border:1px solid #cbd5e1; border-radius:4px; padding:2px 4px; font-weight:600;">
-                      ` : '-'}
+                      <div style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                        <select class="table-sub-select no-print" data-idx="${idx}" style="font-weight:700; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:12px; cursor:pointer; color:${isO ? '#b91c1c' : '#15803d'};">
+                          <option value="S" ${!isO ? 'selected' : ''}>S</option>
+                          <option value="O" ${isO ? 'selected' : ''}>O</option>
+                        </select>
+                        ${isO ? `
+                          <span class="no-print" style="font-size:11px; color:#64748b;">จำนวน:</span>
+                          <input type="number" min="1" max="20" class="table-sub-nc-count no-print" data-idx="${idx}" value="${r.ncCount || 1}" style="width:45px; text-align:center; border:1px solid #f87171; border-radius:4px; padding:2px; font-weight:700; color:#b91c1c;">
+                        ` : ''}
+                        <span class="print-only" style="display:none; font-weight:700; color:${isO ? '#b91c1c' : '#15803d'};">${r.result}</span>
+                      </div>
                     </td>
-                    <td style="text-align:center;">
-                      <input type="text" class="table-result-input" data-idx="${idx}" value="${r.result || ''}" style="width:75px; text-align:center; border:1px solid #cbd5e1; border-radius:4px; padding:2px 4px; font-weight:700; color:${r.result?.includes('O') || r.result?.includes('NC') ? '#b91c1c' : '#15803d'};">
-                    </td>
-                    <td style="text-align:center;">
-                      ${r.score !== '' ? `
-                        <input type="number" class="table-score-input" data-idx="${idx}" value="${r.score}" style="width:60px; text-align:center; border:1px solid #cbd5e1; border-radius:4px; padding:2px 4px; font-weight:700;">
-                      ` : '-'}
-                    </td>
+                    <td style="text-align:center;">-</td>
                   </tr>
                 `
               }).join('')}
               <tr style="background:#f1f5f9; font-weight:800; border-top:2px solid #0f172a;">
                 <td style="text-align:center;"></td>
                 <td style="text-align:left;">ผลรวม</td>
-                <td style="text-align:center;" id="report-total-full">${totalFull}</td>
+                <td style="text-align:center;" id="report-total-full">${calc.totalFull}</td>
                 <td style="text-align:center;">-</td>
-                <td style="text-align:center;" id="report-total-score">${totalScore}</td>
+                <td style="text-align:center;" id="report-total-score">${calc.totalScore}</td>
               </tr>
             </tbody>
           </table>
@@ -390,9 +620,12 @@ export function renderAuditReportHtml(agency, reportData) {
           </div>
 
           <!-- Weak Points / NC items Header & Button -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <div style="font-weight:700; font-size:14px; color:#b91c1c;">
-              ⚠️ ข้อที่ควรทำการแก้ไข (Weak Point / Non-Conformity) :
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+            <div style="font-weight:700; font-size:14px; color:#b91c1c; display:flex; align-items:center; gap:8px;">
+              <span>⚠️ ข้อที่ควรทำการแก้ไข (Weak Point / Non-Conformity) :</span>
+              <span style="font-size:12px; font-weight:600; padding:2px 8px; border-radius:4px; ${(data.weakPoints?.length || 0) === calc.totalFailed ? 'background:#dcfce7; color:#15803d; border:1px solid #86efac;' : 'background:#fef3c7; color:#b45309; border:1px solid #fde68a;'}">
+                บันทึกรายละเอียดแล้ว ${(data.weakPoints?.length || 0)} / ${calc.totalFailed} ข้อ NC
+              </span>
             </div>
             <button id="add-finding-btn" class="btn no-print" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:12px; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;">
               + เพิ่มข้อที่ควรแก้ไข
@@ -499,17 +732,7 @@ export function renderAuditReportHtml(agency, reportData) {
 
 export function exportAuditReportToWord(agency, reportData) {
   const data = reportData || DEFAULT_AUDIT_REPORT_SKO
-
-  // Calculate totals
-  let totalFull = 0
-  let totalScore = 0
-  data.tableRows.forEach(r => {
-    if (r.isHeader || r.isSub) return
-    if (r.fullScore) totalFull += Number(r.fullScore) || 0
-    if (r.score) totalScore += Number(r.score) || 0
-  })
-  const percent = totalFull > 0 ? ((totalScore / totalFull) * 100).toFixed(2) : '0.00'
-  const failedCount = data.weakPoints?.length || 0
+  const calc = calculateAuditScores(data)
 
   const docHtml = `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -603,10 +826,10 @@ export function exportAuditReportToWord(agency, reportData) {
       <div class="divider"></div>
 
       <h2>สรุปผลการประเมินโดยภาพรวม (Executive Summary)</h2>
-      <p class="bold" style="font-size:16pt; color:#003399;">${data.summaryStatus || 'ผ่านการประเมินโดยรวม'}</p>
-      <p>คะแนนรวมที่ได้จากการประเมิน : <span class="bold">${percent} %</span> (จำนวนข้อที่สอดคล้อง / จำนวนข้อทั้งหมด เช่น ${totalScore} / ${totalFull})</p>
-      <p>จำนวนตัวควบคุมทั้งหมดที่ใช้ในการตรวจประเมิน = ${totalFull} ตัวควบคุม</p>
-      <p>จำนวนตัวควบคุมที่ไม่ผ่านการประเมิน = ${failedCount} ตัวควบคุม</p>
+      <p class="bold" style="font-size:16pt; color:${calc.percent < 80 ? '#cc0000' : calc.totalFailed > 0 ? '#003399' : '#006600'};">${calc.status}</p>
+      <p>คะแนนรวมที่ได้จากการประเมิน : <span class="bold">${calc.percent} %</span> (สัดส่วน ${calc.totalScore} / ${calc.totalFull} ข้อ)</p>
+      <p>จำนวนตัวควบคุมทั้งหมดที่ใช้ในการตรวจประเมิน = ${calc.totalFull} ตัวควบคุม</p>
+      <p>จำนวนตัวควบคุมที่ไม่ผ่านการประเมิน = ${calc.totalFailed} ตัวควบคุม</p>
 
       <table>
         <thead>
@@ -632,18 +855,18 @@ export function exportAuditReportToWord(agency, reportData) {
               <tr style="${r.num === '1' || r.num === '2' || r.num === '3' ? 'font-weight:bold;' : ''}">
                 <td class="text-center">${r.num}</td>
                 <td class="text-left" style="${r.isSub ? 'padding-left:18pt;' : ''}">${r.title}</td>
-                <td class="text-center">${r.fullScore || ''}</td>
-                <td class="text-center" style="font-weight:bold;">${r.result || ''}</td>
-                <td class="text-center">${r.score || ''}</td>
+                <td class="text-center">${r.fullScore || '-'}</td>
+                <td class="text-center" style="font-weight:bold; color:${r.result?.includes('NC') || r.result?.startsWith('O') ? '#cc0000' : '#006600'};">${r.result || ''}</td>
+                <td class="text-center">${r.score !== '' ? r.score : '-'}</td>
               </tr>
             `
           }).join('')}
           <tr style="font-weight:bold; background-color:#eeeeee;">
             <td class="text-center"></td>
             <td class="text-left">ผลรวม</td>
-            <td class="text-center">${totalFull}</td>
-            <td class="text-center"></td>
-            <td class="text-center">${totalScore}</td>
+            <td class="text-center">${calc.totalFull}</td>
+            <td class="text-center">-</td>
+            <td class="text-center">${calc.totalScore}</td>
           </tr>
         </tbody>
       </table>
@@ -661,7 +884,7 @@ export function exportAuditReportToWord(agency, reportData) {
       </div>
 
       <br>
-      <p class="bold" style="color:#cc0000;">ข้อที่ควรทำการแก้ไข (Weak Point) :</p>
+      <p class="bold" style="color:#cc0000;">ข้อที่ควรทำการแก้ไข (Weak Point / Non-Conformity) :</p>
 
       ${(data.weakPoints || []).map((wp, fIdx) => `
         <div style="margin-bottom:18pt;">
@@ -698,7 +921,7 @@ export function exportAuditReportToWord(agency, reportData) {
   const blob = new Blob([docHtml], { type: 'application/msword;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  const safeAgencyName = (data.agency || 'หน่วยงาน').replace(/[\s\/\\:*?"<>|]/g, '_')
+  const safeAgencyName = (data.agency || 'หน่วยงาน').replace(/[\s\/\:*?"<>|]/g, '_')
   a.href = url
   a.download = `Audit_Report_${safeAgencyName}_2569.doc`
   document.body.appendChild(a)
@@ -709,10 +932,28 @@ export function exportAuditReportToWord(agency, reportData) {
   showNotification('ส่งออกไฟล์ Word (.doc) เรียบร้อยแล้ว', 'success')
 }
 
-export function bindAuditReportEvents(el, agency, onUpdate) {
+export function bindAuditReportEvents(el, agency, activeReportId, onUpdate) {
   // Agency Change
   document.getElementById('report-agency-select')?.addEventListener('change', (e) => {
     onUpdate({ type: 'changeAgency', agency: e.target.value })
+  })
+
+  // Version / Date Change
+  document.getElementById('report-version-select')?.addEventListener('change', (e) => {
+    onUpdate({ type: 'changeReport', reportId: e.target.value })
+  })
+
+  // Create New Report
+  document.getElementById('create-report-btn')?.addEventListener('click', () => {
+    onUpdate({ type: 'createReport' })
+  })
+
+  // Delete Current Report
+  document.getElementById('delete-report-btn')?.addEventListener('click', (e) => {
+    const rId = e.currentTarget.dataset.id
+    if (confirm('คุณต้องการลบรายงานรอบนี้ใช่หรือไม่?')) {
+      onUpdate({ type: 'deleteReport', reportId: rId })
+    }
   })
 
   // Export Word
@@ -740,29 +981,55 @@ export function bindAuditReportEvents(el, agency, onUpdate) {
   bindField('report-prev-audit-input', 'prevAudit')
   bindField('report-strong-points', 'strongPoints')
 
+  // Date pickers range
+  const handleDateRangeChange = () => {
+    const start = document.getElementById('report-start-date')?.value || ''
+    const end = document.getElementById('report-end-date')?.value || ''
+    const formatted = formatThaiDateRange(start, end)
+    const dateInput = document.getElementById('report-date-input')
+    if (dateInput) dateInput.value = formatted
+    onUpdate({ type: 'updateDateRange', startDate: start, endDate: end, auditDate: formatted })
+  }
+  document.getElementById('report-start-date')?.addEventListener('change', handleDateRangeChange)
+  document.getElementById('report-end-date')?.addEventListener('change', handleDateRangeChange)
+
   // Auditors textarea
   document.getElementById('report-auditors-input')?.addEventListener('change', (e) => {
     const list = e.target.value.split('\n').filter(s => s.trim())
     onUpdate({ type: 'updateField', field: 'auditors', value: list })
   })
 
-  // Table summary row changes
-  el.querySelectorAll('.table-full-score-input').forEach(input => {
-    input.addEventListener('change', (e) => {
+  // Major Items 1 and 2 select (S or NC)
+  el.querySelectorAll('.table-major-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
       const idx = Number(e.target.dataset.idx)
-      onUpdate({ type: 'updateTableRow', idx, field: 'fullScore', value: Number(e.target.value) || 0 })
+      onUpdate({ type: 'updateMajorResult', idx, resultType: e.target.value })
     })
   })
-  el.querySelectorAll('.table-score-input').forEach(input => {
+
+  // Major Items 1 and 2 ncCount input
+  el.querySelectorAll('.table-major-nc-count').forEach(input => {
     input.addEventListener('change', (e) => {
       const idx = Number(e.target.dataset.idx)
-      onUpdate({ type: 'updateTableRow', idx, field: 'score', value: Number(e.target.value) || 0 })
+      const count = Number(e.target.value) || 1
+      onUpdate({ type: 'updateMajorNcCount', idx, ncCount: count })
     })
   })
-  el.querySelectorAll('.table-result-input').forEach(input => {
+
+  // Sub Items 3.1.1 to 3.2.6 select (S or O)
+  el.querySelectorAll('.table-sub-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const idx = Number(e.target.dataset.idx)
+      onUpdate({ type: 'updateSubResult', idx, resultType: e.target.value })
+    })
+  })
+
+  // Sub Items 3.1.1 to 3.2.6 ncCount input
+  el.querySelectorAll('.table-sub-nc-count').forEach(input => {
     input.addEventListener('change', (e) => {
       const idx = Number(e.target.dataset.idx)
-      onUpdate({ type: 'updateTableRow', idx, field: 'result', value: e.target.value.trim() })
+      const count = Number(e.target.value) || 1
+      onUpdate({ type: 'updateSubNcCount', idx, ncCount: count })
     })
   })
 

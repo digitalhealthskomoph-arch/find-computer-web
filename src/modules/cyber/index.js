@@ -118,6 +118,7 @@ let cyberState = {
   selectedAuditYear: '2569',
   auditReports: {},
   selectedAuditReportAgency: 'สำนักงานสาธารณสุขจังหวัดสระแก้ว',
+  activeAuditReportId: {},
   incidents: [],
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
@@ -267,15 +268,24 @@ function initData() {
   try {
     const savedReports = localStorage.getItem(LOCAL_STORAGE_AUDIT_REPORTS_KEY)
     if (savedReports) {
-      cyberState.auditReports = JSON.parse(savedReports)
+      const parsed = JSON.parse(savedReports)
+      cyberState.auditReports = {}
+      Object.keys(parsed).forEach(agency => {
+        const item = parsed[agency]
+        if (Array.isArray(item)) {
+          cyberState.auditReports[agency] = item
+        } else if (item && typeof item === 'object') {
+          cyberState.auditReports[agency] = [item]
+        }
+      })
     } else {
-      cyberState.auditReports = { 'สำนักงานสาธารณสุขจังหวัดสระแก้ว': JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO)) }
+      cyberState.auditReports = { 'สำนักงานสาธารณสุขจังหวัดสระแก้ว': [JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))] }
     }
   } catch (e) {
-    cyberState.auditReports = { 'สำนักงานสาธารณสุขจังหวัดสระแก้ว': JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO)) }
+    cyberState.auditReports = { 'สำนักงานสาธารณสุขจังหวัดสระแก้ว': [JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))] }
   }
-  if (!cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว']) {
-    cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'] = JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))
+  if (!cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'] || cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'].length === 0) {
+    cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'] = [JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))]
   }
 }
 
@@ -317,16 +327,26 @@ function saveAuditReports() {
   } catch (e) {}
 }
 
-function getAuditReportData(agency) {
-  if (!cyberState.auditReports[agency]) {
+function getAuditReportsList(agency) {
+  if (!cyberState.auditReports[agency] || cyberState.auditReports[agency].length === 0) {
     const cloned = JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))
+    cloned.id = `report_${Date.now()}`
     cloned.agency = agency
     cloned.scope = agency
     cloned.objective = `เพื่อแน่ใจว่า${agency} ได้ปฏิบัติตาม พรบ ไซเบอร์ 2562 และกฎหมายลำดับรอง 15 ฉบับ`
-    cyberState.auditReports[agency] = cloned
+    cyberState.auditReports[agency] = [cloned]
     saveAuditReports()
   }
   return cyberState.auditReports[agency]
+}
+
+function getActiveAuditReport(agency) {
+  const list = getAuditReportsList(agency)
+  if (!cyberState.activeAuditReportId) cyberState.activeAuditReportId = {}
+  const activeId = cyberState.activeAuditReportId[agency]
+  const found = list.find(r => r.id === activeId)
+  if (found) return found
+  return list[0]
 }
 
 // Calculations
@@ -1852,7 +1872,7 @@ function renderPolicyAndFrameworkTab(el) {
         ${isAuditProgramme 
           ? renderAuditProgrammeHtml() 
           : isAuditReport
-          ? renderAuditReportHtml(cyberState.selectedAuditReportAgency, getAuditReportData(cyberState.selectedAuditReportAgency))
+          ? renderAuditReportHtml(cyberState.selectedAuditReportAgency, getAuditReportsList(cyberState.selectedAuditReportAgency), getActiveAuditReport(cyberState.selectedAuditReportAgency).id)
           : renderGenericDocLinksHtml(savedData)}
 
       </div>
@@ -1872,14 +1892,99 @@ function renderPolicyAndFrameworkTab(el) {
   if (isAuditProgramme) {
     bindAuditProgrammeEvents(el)
   } else if (isAuditReport) {
-    bindAuditReportEvents(el, cyberState.selectedAuditReportAgency, (action) => {
+    const activeReport = getActiveAuditReport(cyberState.selectedAuditReportAgency)
+    bindAuditReportEvents(el, cyberState.selectedAuditReportAgency, activeReport.id, (action) => {
       const currentAgency = cyberState.selectedAuditReportAgency || 'สำนักงานสาธารณสุขจังหวัดสระแก้ว'
-      const report = getAuditReportData(currentAgency)
+      const reportList = getAuditReportsList(currentAgency)
+      const report = getActiveAuditReport(currentAgency)
 
       if (action.type === 'changeAgency') {
         cyberState.selectedAuditReportAgency = action.agency
         renderPolicyAndFrameworkTab(el)
         showNotification(`สลับไปยังรายงานของ ${action.agency}`, 'info')
+        return
+      }
+
+      if (action.type === 'changeReport') {
+        if (!cyberState.activeAuditReportId) cyberState.activeAuditReportId = {}
+        cyberState.activeAuditReportId[currentAgency] = action.reportId
+        renderPolicyAndFrameworkTab(el)
+        return
+      }
+
+      if (action.type === 'createReport') {
+        const nextId = `report_${Date.now()}`
+        const newReport = JSON.parse(JSON.stringify(report || DEFAULT_AUDIT_REPORT_SKO))
+        newReport.id = nextId
+        newReport.startDate = ''
+        newReport.endDate = ''
+        newReport.auditDate = 'รอบใหม่ (ยังไม่ระบุวันที่)'
+        reportList.unshift(newReport)
+        if (!cyberState.activeAuditReportId) cyberState.activeAuditReportId = {}
+        cyberState.activeAuditReportId[currentAgency] = nextId
+        saveAuditReports()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('สร้างรายงานรอบใหม่เรียบร้อยแล้ว', 'success')
+        return
+      }
+
+      if (action.type === 'deleteReport') {
+        if (reportList.length <= 1) {
+          alert('ไม่สามารถลบได้ เนื่องจากต้องมีรายงานอย่างน้อย 1 ฉบับ')
+          return
+        }
+        cyberState.auditReports[currentAgency] = reportList.filter(r => r.id !== action.reportId)
+        if (!cyberState.activeAuditReportId) cyberState.activeAuditReportId = {}
+        cyberState.activeAuditReportId[currentAgency] = cyberState.auditReports[currentAgency][0].id
+        saveAuditReports()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('ลบรายงานรอบนี้เรียบร้อยแล้ว', 'info')
+        return
+      }
+
+      if (action.type === 'updateDateRange') {
+        report.startDate = action.startDate
+        report.endDate = action.endDate
+        report.auditDate = action.auditDate
+        saveAuditReports()
+        const opt = el.querySelector(`#report-version-select option[value="${report.id}"]`)
+        if (opt) opt.textContent = report.auditDate || 'รอบไม่มีระบุวันที่'
+        return
+      }
+
+      if (action.type === 'updateMajorResult') {
+        if (report.tableRows && report.tableRows[action.idx]) {
+          report.tableRows[action.idx].resultType = action.resultType
+          saveAuditReports()
+          renderPolicyAndFrameworkTab(el)
+        }
+        return
+      }
+
+      if (action.type === 'updateMajorNcCount') {
+        if (report.tableRows && report.tableRows[action.idx]) {
+          report.tableRows[action.idx].ncCount = action.ncCount
+          saveAuditReports()
+          renderPolicyAndFrameworkTab(el)
+        }
+        return
+      }
+
+      if (action.type === 'updateSubResult') {
+        if (report.tableRows && report.tableRows[action.idx]) {
+          report.tableRows[action.idx].resultType = action.resultType
+          saveAuditReports()
+          renderPolicyAndFrameworkTab(el)
+        }
+        return
+      }
+
+      if (action.type === 'updateSubNcCount') {
+        if (report.tableRows && report.tableRows[action.idx]) {
+          report.tableRows[action.idx].ncCount = action.ncCount
+          saveAuditReports()
+          renderPolicyAndFrameworkTab(el)
+        }
         return
       }
 
@@ -1891,25 +1996,9 @@ function renderPolicyAndFrameworkTab(el) {
       if (action.type === 'updateField') {
         report[action.field] = action.value
         saveAuditReports()
-        return
-      }
-
-      if (action.type === 'updateTableRow') {
-        if (report.tableRows && report.tableRows[action.idx]) {
-          report.tableRows[action.idx][action.field] = action.value
-          saveAuditReports()
-          // Recalculate totals and update in DOM
-          let totalFull = 0
-          let totalScore = 0
-          report.tableRows.forEach(r => {
-            if (r.isHeader || r.isSub) return
-            if (r.fullScore) totalFull += Number(r.fullScore) || 0
-            if (r.score) totalScore += Number(r.score) || 0
-          })
-          const tfEl = document.getElementById('report-total-full')
-          const tsEl = document.getElementById('report-total-score')
-          if (tfEl) tfEl.textContent = String(totalFull)
-          if (tsEl) tsEl.textContent = String(totalScore)
+        if (action.field === 'auditDate') {
+          const opt = el.querySelector(`#report-version-select option[value="${report.id}"]`)
+          if (opt) opt.textContent = action.value || 'รอบไม่มีระบุวันที่'
         }
         return
       }
