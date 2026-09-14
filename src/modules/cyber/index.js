@@ -6,6 +6,90 @@ const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
 const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
 const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
+const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
+
+const DEFAULT_AUDIT_PROGRAMME_2569 = [
+  {
+    id: 1,
+    agency: 'โรงพยาบาลสมเด็จพระยุพราชสระแก้ว',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: true, q2: false, q3: false, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 2,
+    agency: 'โรงพยาบาลอรัญประเทศ',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: true, q3: false, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 3,
+    agency: 'โรงพยาบาลวัฒนานคร',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: false, q3: true, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 4,
+    agency: 'โรงพยาบาลเขาฉกรรจ์',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: false, q3: false, q4: true },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 5,
+    agency: 'โรงพยาบาลวังน้ำเย็น',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: false, q3: false, q4: true },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 6,
+    agency: 'โรงพยาบาลวังสมบูรณ์',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: false, q3: true, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 7,
+    agency: 'โรงพยาบาลคลองหาด',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: true, q3: false, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 8,
+    agency: 'โรงพยาบาลโคกสูง',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: true, q2: false, q3: false, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 9,
+    agency: 'โรงพยาบาลตาพระยา',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: true, q3: false, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  },
+  {
+    id: 10,
+    agency: 'สำนักงานสาธารณสุขจังหวัดสระแก้ว',
+    scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+    quarters: { q1: false, q2: false, q3: true, q4: false },
+    auditDate: '',
+    note: 'สัมภาษณ์ผู้บริหาร'
+  }
+]
 
 let cyberState = {
   activeTab: 'assessment', // 'assessment' | 'docs' | 'incidents'
@@ -22,6 +106,8 @@ let cyberState = {
   },
   docSearchKeyword: '',
   docLinks: {},
+  auditProgrammes: {},
+  selectedAuditYear: '2569',
   incidents: [],
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
@@ -151,6 +237,21 @@ function initData() {
   } catch (e) {
     cyberState.updateLogs = []
   }
+
+  // 5. Audit Programmes
+  try {
+    const savedAudit = localStorage.getItem(LOCAL_STORAGE_AUDIT_PROGRAMME_KEY)
+    if (savedAudit) {
+      cyberState.auditProgrammes = JSON.parse(savedAudit)
+    } else {
+      cyberState.auditProgrammes = { '2569': JSON.parse(JSON.stringify(DEFAULT_AUDIT_PROGRAMME_2569)) }
+    }
+  } catch (e) {
+    cyberState.auditProgrammes = { '2569': JSON.parse(JSON.stringify(DEFAULT_AUDIT_PROGRAMME_2569)) }
+  }
+  if (!cyberState.auditProgrammes['2569'] || cyberState.auditProgrammes['2569'].length === 0) {
+    cyberState.auditProgrammes['2569'] = JSON.parse(JSON.stringify(DEFAULT_AUDIT_PROGRAMME_2569))
+  }
 }
 
 initData()
@@ -176,6 +277,12 @@ function saveIncidents() {
 function saveDocs() {
   try {
     localStorage.setItem(LOCAL_STORAGE_DOCS_KEY, JSON.stringify(cyberState.docLinks))
+  } catch (e) {}
+}
+
+function saveAuditProgrammes() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_AUDIT_PROGRAMME_KEY, JSON.stringify(cyberState.auditProgrammes))
   } catch (e) {}
 }
 
@@ -1048,173 +1155,510 @@ function isGoogleUrl(url) {
   return /drive\.google\.com|docs\.google\.com/i.test(url || '')
 }
 
-function renderPolicyAndFrameworkTab(el) {
-  const q = cyberState.docSearchKeyword.toLowerCase().trim()
-  const filteredDocs = q ? allFlatDocs.filter(d => 
-    d.title.toLowerCase().includes(q) ||
-    d.category.toLowerCase().includes(q) ||
-    d.domain.toLowerCase().includes(q) ||
-    d.major.toLowerCase().includes(q)
-  ) : null
-
-  const currentKey = cyberState.selectedDoc.key || '1.1 Audit Plan Procedure'
-  const savedData = cyberState.docLinks[currentKey] || {
-    editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
-    pdfLinks: []
+function ensureAuditPrintStyles() {
+  if (!document.getElementById('audit-programme-print-style')) {
+    const style = document.createElement('style')
+    style.id = 'audit-programme-print-style'
+    style.innerHTML = `
+      @media print {
+        body {
+          background: #fff !important;
+          color: #000 !important;
+        }
+        body * {
+          visibility: hidden !important;
+        }
+        #audit-print-area, #audit-print-area * {
+          visibility: visible !important;
+        }
+        #audit-print-area {
+          position: fixed !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100vw !important;
+          margin: 0 !important;
+          padding: 8mm 10mm !important;
+          background: #fff !important;
+          box-shadow: none !important;
+          border: none !important;
+          display: block !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .audit-print-agency, .audit-print-note, .audit-print-date {
+          display: inline-block !important;
+        }
+        .audit-agency-input, .audit-note-input, .audit-date-input {
+          display: none !important;
+        }
+        table.audit-programme-table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          font-size: 10pt !important;
+        }
+        table.audit-programme-table th, table.audit-programme-table td {
+          border: 1px solid #1e293b !important;
+          color: #000 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        table.audit-programme-table thead tr th {
+          background-color: #f1f5f9 !important;
+          color: #000 !important;
+        }
+        @page {
+          size: landscape;
+          margin: 8mm;
+        }
+      }
+    `
+    document.head.appendChild(style)
   }
+}
 
-  el.innerHTML = `
-    <div style="display:flex; height:800px; overflow:hidden;">
+function renderAuditProgrammeHtml() {
+  ensureAuditPrintStyles()
+  const years = Object.keys(cyberState.auditProgrammes).sort((a, b) => Number(b) - Number(a))
+  if (!years.includes(cyberState.selectedAuditYear)) {
+    cyberState.selectedAuditYear = years[0] || '2569'
+  }
+  const currentYear = cyberState.selectedAuditYear
+  const list = cyberState.auditProgrammes[currentYear] || []
+
+  const scopesList = [
+    { key: 'guideline', label: 'ประมวลแนวทางฯ' },
+    { key: 'govern', label: 'Govern' },
+    { key: 'identify', label: 'Identify' },
+    { key: 'protect', label: 'Protect' },
+    { key: 'detect', label: 'Detect' },
+    { key: 'respond', label: 'Respond' },
+    { key: 'recover', label: 'Recover' }
+  ]
+
+  const quartersList = [
+    { key: 'q1', label: 'Q1' },
+    { key: 'q2', label: 'Q2' },
+    { key: 'q3', label: 'Q3' },
+    { key: 'q4', label: 'Q4' }
+  ]
+
+  return `
+    <div class="card" style="border:1px solid #cbd5e1; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); background:#fff; overflow:hidden; margin-bottom:24px;">
       
-      <!-- Left Sidebar: Complete Hierarchy Tree with Search -->
-      <div style="width:360px; border-right:1px solid #e2e8f0; background:#f8fafc; display:flex; flex-direction:column; flex-shrink:0;">
-        
-        <!-- Search Input -->
-        <div style="padding:14px; border-bottom:1px solid #e2e8f0; background:#fff;">
-          <input type="text" id="doc-tree-search-input" class="form-control" 
-            placeholder="🔍 ค้นหาหัวข้อเอกสาร (80 หัวข้อ)..." 
-            value="${cyberState.docSearchKeyword}" 
-            style="width:100%; font-size:13px; padding:7px 12px;">
+      <!-- Top Action Toolbar (Hidden during print) -->
+      <div class="no-print" style="padding:16px 20px; background:#f8fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:flex; align-items:center; gap:6px; margin:0;">
+            <span>📅 ปีงบประมาณ:</span>
+            <select id="audit-year-select" style="font-weight:700; color:#1e40af; border:1px solid #93c5fd; padding:5px 12px; border-radius:6px; background:#eff6ff; font-size:13.5px; cursor:pointer;">
+              ${years.map(y => `<option value="${y}" ${y === currentYear ? 'selected' : ''}>พ.ศ. ${y}</option>`).join('')}
+            </select>
+          </label>
+          <button id="add-audit-year-btn" class="btn" style="background:#fff; border:1px solid #cbd5e1; color:#2563eb; padding:5px 12px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+            + เพิ่มปีงบประมาณ
+          </button>
+          <span style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; color:#16a34a; background:#f0fdf4; padding:4px 9px; border-radius:4px; border:1px solid #bbf7d0;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            บันทึกอัตโนมัติ
+          </span>
         </div>
 
-        <!-- Tree View Scrollable -->
-        <div id="doc-tree-scroll-container" style="flex:1; overflow-y:auto; padding:12px 10px;">
-          ${filteredDocs ? renderFlatSearchResults(filteredDocs) : renderCompleteTreeHtml()}
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button id="add-audit-agency-btn" class="btn" style="background:#2563eb; color:#fff; border:none; padding:7px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 2px rgba(37,99,235,0.2);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + เพิ่มหน่วยรับตรวจ
+          </button>
+          <button id="print-audit-programme-btn" class="btn" style="background:#0f172a; color:#fff; border:none; padding:7px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            พิมพ์แผน / Export PDF
+          </button>
         </div>
       </div>
 
-      <!-- Right Main Content: Document Details & Viewer -->
-      <div style="flex:1; overflow-y:auto; padding:28px;">
+      <!-- Printable Table Container -->
+      <div id="audit-print-area" style="padding:24px;">
         
-        <!-- Breadcrumb & Header -->
-        <div style="border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:24px;">
-          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; margin-bottom:6px; flex-wrap:wrap;">
-            <span style="font-weight:700; color:#2563eb;">${cyberState.selectedDoc.category || 'ประมวลแนวทางปฏิบัติ'}</span>
-            <span>&gt;</span>
-            <span style="font-weight:600;">${cyberState.selectedDoc.domain || ''}</span>
-            ${cyberState.selectedDoc.major ? `<span>&gt;</span><span>${cyberState.selectedDoc.major}</span>` : ''}
-          </div>
-          <h2 style="font-size:1.35rem; font-weight:800; color:#1e293b; margin:0 0 6px 0; line-height:1.35;">
-            ${cyberState.selectedDoc.title}
+        <!-- Document Title Header -->
+        <div class="audit-table-title" style="text-align:center; margin-bottom:20px;">
+          <h2 style="font-size:1.65rem; font-weight:800; color:#0f172a; margin:0 0 6px 0; letter-spacing:-0.3px;">
+            แผนการตรวจสอบภายใน ประจำปี ${currentYear}
           </h2>
           <p style="color:#64748b; font-size:13px; margin:0;">
-            จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ
+            สำนักงานสาธารณสุขจังหวัดสระแก้ว และหน่วยบริการในสังกัด (${list.length} หน่วยงาน)
           </p>
         </div>
 
-        <!-- Section 1: Google Docs / Edit Links -->
-        <div class="card" style="border:1px solid #e2e8f0; border-radius:10px; margin-bottom:24px; overflow:hidden;">
-          <div style="background:#f8fafc; padding:12px 20px; border-bottom:1px solid #e2e8f0; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            ลิงก์สำหรับแก้ไขเอกสาร (Google Docs / Sheets / Word)
-          </div>
-          <div style="padding:20px;">
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-              ${savedData.editLinks.map(link => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
-                  <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-                    <div style="width:34px; height:34px; background:#dbeafe; color:#2563eb; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                    </div>
-                    <div style="min-width:0;">
-                      <div style="font-weight:600; color:#1e293b; font-size:13.5px;">${link.label}</div>
-                      <a href="${link.url}" target="_blank" style="font-size:12px; color:#2563eb; text-decoration:none; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</a>
-                    </div>
-                  </div>
-                  <button class="delete-doc-link-btn" data-id="${link.id}" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; padding:4px 8px; flex-shrink:0;">ลบ</button>
-                </div>
-              `).join('')}
-            </div>
+        <!-- Table -->
+        <div style="overflow-x:auto; border:1px solid #cbd5e1; border-radius:8px;">
+          <table class="audit-programme-table" style="width:100%; border-collapse:collapse; font-size:12px; background:#fff;">
+            <thead>
+              <tr style="background:#1e3a8a; color:#ffffff; font-weight:700; text-align:center;">
+                <th rowspan="2" style="width:42px; padding:10px 4px; border:1px solid #3b82f6; vertical-align:middle;">#</th>
+                <th rowspan="2" style="min-width:220px; padding:10px 12px; border:1px solid #3b82f6; text-align:left; vertical-align:middle;">หน่วยรับตรวจ</th>
+                <th colspan="7" style="padding:8px 4px; border:1px solid #3b82f6; background:#1d4ed8; text-align:center; font-size:12.5px;">ประเภทการตรวจ</th>
+                <th colspan="4" style="padding:8px 4px; border:1px solid #3b82f6; background:#2563eb; text-align:center; font-size:12.5px;">ระยะเวลาการตรวจสอบ</th>
+                <th rowspan="2" style="min-width:135px; padding:10px 8px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">วันที่ออกตรวจ</th>
+                <th rowspan="2" style="min-width:150px; padding:10px 12px; border:1px solid #3b82f6; text-align:left; vertical-align:middle;">หมายเหตุ</th>
+                <th rowspan="2" class="no-print" style="width:48px; padding:10px 4px; border:1px solid #3b82f6; text-align:center; vertical-align:middle;">ลบ</th>
+              </tr>
+              <tr style="background:#2563eb; color:#ffffff; font-weight:600; text-align:center; font-size:11px;">
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:65px; background:#1e40af;">ประมวลแนวทางฯ</th>
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Govern</th>
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Identify</th>
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Protect</th>
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Detect</th>
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Respond</th>
+                <th style="padding:6px 2px; border:1px solid #3b82f6; min-width:50px; background:#1e40af;">Recover</th>
+                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q1</th>
+                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q2</th>
+                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q3</th>
+                <th style="padding:6px 4px; border:1px solid #3b82f6; min-width:38px; background:#3b82f6;">Q4</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.length === 0 ? `
+                <tr>
+                  <td colspan="16" style="text-align:center; padding:36px; color:#94a3b8; font-size:13px;">
+                    ยังไม่มีข้อมูลหน่วยรับตรวจในปี ${currentYear} สามารถกดปุ่ม "+ เพิ่มหน่วยรับตรวจ" ด้านบน
+                  </td>
+                </tr>
+              ` : list.map((row, idx) => `
+                <tr style="border-bottom:1px solid #e2e8f0; background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                  <!-- # -->
+                  <td style="padding:8px 4px; border:1px solid #e2e8f0; text-align:center; font-weight:700; color:#334155;">
+                    ${idx + 1}
+                  </td>
 
-            <!-- Add link input -->
-            <div style="display:flex; gap:10px; border-top:1px dashed #e2e8f0; padding-top:14px; flex-wrap:wrap;">
-              <input type="text" id="new-doc-label" placeholder="ชื่อเอกสาร (เช่น ร่างแบบฟอร์มการขอเปลี่ยนแปลง)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
-              <input type="text" id="new-doc-url" placeholder="URL ลิงก์ (https://docs.google.com/...)" class="form-control" style="flex:2; min-width:240px; font-size:13px;">
-              <button id="add-doc-link-btn" class="btn btn-primary" style="background:#1e293b; border-color:#1e293b; font-size:13px; font-weight:600; white-space:nowrap;">
-                + เพิ่มลิงก์
-              </button>
-            </div>
-          </div>
+                  <!-- หน่วยรับตรวจ -->
+                  <td style="padding:6px 10px; border:1px solid #e2e8f0;">
+                    <input type="text" class="audit-agency-input" data-id="${row.id}" value="${row.agency || ''}" 
+                      style="width:100%; font-weight:600; font-size:12.5px; color:#1e293b; border:1px solid transparent; background:transparent; padding:4px 6px; border-radius:4px; outline:none;"
+                      onfocus="this.style.borderColor='#93c5fd'; this.style.background='#fff';" 
+                      onblur="this.style.borderColor='transparent'; this.style.background='transparent';">
+                    <span class="audit-print-agency" style="display:none; font-weight:600; font-size:12px; color:#1e293b;">${row.agency || '-'}</span>
+                  </td>
+
+                  <!-- 7 Scopes -->
+                  ${scopesList.map(s => {
+                    const isChecked = !!row.scopes?.[s.key]
+                    return `
+                      <td class="audit-toggle-cell" data-id="${row.id}" data-type="scope" data-field="${s.key}" 
+                        style="padding:6px 2px; border:1px solid #e2e8f0; text-align:center; cursor:pointer; background:${isChecked ? '#eff6ff' : 'transparent'}; user-select:none;"
+                        title="คลิกเพื่อสลับ: ${s.label}">
+                        ${isChecked ? '<span style="font-weight:800; color:#1e40af; font-size:14px;">X</span>' : '<span style="color:#cbd5e1; font-size:11px;">-</span>'}
+                      </td>
+                    `
+                  }).join('')}
+
+                  <!-- 4 Quarters -->
+                  ${quartersList.map(q => {
+                    const isChecked = !!row.quarters?.[q.key]
+                    return `
+                      <td class="audit-toggle-cell" data-id="${row.id}" data-type="quarter" data-field="${q.key}" 
+                        style="padding:6px 2px; border:1px solid #e2e8f0; text-align:center; cursor:pointer; background:${isChecked ? '#fef3c7' : 'transparent'}; user-select:none;"
+                        title="คลิกเพื่อสลับ: ${q.label}">
+                        ${isChecked ? '<span style="font-weight:800; color:#b45309; font-size:14px;">X</span>' : '<span style="color:#cbd5e1; font-size:11px;">-</span>'}
+                      </td>
+                    `
+                  }).join('')}
+
+                  <!-- วันที่ออกตรวจ -->
+                  <td style="padding:6px 8px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="date" class="audit-date-input" data-id="${row.id}" value="${row.auditDate || ''}" 
+                      style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:3px 6px; color:#1e293b; background:#fff;">
+                    <span class="audit-print-date" style="display:none; font-size:11.5px;">${row.auditDate ? toThaiDate(row.auditDate) : '-'}</span>
+                  </td>
+
+                  <!-- หมายเหตุ -->
+                  <td style="padding:6px 8px; border:1px solid #e2e8f0;">
+                    <input type="text" class="audit-note-input" data-id="${row.id}" value="${row.note || ''}" placeholder="ระบุหมายเหตุ..." 
+                      style="width:100%; font-size:12px; border:1px solid transparent; background:transparent; padding:4px 6px; border-radius:4px; color:#334155; outline:none;"
+                      onfocus="this.style.borderColor='#93c5fd'; this.style.background='#fff';" 
+                      onblur="this.style.borderColor='transparent'; this.style.background='transparent';">
+                    <span class="audit-print-note" style="display:none; font-size:11.5px;">${row.note || '-'}</span>
+                  </td>
+
+                  <!-- Delete -->
+                  <td class="no-print" style="padding:6px 2px; border:1px solid #e2e8f0; text-align:center;">
+                    <button class="delete-audit-agency-btn" data-id="${row.id}" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:13px; padding:3px; border-radius:4px; opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7" title="ลบหน่วยงานนี้">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         </div>
 
-        <!-- Section 2: PDF Viewer -->
-        <div class="card" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
-          <div style="background:#f8fafc; padding:12px 20px; border-bottom:1px solid #e2e8f0; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            เอกสาร PDF อ้างอิง (แสดงผลบนระบบ)
+        <!-- Legend & Instructions -->
+        <div class="no-print" style="margin-top:16px; padding:12px 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; font-size:12px; color:#64748b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <strong>คำอธิบายสัญลักษณ์:</strong>
+            <span style="margin-left:8px;"><strong style="color:#1e40af;">X</strong> ในประเภทการตรวจ = ขอบเขตการตรวจ</span>
+            <span style="margin-left:12px;"><strong style="color:#b45309;">X</strong> ในระยะเวลา = ไตรมาสที่กำหนดเข้าตรวจ (Q1-Q4)</span>
+            <span style="margin-left:12px;">💡 คลิกที่ช่องเพื่อเปิด/ปิดเครื่องหมาย หรือแก้ไขข้อความได้ทันที</span>
           </div>
-          <div style="padding:20px;">
-            <!-- Helper Note for Google Drive & PDF links -->
-            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px 16px; margin-bottom:18px; font-size:12.5px; color:#0369a1; display:flex; align-items:flex-start; gap:10px;">
-              <span style="font-size:18px; line-height:1;">💡</span>
-              <div style="line-height:1.5;">
-                <strong>ข้อแนะนำการแนบลิงก์จาก Google Drive:</strong>
-                <div>• ระบบจะแปลงลิงก์ Google Drive เป็นโหมดพรีวิว (Preview) ให้อัตโนมัติเพื่อให้แสดงผลในหน้านี้ได้</div>
-                <div>• ใน Google Drive โปรดตั้งค่าสิทธิ์แชร์เป็น <strong>"ทุกคนที่มีลิงก์มีสิทธิ์ดู (Anyone with the link can view)"</strong> เพื่อป้องกันปัญหาการบล็อกสิทธิ์ 403 Forbidden</div>
-                <div>• หากแสดงผลไม่สมบูรณ์ สามารถกดปุ่ม <strong>"เปิดในแท็บใหม่"</strong> เพื่อเปิดอ่านเอกสารได้โดยตรง</div>
-              </div>
-            </div>
-
-            <!-- Add PDF input -->
-            <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
-              <input type="text" id="new-pdf-label" placeholder="ชื่อไฟล์ PDF (เช่น 1.1 Audit Plan Procedure ฉบับอนุมัติ)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
-              <input type="text" id="new-pdf-url" placeholder="URL ของไฟล์ PDF หรือ ลิงก์แชร์จาก Google Drive" class="form-control" style="flex:2; min-width:260px; font-size:13px;">
-              <button id="add-pdf-link-btn" class="btn" style="background:#ef4444; color:#fff; border:none; font-size:13px; font-weight:600; white-space:nowrap; padding:8px 16px; border-radius:6px; cursor:pointer;">
-                + แนบ PDF
-              </button>
-            </div>
-
-            ${savedData.pdfLinks.length === 0 ? `
-              <div style="text-align:center; padding:32px; color:#94a3b8; font-size:13px; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1;">
-                ยังไม่มีเอกสาร PDF แนบในหัวข้อนี้ สามารถกรอก URL ของไฟล์ PDF หรือ Google Drive ด้านบนเพื่อแสดงผล
-              </div>
-            ` : savedData.pdfLinks.map(pdf => {
-              const embedUrl = formatEmbedUrl(pdf.url)
-              const isGoogle = isGoogleUrl(pdf.url)
-              return `
-                <div style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); background:#fff;">
-                  <div style="padding:10px 16px; background:#f8fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <div style="width:28px; height:28px; background:#fee2e2; color:#ef4444; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      </div>
-                      <div>
-                        <span style="font-weight:700; color:#1e293b; font-size:13.5px;">${pdf.label}</span>
-                        ${isGoogle ? `<span style="margin-left:6px; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:2px 7px; border-radius:4px; font-size:11px; font-weight:600;">Google Drive</span>` : ''}
-                      </div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <a href="${pdf.url}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#2563eb; text-decoration:none; background:#fff; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; transition:all 0.15s ease;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        เปิดในแท็บใหม่
-                      </a>
-                      <button class="delete-pdf-btn" data-id="${pdf.id}" style="background:#fff; border:1px solid #fecaca; color:#ef4444; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-                        ลบ
-                      </button>
-                    </div>
-                  </div>
-                  <div style="height:620px; width:100%; background:#f8fafc; position:relative;">
-                    <iframe src="${embedUrl}" style="width:100%; height:100%; border:none;" allow="autoplay" loading="lazy" title="${pdf.label}"></iframe>
-                  </div>
-                </div>
-              `
-            }).join('')}
+          <div style="font-size:11.5px; color:#94a3b8;">
+            * สามารถเลือก "วันที่ออกตรวจ" เพื่อระบุวันลงพื้นที่จริงของแต่ละหน่วยงาน
           </div>
         </div>
 
       </div>
     </div>
   `
+}
 
-  // Bind Search input
-  document.getElementById('doc-tree-search-input')?.addEventListener('input', (e) => {
-    cyberState.docSearchKeyword = e.target.value
+function bindAuditProgrammeEvents(el) {
+  const currentYear = cyberState.selectedAuditYear
+
+  // 1. Year Change
+  document.getElementById('audit-year-select')?.addEventListener('change', (e) => {
+    cyberState.selectedAuditYear = e.target.value
     renderPolicyAndFrameworkTab(el)
   })
 
-  // Bind tree item clicks & toggle clicks
-  bindTreeEvents(el)
+  // 2. Add New Fiscal Year
+  document.getElementById('add-audit-year-btn')?.addEventListener('click', () => {
+    const nextYear = String(Number(currentYear) + 1)
+    const yearInput = prompt('ระบุปีงบประมาณ พ.ศ. ที่ต้องการสร้าง (เช่น ' + nextYear + '):', nextYear)
+    if (!yearInput) return
+    const trimmedYear = yearInput.trim()
+    if (!/^\d{4}$/.test(trimmedYear)) {
+      alert('กรุณาระบุปี พ.ศ. เป็นตัวเลข 4 หลัก (เช่น 2570)')
+      return
+    }
 
+    if (cyberState.auditProgrammes[trimmedYear]) {
+      cyberState.selectedAuditYear = trimmedYear
+      renderPolicyAndFrameworkTab(el)
+      showNotification(`สลับไปยังแผนการตรวจสอบภายใน ประจำปี ${trimmedYear} เรียบร้อยแล้ว`, 'info')
+      return
+    }
+
+    // Clone 10 agencies from default template
+    cyberState.auditProgrammes[trimmedYear] = DEFAULT_AUDIT_PROGRAMME_2569.map((item, idx) => ({
+      ...item,
+      id: Date.now() + idx,
+      auditDate: '',
+      quarters: { q1: false, q2: false, q3: false, q4: false }
+    }))
+    cyberState.selectedAuditYear = trimmedYear
+    saveAuditProgrammes()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`สร้างแผนการตรวจสอบภายใน ประจำปี ${trimmedYear} เรียบร้อยแล้ว`, 'success')
+  })
+
+  // 3. Add Agency
+  document.getElementById('add-audit-agency-btn')?.addEventListener('click', () => {
+    const currentList = cyberState.auditProgrammes[cyberState.selectedAuditYear] || []
+    const newAgency = {
+      id: Date.now(),
+      agency: `หน่วยรับตรวจที่ ${currentList.length + 1}`,
+      scopes: { guideline: true, govern: true, identify: true, protect: true, detect: true, respond: true, recover: true },
+      quarters: { q1: false, q2: false, q3: false, q4: false },
+      auditDate: '',
+      note: 'สัมภาษณ์ผู้บริหาร'
+    }
+    currentList.push(newAgency)
+    cyberState.auditProgrammes[cyberState.selectedAuditYear] = currentList
+    saveAuditProgrammes()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มหน่วยรับตรวจใหม่เรียบร้อยแล้ว', 'success')
+  })
+
+  // 4. Print / Export PDF
+  document.getElementById('print-audit-programme-btn')?.addEventListener('click', () => {
+    window.print()
+  })
+
+  // 5. Toggle Cells (Scopes & Quarters)
+  el.querySelectorAll('.audit-toggle-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const id = Number(cell.dataset.id)
+      const type = cell.dataset.type
+      const field = cell.dataset.field
+      const currentList = cyberState.auditProgrammes[cyberState.selectedAuditYear] || []
+      const row = currentList.find(r => r.id === id)
+      if (row) {
+        if (type === 'scope') {
+          if (!row.scopes) row.scopes = {}
+          row.scopes[field] = !row.scopes[field]
+        } else if (type === 'quarter') {
+          if (!row.quarters) row.quarters = {}
+          row.quarters[field] = !row.quarters[field]
+        }
+        saveAuditProgrammes()
+        renderPolicyAndFrameworkTab(el)
+      }
+    })
+  })
+
+  // 6. Text inputs change & blur (Agency, Date & Note)
+  el.querySelectorAll('.audit-agency-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const id = Number(e.target.dataset.id)
+      const currentList = cyberState.auditProgrammes[cyberState.selectedAuditYear] || []
+      const row = currentList.find(r => r.id === id)
+      if (row) {
+        row.agency = e.target.value.trim()
+        saveAuditProgrammes()
+        const printSpan = e.target.parentElement?.querySelector('.audit-print-agency')
+        if (printSpan) printSpan.textContent = row.agency || '-'
+      }
+    })
+  })
+
+  el.querySelectorAll('.audit-date-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const id = Number(e.target.dataset.id)
+      const currentList = cyberState.auditProgrammes[cyberState.selectedAuditYear] || []
+      const row = currentList.find(r => r.id === id)
+      if (row) {
+        row.auditDate = e.target.value
+        saveAuditProgrammes()
+        const printSpan = e.target.parentElement?.querySelector('.audit-print-date')
+        if (printSpan) printSpan.textContent = row.auditDate ? toThaiDate(row.auditDate) : '-'
+      }
+    })
+  })
+
+  el.querySelectorAll('.audit-note-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const id = Number(e.target.dataset.id)
+      const currentList = cyberState.auditProgrammes[cyberState.selectedAuditYear] || []
+      const row = currentList.find(r => r.id === id)
+      if (row) {
+        row.note = e.target.value.trim()
+        saveAuditProgrammes()
+        const printSpan = e.target.parentElement?.querySelector('.audit-print-note')
+        if (printSpan) printSpan.textContent = row.note || '-'
+      }
+    })
+  })
+
+  // 7. Delete Agency Row
+  el.querySelectorAll('.delete-audit-agency-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const id = Number(btn.dataset.id)
+      const currentList = cyberState.auditProgrammes[cyberState.selectedAuditYear] || []
+      const target = currentList.find(r => r.id === id)
+      if (confirm(`คุณต้องการลบ "${target?.agency || 'หน่วยงานนี้'}" ออกจากแผนใช่หรือไม่?`)) {
+        cyberState.auditProgrammes[cyberState.selectedAuditYear] = currentList.filter(r => r.id !== id)
+        saveAuditProgrammes()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('ลบหน่วยรับตรวจเรียบร้อยแล้ว', 'success')
+      }
+    })
+  })
+}
+
+function renderGenericDocLinksHtml(savedData) {
+  return `
+    <!-- Section 1: Google Docs / Edit Links -->
+    <div class="card" style="border:1px solid #e2e8f0; border-radius:10px; margin-bottom:24px; overflow:hidden;">
+      <div style="background:#f8fafc; padding:12px 20px; border-bottom:1px solid #e2e8f0; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        ลิงก์สำหรับแก้ไขเอกสาร (Google Docs / Sheets / Word)
+      </div>
+      <div style="padding:20px;">
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+          ${savedData.editLinks.map(link => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+              <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                <div style="width:34px; height:34px; background:#dbeafe; color:#2563eb; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-weight:600; color:#1e293b; font-size:13.5px;">${link.label}</div>
+                  <a href="${link.url}" target="_blank" style="font-size:12px; color:#2563eb; text-decoration:none; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</a>
+                </div>
+              </div>
+              <button class="delete-doc-link-btn" data-id="${link.id}" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; padding:4px 8px; flex-shrink:0;">ลบ</button>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Add link input -->
+        <div style="display:flex; gap:10px; border-top:1px dashed #e2e8f0; padding-top:14px; flex-wrap:wrap;">
+          <input type="text" id="new-doc-label" placeholder="ชื่อเอกสาร (เช่น ร่างแบบฟอร์มการขอเปลี่ยนแปลง)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
+          <input type="text" id="new-doc-url" placeholder="URL ลิงก์ (https://docs.google.com/...)" class="form-control" style="flex:2; min-width:240px; font-size:13px;">
+          <button id="add-doc-link-btn" class="btn btn-primary" style="background:#1e293b; border-color:#1e293b; font-size:13px; font-weight:600; white-space:nowrap;">
+            + เพิ่มลิงก์
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: PDF Viewer -->
+    <div class="card" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+      <div style="background:#f8fafc; padding:12px 20px; border-bottom:1px solid #e2e8f0; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        เอกสาร PDF อ้างอิง (แสดงผลบนระบบ)
+      </div>
+      <div style="padding:20px;">
+        <!-- Helper Note for Google Drive & PDF links -->
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px 16px; margin-bottom:18px; font-size:12.5px; color:#0369a1; display:flex; align-items:flex-start; gap:10px;">
+          <span style="font-size:18px; line-height:1;">💡</span>
+          <div style="line-height:1.5;">
+            <strong>ข้อแนะนำการแนบลิงก์จาก Google Drive:</strong>
+            <div>• ระบบจะแปลงลิงก์ Google Drive เป็นโหมดพรีวิว (Preview) ให้อัตโนมัติเพื่อให้แสดงผลในหน้านี้ได้</div>
+            <div>• ใน Google Drive โปรดตั้งค่าสิทธิ์แชร์เป็น <strong>"ทุกคนที่มีลิงก์มีสิทธิ์ดู (Anyone with the link can view)"</strong> เพื่อป้องกันปัญหาการบล็อกสิทธิ์ 403 Forbidden</div>
+            <div>• หากแสดงผลไม่สมบูรณ์ สามารถกดปุ่ม <strong>"เปิดในแท็บใหม่"</strong> เพื่อเปิดอ่านเอกสารได้โดยตรง</div>
+          </div>
+        </div>
+
+        <!-- Add PDF input -->
+        <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+          <input type="text" id="new-pdf-label" placeholder="ชื่อไฟล์ PDF (เช่น 1.1 Audit Plan Procedure ฉบับอนุมัติ)" class="form-control" style="flex:1; min-width:180px; font-size:13px;">
+          <input type="text" id="new-pdf-url" placeholder="URL ของไฟล์ PDF หรือ ลิงก์แชร์จาก Google Drive" class="form-control" style="flex:2; min-width:260px; font-size:13px;">
+          <button id="add-pdf-link-btn" class="btn" style="background:#ef4444; color:#fff; border:none; font-size:13px; font-weight:600; white-space:nowrap; padding:8px 16px; border-radius:6px; cursor:pointer;">
+            + แนบ PDF
+          </button>
+        </div>
+
+        ${savedData.pdfLinks.length === 0 ? `
+          <div style="text-align:center; padding:32px; color:#94a3b8; font-size:13px; background:#f8fafc; border-radius:8px; border:1px dashed #cbd5e1;">
+            ยังไม่มีเอกสาร PDF แนบในหัวข้อนี้ สามารถกรอก URL ของไฟล์ PDF หรือ Google Drive ด้านบนเพื่อแสดงผล
+          </div>
+        ` : savedData.pdfLinks.map(pdf => {
+          const embedUrl = formatEmbedUrl(pdf.url)
+          const isGoogle = isGoogleUrl(pdf.url)
+          return `
+            <div style="border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); background:#fff;">
+              <div style="padding:10px 16px; background:#f8fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="width:28px; height:28px; background:#fee2e2; color:#ef4444; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div>
+                    <span style="font-weight:700; color:#1e293b; font-size:13.5px;">${pdf.label}</span>
+                    ${isGoogle ? `<span style="margin-left:6px; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:2px 7px; border-radius:4px; font-size:11px; font-weight:600;">Google Drive</span>` : ''}
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <a href="${pdf.url}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#2563eb; text-decoration:none; background:#fff; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; transition:all 0.15s ease;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    เปิดในแท็บใหม่
+                  </a>
+                  <button class="delete-pdf-btn" data-id="${pdf.id}" style="background:#fff; border:1px solid #fecaca; color:#ef4444; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+                    ลบ
+                  </button>
+                </div>
+              </div>
+              <div style="height:620px; width:100%; background:#f8fafc; position:relative;">
+                <iframe src="${embedUrl}" style="width:100%; height:100%; border:none;" allow="autoplay" loading="lazy" title="${pdf.label}"></iframe>
+              </div>
+            </div>
+          `
+        }).join('')}
+      </div>
+    </div>
+  `
+}
+
+function bindGenericDocEvents(el, currentKey) {
   // Add Google Doc link
   document.getElementById('add-doc-link-btn')?.addEventListener('click', () => {
     const labelInput = document.getElementById('new-doc-label')
@@ -1282,6 +1726,87 @@ function renderPolicyAndFrameworkTab(el) {
       }
     })
   })
+}
+
+function renderPolicyAndFrameworkTab(el) {
+  const q = cyberState.docSearchKeyword.toLowerCase().trim()
+  const filteredDocs = q ? allFlatDocs.filter(d => 
+    d.title.toLowerCase().includes(q) ||
+    d.category.toLowerCase().includes(q) ||
+    d.domain.toLowerCase().includes(q) ||
+    d.major.toLowerCase().includes(q)
+  ) : null
+
+  const currentKey = cyberState.selectedDoc.key || '1.1 Audit Plan Procedure'
+  const isAuditProgramme = (currentKey === '1.3 Audit Programme' || cyberState.selectedDoc.title === '1.3 Audit Programme')
+
+  const savedData = cyberState.docLinks[currentKey] || {
+    editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
+    pdfLinks: []
+  }
+
+  el.innerHTML = `
+    <div style="display:flex; height:800px; overflow:hidden;">
+      
+      <!-- Left Sidebar: Complete Hierarchy Tree with Search -->
+      <div style="width:360px; border-right:1px solid #e2e8f0; background:#f8fafc; display:flex; flex-direction:column; flex-shrink:0;">
+        
+        <!-- Search Input -->
+        <div style="padding:14px; border-bottom:1px solid #e2e8f0; background:#fff;">
+          <input type="text" id="doc-tree-search-input" class="form-control" 
+            placeholder="🔍 ค้นหาหัวข้อเอกสาร (80 หัวข้อ)..." 
+            value="${cyberState.docSearchKeyword}" 
+            style="width:100%; font-size:13px; padding:7px 12px;">
+        </div>
+
+        <!-- Tree View Scrollable -->
+        <div id="doc-tree-scroll-container" style="flex:1; overflow-y:auto; padding:12px 10px;">
+          ${filteredDocs ? renderFlatSearchResults(filteredDocs) : renderCompleteTreeHtml()}
+        </div>
+      </div>
+
+      <!-- Right Main Content: Document Details & Viewer -->
+      <div style="flex:1; overflow-y:auto; padding:28px;">
+        
+        <!-- Breadcrumb & Header -->
+        <div style="border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:24px;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; margin-bottom:6px; flex-wrap:wrap;">
+            <span style="font-weight:700; color:#2563eb;">${cyberState.selectedDoc.category || 'ประมวลแนวทางปฏิบัติ'}</span>
+            <span>&gt;</span>
+            <span style="font-weight:600;">${cyberState.selectedDoc.domain || ''}</span>
+            ${cyberState.selectedDoc.major ? `<span>&gt;</span><span>${cyberState.selectedDoc.major}</span>` : ''}
+          </div>
+          <h2 style="font-size:1.35rem; font-weight:800; color:#1e293b; margin:0 0 6px 0; line-height:1.35;">
+            ${cyberState.selectedDoc.title}
+          </h2>
+          <p style="color:#64748b; font-size:13px; margin:0;">
+            ${isAuditProgramme 
+              ? 'ระบบจัดทำแผนการตรวจสอบภายใน ประจำปี (Audit Programme) เพิ่ม แก้ไข และกำหนดระยะเวลาการตรวจ' 
+              : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
+          </p>
+        </div>
+
+        ${isAuditProgramme ? renderAuditProgrammeHtml() : renderGenericDocLinksHtml(savedData)}
+
+      </div>
+    </div>
+  `
+
+  // Bind Search input
+  document.getElementById('doc-tree-search-input')?.addEventListener('input', (e) => {
+    cyberState.docSearchKeyword = e.target.value
+    renderPolicyAndFrameworkTab(el)
+  })
+
+  // Bind tree item clicks & toggle clicks
+  bindTreeEvents(el)
+
+  // Bind specific section events
+  if (isAuditProgramme) {
+    bindAuditProgrammeEvents(el)
+  } else {
+    bindGenericDocEvents(el, currentKey)
+  }
 }
 
 function renderFlatSearchResults(docs) {
