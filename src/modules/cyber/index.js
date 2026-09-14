@@ -1,12 +1,20 @@
 import ciiData from './data/ciiData.json'
 import policyFrameworkData from './data/policyFrameworkData.json'
 import { showNotification, toThaiDate } from '../../lib/utils.js'
+import { 
+  renderAuditReportHtml, 
+  bindAuditReportEvents, 
+  exportAuditReportToWord, 
+  DEFAULT_AUDIT_REPORT_SKO, 
+  AUDIT_AGENCIES 
+} from './auditReport.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
 const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
 const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
 const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
+const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -108,6 +116,8 @@ let cyberState = {
   docLinks: {},
   auditProgrammes: {},
   selectedAuditYear: '2569',
+  auditReports: {},
+  selectedAuditReportAgency: 'สำนักงานสาธารณสุขจังหวัดสระแก้ว',
   incidents: [],
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
@@ -252,6 +262,21 @@ function initData() {
   if (!cyberState.auditProgrammes['2569'] || cyberState.auditProgrammes['2569'].length === 0) {
     cyberState.auditProgrammes['2569'] = JSON.parse(JSON.stringify(DEFAULT_AUDIT_PROGRAMME_2569))
   }
+
+  // 6. Audit Reports
+  try {
+    const savedReports = localStorage.getItem(LOCAL_STORAGE_AUDIT_REPORTS_KEY)
+    if (savedReports) {
+      cyberState.auditReports = JSON.parse(savedReports)
+    } else {
+      cyberState.auditReports = { 'สำนักงานสาธารณสุขจังหวัดสระแก้ว': JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO)) }
+    }
+  } catch (e) {
+    cyberState.auditReports = { 'สำนักงานสาธารณสุขจังหวัดสระแก้ว': JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO)) }
+  }
+  if (!cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว']) {
+    cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'] = JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))
+  }
 }
 
 initData()
@@ -284,6 +309,24 @@ function saveAuditProgrammes() {
   try {
     localStorage.setItem(LOCAL_STORAGE_AUDIT_PROGRAMME_KEY, JSON.stringify(cyberState.auditProgrammes))
   } catch (e) {}
+}
+
+function saveAuditReports() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_AUDIT_REPORTS_KEY, JSON.stringify(cyberState.auditReports))
+  } catch (e) {}
+}
+
+function getAuditReportData(agency) {
+  if (!cyberState.auditReports[agency]) {
+    const cloned = JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))
+    cloned.agency = agency
+    cloned.scope = agency
+    cloned.objective = `เพื่อแน่ใจว่า${agency} ได้ปฏิบัติตาม พรบ ไซเบอร์ 2562 และกฎหมายลำดับรอง 15 ฉบับ`
+    cyberState.auditReports[agency] = cloned
+    saveAuditReports()
+  }
+  return cyberState.auditReports[agency]
 }
 
 // Calculations
@@ -1156,8 +1199,12 @@ function isGoogleUrl(url) {
 }
 
 function ensureAuditPrintStyles() {
-  if (!document.getElementById('audit-programme-print-style')) {
-    const style = document.createElement('style')
+  const reportStyle = document.getElementById('audit-report-custom-style')
+  if (reportStyle) reportStyle.disabled = true
+
+  let style = document.getElementById('audit-programme-print-style')
+  if (!style) {
+    style = document.createElement('style')
     style.id = 'audit-programme-print-style'
     style.innerHTML = `
       table.audit-programme-table thead th {
@@ -1227,6 +1274,7 @@ function ensureAuditPrintStyles() {
     `
     document.head.appendChild(style)
   }
+  style.disabled = false
 }
 
 function renderAuditProgrammeHtml() {
@@ -1751,6 +1799,7 @@ function renderPolicyAndFrameworkTab(el) {
 
   const currentKey = cyberState.selectedDoc.key || '1.1 Audit Plan Procedure'
   const isAuditProgramme = (currentKey === '1.3 Audit Programme' || cyberState.selectedDoc.title === '1.3 Audit Programme')
+  const isAuditReport = (currentKey === '1.4 Audit Report' || cyberState.selectedDoc.title === '1.4 Audit Report')
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -1794,11 +1843,17 @@ function renderPolicyAndFrameworkTab(el) {
           <p style="color:#64748b; font-size:13px; margin:0;">
             ${isAuditProgramme 
               ? 'ระบบจัดทำแผนการตรวจสอบภายใน ประจำปี (Audit Programme) เพิ่ม แก้ไข และกำหนดระยะเวลาการตรวจ' 
+              : isAuditReport
+              ? 'ระบบจัดทำ พิมพ์ และส่งออกไฟล์ Word รายงานการตรวจสอบด้านความมั่นคงปลอดภัยไซเบอร์ (Audit Report)'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
 
-        ${isAuditProgramme ? renderAuditProgrammeHtml() : renderGenericDocLinksHtml(savedData)}
+        ${isAuditProgramme 
+          ? renderAuditProgrammeHtml() 
+          : isAuditReport
+          ? renderAuditReportHtml(cyberState.selectedAuditReportAgency, getAuditReportData(cyberState.selectedAuditReportAgency))
+          : renderGenericDocLinksHtml(savedData)}
 
       </div>
     </div>
@@ -1816,6 +1871,90 @@ function renderPolicyAndFrameworkTab(el) {
   // Bind specific section events
   if (isAuditProgramme) {
     bindAuditProgrammeEvents(el)
+  } else if (isAuditReport) {
+    bindAuditReportEvents(el, cyberState.selectedAuditReportAgency, (action) => {
+      const currentAgency = cyberState.selectedAuditReportAgency || 'สำนักงานสาธารณสุขจังหวัดสระแก้ว'
+      const report = getAuditReportData(currentAgency)
+
+      if (action.type === 'changeAgency') {
+        cyberState.selectedAuditReportAgency = action.agency
+        renderPolicyAndFrameworkTab(el)
+        showNotification(`สลับไปยังรายงานของ ${action.agency}`, 'info')
+        return
+      }
+
+      if (action.type === 'exportWord') {
+        exportAuditReportToWord(currentAgency, report)
+        return
+      }
+
+      if (action.type === 'updateField') {
+        report[action.field] = action.value
+        saveAuditReports()
+        return
+      }
+
+      if (action.type === 'updateTableRow') {
+        if (report.tableRows && report.tableRows[action.idx]) {
+          report.tableRows[action.idx][action.field] = action.value
+          saveAuditReports()
+          // Recalculate totals and update in DOM
+          let totalFull = 0
+          let totalScore = 0
+          report.tableRows.forEach(r => {
+            if (r.isHeader || r.isSub) return
+            if (r.fullScore) totalFull += Number(r.fullScore) || 0
+            if (r.score) totalScore += Number(r.score) || 0
+          })
+          const tfEl = document.getElementById('report-total-full')
+          const tsEl = document.getElementById('report-total-score')
+          if (tfEl) tfEl.textContent = String(totalFull)
+          if (tsEl) tsEl.textContent = String(totalScore)
+        }
+        return
+      }
+
+      if (action.type === 'addFinding') {
+        if (!report.weakPoints) report.weakPoints = []
+        const nextId = (report.weakPoints.length > 0 ? Math.max(...report.weakPoints.map(w => w.id || 0)) : 0) + 1
+        report.weakPoints.push({
+          id: nextId,
+          controlText: '',
+          objective: '',
+          methodInterview: '',
+          methodReview: '',
+          methodObserve: '',
+          auditorProcess: '',
+          evalResult: 'ไม่ผ่านการประเมิน (O)',
+          auditorOpinion: '',
+          recommendation: '',
+          rca: '',
+          ca: '',
+          timeline: ''
+        })
+        saveAuditReports()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('เพิ่มข้อที่ควรแก้ไขเรียบร้อยแล้ว', 'success')
+        return
+      }
+
+      if (action.type === 'deleteFinding') {
+        report.weakPoints = (report.weakPoints || []).filter(w => w.id !== action.id)
+        saveAuditReports()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('ลบข้อที่ควรทำการแก้ไขเรียบร้อยแล้ว', 'info')
+        return
+      }
+
+      if (action.type === 'updateFinding') {
+        const finding = (report.weakPoints || []).find(w => w.id === action.id)
+        if (finding) {
+          finding[action.field] = action.value
+          saveAuditReports()
+        }
+        return
+      }
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
   }
