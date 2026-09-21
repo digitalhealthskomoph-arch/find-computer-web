@@ -1,21 +1,12 @@
 import './style.css'
 import { supabase } from './lib/supabase.js'
 import { toThaiDate, formatCurrency } from './lib/utils.js'
-import { renderPublicRopa } from './modules/pdpa/publicRopa.js'
-import { renderCyberModule } from './modules/cyber/index.js'
 
 const app = document.getElementById('app')
-let currentPublicTab = 'procurement' // 'procurement' | 'ropa' | 'cyber'
 
 async function init() {
   renderLayout()
-  if (currentPublicTab === 'procurement') {
-    await loadProcurementDashboard()
-  } else if (currentPublicTab === 'ropa') {
-    renderPublicRopa(document.getElementById('public-main-content'))
-  } else if (currentPublicTab === 'cyber') {
-    renderCyberModule(document.getElementById('public-main-content'))
-  }
+  await loadProcurementDashboard()
 }
 
 function renderLayout() {
@@ -27,22 +18,6 @@ function renderLayout() {
             <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
           </svg>
           ศูนย์บริการข้อมูลดิจิทัล สสจ.สระแก้ว
-        </div>
-
-        <!-- Public Tab Switcher -->
-        <div class="portal-nav">
-          <button class="portal-nav-btn ${currentPublicTab==='procurement'?'active':''}" id="public-tab-procurement">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-            1. แดชบอร์ดจัดหาคอมพิวเตอร์
-          </button>
-          <button class="portal-nav-btn ${currentPublicTab==='ropa'?'active':''}" id="public-tab-ropa">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            2. ทะเบียน ROPA (สำหรับบุคลากร)
-          </button>
-          <button class="portal-nav-btn ${currentPublicTab==='cyber'?'active':''}" id="public-tab-cyber">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            3. พรบ.ไซเบอร์ & CII (ประเมินสถานภาพ)
-          </button>
         </div>
       </div>
 
@@ -56,53 +31,6 @@ function renderLayout() {
 
     <div id="public-main-content"></div>
   `
-
-  bindNavEvents()
-}
-
-function bindNavEvents() {
-  const procBtn = document.getElementById('public-tab-procurement')
-  const ropaBtn = document.getElementById('public-tab-ropa')
-  const cyberBtn = document.getElementById('public-tab-cyber')
-
-  if (procBtn) {
-    procBtn.addEventListener('click', async () => {
-      if (currentPublicTab === 'procurement') return
-      currentPublicTab = 'procurement'
-      updateNavButtons()
-      await loadProcurementDashboard()
-    })
-  }
-
-  if (ropaBtn) {
-    ropaBtn.addEventListener('click', () => {
-      if (currentPublicTab === 'ropa') return
-      currentPublicTab = 'ropa'
-      updateNavButtons()
-      const contentEl = document.getElementById('public-main-content')
-      renderPublicRopa(contentEl)
-    })
-  }
-
-  if (cyberBtn) {
-    cyberBtn.addEventListener('click', () => {
-      if (currentPublicTab === 'cyber') return
-      currentPublicTab = 'cyber'
-      updateNavButtons()
-      const contentEl = document.getElementById('public-main-content')
-      renderCyberModule(contentEl)
-    })
-  }
-}
-
-function updateNavButtons() {
-  const procBtn = document.getElementById('public-tab-procurement')
-  const ropaBtn = document.getElementById('public-tab-ropa')
-  const cyberBtn = document.getElementById('public-tab-cyber')
-
-  if (procBtn) procBtn.classList.toggle('active', currentPublicTab === 'procurement')
-  if (ropaBtn) ropaBtn.classList.toggle('active', currentPublicTab === 'ropa')
-  if (cyberBtn) cyberBtn.classList.toggle('active', currentPublicTab === 'cyber')
 }
 
 

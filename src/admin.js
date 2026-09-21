@@ -406,7 +406,7 @@ function renderRecords(el) {
     <div class="card mb-4">
       <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
         <span>เพิ่มรายการครุภัณฑ์</span>
-        <button class="btn btn-accent btn-sm" onclick="showPdfUpload()" style="font-weight:600;">✨ สแกนไฟล์ PDF อัตโนมัติด้วย AI</button>
+        <button class="btn btn-accent btn-sm" onclick="showPdfUpload()" style="font-weight:600;">✨ สแกนเอกสารคำขอด้วย AI (Gemini 3.8 Flash)</button>
       </div>
       <div class="card-body">
         <div class="grid-2">
@@ -771,68 +771,254 @@ window.saveEditedRecord = async (id) => {
 }
 
 // ==========================================
-// PDF Upload + AI Extract
+// AI Helpers: Matching & Normalization
+// ==========================================
+function findStandardItem(rawName, suggestedStandard) {
+  if (!state.items || !state.items.length) return null
+
+  // 1. Match from AI suggested standard item
+  if (suggestedStandard) {
+    const bySuggested = state.items.find(i => i.name === suggestedStandard)
+    if (bySuggested) return bySuggested
+  }
+
+  // 2. Exact match with rawName
+  if (rawName) {
+    const trimmed = rawName.trim()
+    const exact = state.items.find(i => i.name.toLowerCase() === trimmed.toLowerCase())
+    if (exact) return exact
+
+    // 3. Normalized fuzzy match (strip punctuation, spaces, common Thai prefixes)
+    const cleanStr = (s) => (s || '').toLowerCase()
+      .replace(/[\s\-_(),./[\]]/g, '')
+      .replace(/^(เครื่อง|ชุด|อุปกรณ์)/, '')
+
+    const targetClean = cleanStr(trimmed)
+    if (targetClean.length >= 3) {
+      const fuzzy = state.items.find(i => {
+        const itemClean = cleanStr(i.name)
+        return itemClean.includes(targetClean) || targetClean.includes(itemClean)
+      })
+      if (fuzzy) return fuzzy
+    }
+  }
+
+  return null
+}
+
+function normalizeFundingSource(val) {
+  if (!val) return 'งบเงินบำรุง'
+  const v = val.toString().trim()
+  if (v.includes('บำรุง')) return 'งบเงินบำรุง'
+  if (v.includes('ค่าเสื่อม') || v.toUpperCase().includes('UC')) return 'งบค่าเสื่อม'
+  return v
+}
+
+function normalizeProcurementMethod(val) {
+  if (!val) return 'จัดหาใหม่'
+  const v = val.toString().trim()
+  if (v.includes('ทดแทน') || v.includes('แทน')) return 'ทดแทน'
+  if (v.includes('เพิ่มประสิทธิภาพ') || v.includes('ประสิทธิภาพ')) return 'เพิ่มประสิทธิภาพ'
+  return 'จัดหาใหม่'
+}
+
+// ==========================================
+// PDF Upload + AI Extract (Gemini 3.8 Flash)
 // ==========================================
 window.showPdfUpload = () => {
   showModal(`
-    <div class="modal-header"><span>อ่าน PDF ด้วย AI</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-header">
+      <span>📄 อ่านเอกสารคำขอจัดหาด้วย AI (Gemini 3.8 Flash)</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
     <div class="modal-body">
-      <div class="alert alert-info">AI จะวิเคราะห์ไฟล์ PDF และดึงรายการครุภัณฑ์มาให้อัตโนมัติ</div>
+      <div class="alert alert-info">
+        ระบบใช้ <strong>Google Gemini 3.8 Flash</strong> สแกนไฟล์ PDF หรือรูปภาพเอกสารคำขอจัดหา เพื่อตรวจจับหน่วยงาน อำเภอ และแปลงเป็นรายการครุภัณฑ์พร้อมจับคู่ราคากลางให้อัตโนมัติ
+      </div>
       <div class="form-group">
-        <label class="form-label">เลือกไฟล์ PDF</label>
+        <label class="form-label">เลือกไฟล์เอกสารคำขอ (PDF หรือ รูปภาพ)</label>
         <input type="file" id="pdf-file" class="form-control" accept="application/pdf,image/*">
       </div>
       <div id="pdf-result"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">ปิด</button>
-      <button class="btn btn-primary" onclick="extractPdf()">🤖 วิเคราะห์ด้วย AI</button>
+      <button class="btn btn-primary" onclick="extractPdf()">🤖 เริ่มวิเคราะห์ด้วย Gemini 3.8 Flash</button>
     </div>`)
 }
 
 window.extractPdf = async () => {
   const file = document.getElementById('pdf-file')?.files[0]
-  if (!file) { showNotification('กรุณาเลือกไฟล์', 'error'); return }
+  if (!file) { showNotification('กรุณาเลือกไฟล์เอกสาร', 'error'); return }
   const resultEl = document.getElementById('pdf-result')
-  resultEl.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><span>กำลังวิเคราะห์...</span></div>'
+  resultEl.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><span>กำลังวิเคราะห์เอกสารด้วย Gemini 3.8 Flash...</span></div>'
 
   const reader = new FileReader()
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1]
     const mimeType = file.type || (file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg')
     try {
+      const districtList = Object.keys(state.districts || {})
       const itemNames = state.items.map(i => i.name)
-      const prompt = `จงดึงข้อมูลจากเอกสารคำขอจัดหาคอมพิวเตอร์นี้และส่งกลับมาในรูปแบบ JSON Array เท่านั้น ไม่ต้องมีข้อความอื่น:\n[{"itemName":"ชื่อรายการ","quantity":1,"unit":"เครื่อง","unitPrice":20000,"fundingSource":"งบเงินบำรุง","procurementMethod":"จัดหาใหม่","replacementNum":""}]\nถ้ามีหลายรายการสร้าง object เพิ่ม รายชื่อครุภัณฑ์ในระบบ:\n- ${itemNames.join('\n- ')}`
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+      const prompt = `คุณคือผู้เชี่ยวชาญด้านการตรวจสอบและจัดหาระบบคอมพิวเตอร์ภาครัฐ (กระทรวงสาธารณสุข)
+หน้าที่ของคุณคืออ่านเอกสารคำขอจัดหาระบบคอมพิวเตอร์นี้ แล้วสกัดข้อมูลที่สำคัญออกมาในรูปแบบ JSON Object เท่านั้น:
+{
+  "district": "ชื่ออำเภอที่สังกัด (ตัดคำว่า 'อำเภอ' ออก เช่น เมืองสระแก้ว, วังน้ำเย็น)",
+  "agency": "ชื่อหน่วยงานที่ขอจัดหา (เช่น โรงพยาบาลสมเด็จพระยุพราชสระแก้ว, รพ.สต.บ้านคลองมะนาว)",
+  "items": [
+    {
+      "itemName": "ชื่อรายการครุภัณฑ์ตามที่ระบุในเอกสาร",
+      "matchedStandardName": "ชื่อรายการครุภัณฑ์มาตรฐานในระบบที่ตรงกันหรือใกล้เคียงที่สุดจากรายชื่อด้านล่าง (ถ้าไม่ตรงกับเกณฑ์มาตรฐานใดเลยให้ใส่ null)",
+      "quantity": 1,
+      "unit": "หน่วยนับ เช่น เครื่อง, ชุด",
+      "unitPrice": 22000,
+      "fundingSource": "งบเงินบำรุง หรือ งบค่าเสื่อม หรือ ระบุตามเอกสาร",
+      "procurementMethod": "จัดหาใหม่ หรือ ทดแทน หรือ เพิ่มประสิทธิภาพ",
+      "replacementNum": "เลขครุภัณฑ์เดิมกรณีจัดหาทดแทน (ถ้าไม่มีให้ระบุว่าง)"
+    }
+  ]
+}
+
+รายชื่ออำเภอในระบบ:
+${districtList.map(d => `- ${d}`).join('\n')}
+
+รายชื่อครุภัณฑ์มาตรฐานตามเกณฑ์ราคากลางในระบบ:
+${itemNames.map(i => `- ${i}`).join('\n')}
+
+ข้อกำหนดสำคัญ:
+1. ตอบกลับเป็น JSON Object ตามโครงสร้างข้างต้นเท่านั้น ห้ามใส่ข้อความอธิบายอื่นใด
+2. ให้พยายามจับคู่ชื่อรายการในเอกสารกับ 'รายชื่อครุภัณฑ์มาตรฐานตามเกณฑ์ราคากลางในระบบ' แล้วใส่ใน matchedStandardName
+3. ราคา (unitPrice) และจำนวน (quantity) ต้องเป็นตัวเลขเท่านั้น (ห้ามใส่จุลภาคหรือข้อความ)`
+
+      const requestPayload = {
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType: mimeType, data: base64 } }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.1
+        }
+      }
+
+      // Primary model: gemini-3.8-flash
+      let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: mimeType, data: base64 } }] }] })
+        body: JSON.stringify(requestPayload)
       })
+
+      // Fallback mechanism to gemini-2.0-flash if gemini-3.8-flash returns 404 or unsupported
+      if (!res.ok && (res.status === 404 || res.status === 400)) {
+        const errJson = await res.clone().json().catch(() => ({}))
+        const errMsg = (errJson.error?.message || '').toLowerCase()
+        if (errMsg.includes('not found') || errMsg.includes('not supported') || res.status === 404) {
+          console.warn('Gemini 3.8 Flash unavailable, fallback to gemini-2.0-flash:', errMsg)
+          res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload)
+          })
+        }
+      }
+
       const json = await res.json()
       if (json.error) throw new Error(json.error.message || JSON.stringify(json.error))
-      
-      let text = json.candidates?.[0]?.content?.parts?.[0]?.text || ''
-      const match = text.match(/\[.*\]/s)
-      if (match) {
-        text = match[0]
-      } else {
-        text = text.replace(/```json/gi, '').replace(/```/g, '').trim()
-      }
-      
-      const extracted = JSON.parse(text)
 
-      resultEl.innerHTML = `<div class="alert alert-success">พบ ${extracted.length} รายการ กดปุ่มด้านล่างเพื่อเพิ่มเข้าตาราง</div>
-        <div class="table-wrap"><table><thead><tr><th>รายการ</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>แหล่งเงิน</th></tr></thead>
-        <tbody>${extracted.map(r => `<tr><td>${escHtml(r.itemName||'')}</td><td>${r.quantity||1} ${escHtml(r.unit||'')}</td><td>${formatCurrency(r.unitPrice)}</td><td>${escHtml(r.fundingSource||'')}</td></tr>`).join('')}
-        </tbody></table></div>`
-      resultEl.dataset.extracted = JSON.stringify(extracted)
+      let text = json.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      text = text.replace(/```json/gi, '').replace(/```/g, '').trim()
+
+      let parsedData = {}
+      try {
+        parsedData = JSON.parse(text)
+      } catch (pe) {
+        const objMatch = text.match(/\{[\s\S]*\}/)
+        const arrMatch = text.match(/\[[\s\S]*\]/)
+        if (objMatch) parsedData = JSON.parse(objMatch[0])
+        else if (arrMatch) parsedData = { items: JSON.parse(arrMatch[0]) }
+        else throw pe
+      }
+
+      let extractedItems = []
+      let detectedAgency = ''
+      let detectedDistrict = ''
+
+      if (Array.isArray(parsedData)) {
+        extractedItems = parsedData
+      } else if (parsedData && typeof parsedData === 'object') {
+        extractedItems = Array.isArray(parsedData.items) ? parsedData.items : []
+        detectedAgency = parsedData.agency || ''
+        detectedDistrict = parsedData.district || ''
+      }
+
+      if (extractedItems.length === 0) {
+        throw new Error('ไม่พบรายการครุภัณฑ์ในเอกสารที่อัปโหลด กรุณาตรวจสอบไฟล์อีกครั้ง')
+      }
+
+      const formattedData = {
+        agency: detectedAgency,
+        district: detectedDistrict,
+        items: extractedItems
+      }
+      resultEl.dataset.extractedData = JSON.stringify(formattedData)
+
+      // Render Preview Table
+      resultEl.innerHTML = `
+        <div class="alert alert-success" style="margin-bottom:12px;">
+          <div style="font-weight:600;display:flex;align-items:center;gap:6px;">
+            <span>🤖 สกัดข้อมูลสำเร็จด้วย Gemini 3.8 Flash</span>
+            <span class="badge badge-blue">พบ ${extractedItems.length} รายการ</span>
+          </div>
+          ${(detectedAgency || detectedDistrict) ? `
+            <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;">
+              📍 ข้อมูลหน่วยงานที่ตรวจพบ: <strong>${escHtml(detectedAgency || 'ไม่ระบุหน่วยงาน')}</strong>
+              ${detectedDistrict ? ` (อ.${escHtml(detectedDistrict)})` : ''}
+            </div>` : ''}
+        </div>
+        <div class="table-wrap" style="max-height:260px;overflow-y:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>รายการในเอกสาร</th>
+                <th>การจับคู่มาตรฐาน</th>
+                <th>จำนวน</th>
+                <th>ราคา/หน่วย</th>
+                <th>แหล่งเงิน</th>
+                <th>วิธีจัดหา</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${extractedItems.map(r => {
+                const matched = findStandardItem(r.itemName, r.matchedStandardName)
+                const isMatch = !!matched
+                return `<tr>
+                  <td><strong>${escHtml(r.itemName || '')}</strong></td>
+                  <td>${isMatch 
+                    ? `<span class="badge badge-green" title="${escHtml(matched.name)}">ตรงเกณฑ์: ${escHtml(matched.name.substring(0, 24))}${matched.name.length > 24 ? '...' : ''}</span>`
+                    : `<span class="badge badge-orange">นอกเกณฑ์ราคากลาง</span>`}</td>
+                  <td>${r.quantity || 1} ${escHtml(r.unit || 'เครื่อง')}</td>
+                  <td>${formatCurrency(r.unitPrice || 0)}</td>
+                  <td>${escHtml(r.fundingSource || 'งบเงินบำรุง')}</td>
+                  <td>${escHtml(r.procurementMethod || 'จัดหาใหม่')}</td>
+                </tr>`
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`
 
       const footer = document.querySelector('.modal-footer')
-      footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">ปิด</button>
-        <button class="btn btn-primary" onclick="applyExtracted()">✅ เพิ่มรายการเข้าตาราง</button>`
+      if (footer) {
+        footer.innerHTML = `
+          <button class="btn btn-ghost" onclick="closeModal()">ปิด</button>
+          <button class="btn btn-primary" onclick="applyExtracted()">✅ เพิ่ม ${extractedItems.length} รายการเข้าตาราง</button>`
+      }
     } catch (err) {
-      console.error(err)
+      console.error('Gemini extraction error:', err)
       resultEl.innerHTML = `<div class="alert alert-danger">วิเคราะห์ไม่สำเร็จ: ${err.message}</div>`
     }
   }
@@ -841,40 +1027,128 @@ window.extractPdf = async () => {
 
 window.applyExtracted = () => {
   const resultEl = document.getElementById('pdf-result')
-  const extracted = JSON.parse(resultEl.dataset.extracted || '[]')
-  // Remove existing empty rows first
+  const rawData = resultEl?.dataset?.extractedData
+  if (!rawData) return
+
+  const data = JSON.parse(rawData)
+  const items = data.items || []
+  const district = (data.district || '').trim()
+  const agency = (data.agency || '').trim()
+
+  // 1. Auto-select District and Agency if detected
+  if (district) {
+    const distSel = document.getElementById('rec-district')
+    if (distSel) {
+      const opt = Array.from(distSel.options).find(o => 
+        o.value && (o.value === district || o.value.includes(district) || district.includes(o.value))
+      )
+      if (opt) {
+        distSel.value = opt.value
+        window.onDistrictChange()
+
+        if (agency) {
+          const agencySel = document.getElementById('rec-agency')
+          if (agencySel) {
+            const agOpt = Array.from(agencySel.options).find(o => 
+              o.value && (o.value === agency || o.value.includes(agency) || agency.includes(o.value))
+            )
+            if (agOpt) agencySel.value = agOpt.value
+          }
+        }
+      }
+    }
+  } else if (agency) {
+    // Search district by agency name
+    let foundDist = null
+    let foundAg = null
+    for (const [dName, agList] of Object.entries(state.districts || {})) {
+      const match = agList.find(a => a === agency || a.includes(agency) || agency.includes(a))
+      if (match) {
+        foundDist = dName
+        foundAg = match
+        break
+      }
+    }
+    if (foundDist) {
+      const distSel = document.getElementById('rec-district')
+      if (distSel) {
+        distSel.value = foundDist
+        window.onDistrictChange()
+        const agencySel = document.getElementById('rec-agency')
+        if (agencySel && foundAg) agencySel.value = foundAg
+      }
+    }
+  }
+
+  // 2. Clear existing empty rows
   document.querySelectorAll('#dt-tbody tr').forEach(tr => tr.remove())
   state.dtRowId = 0
-  extracted.forEach(r => {
+
+  // 3. Populate rows
+  items.forEach(r => {
     addDtRow()
     const id = state.dtRowId
-    // Try to match with existing items
-    const found = state.items.find(i => i.name === r.itemName)
+
+    // Smart item matching
+    const matched = findStandardItem(r.itemName, r.matchedStandardName)
     const sel = document.getElementById('sel-' + id)
-    if (found && sel) {
-      sel.value = found.name
+    if (matched && sel) {
+      sel.value = matched.name
       onItemSelect(id)
     } else {
       const nameInput = document.getElementById('name-' + id)
       if (nameInput) { nameInput.value = r.itemName || ''; nameInput.classList.remove('hidden') }
       if (sel) sel.value = '__custom__'
     }
-    if (r.quantity) { const q = document.getElementById('qty-' + id); if (q) { q.value = r.quantity; calcTotal(id) } }
-    if (r.unit) { const u = document.getElementById('unit-' + id); if (u) u.value = r.unit }
-    if (r.unitPrice) { const p = document.getElementById('price-' + id); if (p) { p.value = r.unitPrice; calcTotal(id) } }
-    if (r.fundingSource) {
-      const f = document.getElementById('fund-' + id)
-      if (f) {
-        const opts = ['งบเงินบำรุง', 'งบค่าเสื่อม']
-        if (opts.includes(r.fundingSource)) f.value = r.fundingSource
-        else { f.value = 'อื่นๆ'; const fo = document.getElementById('fund-other-' + id); if (fo) { fo.value = r.fundingSource; fo.classList.remove('hidden') } }
+
+    if (r.quantity) {
+      const q = document.getElementById('qty-' + id)
+      if (q) { q.value = parseInt(r.quantity, 10) || 1 }
+    }
+    if (r.unit) {
+      const u = document.getElementById('unit-' + id)
+      if (u) u.value = r.unit
+    }
+    if (r.unitPrice) {
+      const p = document.getElementById('price-' + id)
+      if (p) {
+        const numPrice = typeof r.unitPrice === 'number' ? r.unitPrice : parseFloat(String(r.unitPrice).replace(/,/g, ''))
+        if (!isNaN(numPrice)) p.value = numPrice
       }
     }
-    if (r.procurementMethod) { const m = document.getElementById('method-' + id); if (m) m.value = r.procurementMethod }
-    if (r.replacementNum) { const rep = document.getElementById('replace-' + id); if (rep) { rep.value = r.replacementNum; rep.classList.remove('hidden') } }
+    calcTotal(id)
+
+    // Funding source
+    if (r.fundingSource) {
+      const normFund = normalizeFundingSource(r.fundingSource)
+      const f = document.getElementById('fund-' + id)
+      if (f) {
+        if (['งบเงินบำรุง', 'งบค่าเสื่อม'].includes(normFund)) {
+          f.value = normFund
+        } else {
+          f.value = 'อื่นๆ'
+          const fo = document.getElementById('fund-other-' + id)
+          if (fo) { fo.value = normFund; fo.classList.remove('hidden') }
+        }
+      }
+    }
+
+    // Procurement method
+    if (r.procurementMethod) {
+      const normMethod = normalizeProcurementMethod(r.procurementMethod)
+      const m = document.getElementById('method-' + id)
+      if (m) m.value = normMethod
+    }
+
+    // Replacement number
+    if (r.replacementNum) {
+      const rep = document.getElementById('replace-' + id)
+      if (rep) { rep.value = r.replacementNum; rep.classList.remove('hidden') }
+    }
   })
+
   closeModal()
-  showNotification(`เพิ่ม ${extracted.length} รายการจาก AI เรียบร้อยแล้ว`)
+  showNotification(`เพิ่ม ${items.length} รายการจาก AI (Gemini 3.8 Flash) เรียบร้อยแล้ว`)
 }
 
 // ==========================================

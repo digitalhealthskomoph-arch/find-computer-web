@@ -1,7 +1,7 @@
 # ระบบจัดหาคอมพิวเตอร์ภาครัฐ (Vite + Supabase)
 > **สำนักงานสาธารณสุขจังหวัดสระแก้ว**
 
-ระบบบริหารและจัดหาระบบคอมพิวเตอร์ภาครัฐ เวอร์ชัน 2.0 พัฒนาด้วย **Vite + Vanilla JS + Supabase (PostgreSQL) + Google Gemini AI**
+ระบบบริหารและจัดหาระบบคอมพิวเตอร์ภาครัฐ เวอร์ชัน 2.0 พัฒนาด้วย **Vite + Vanilla JS + Supabase (PostgreSQL) + Google Gemini 3.8 Flash AI**
 
 ---
 
