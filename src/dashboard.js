@@ -73,8 +73,10 @@ async function loadProcurementDashboard() {
 
     let { data: records } = await supabase.from('records').select('*')
     records = (records || []).map(r => {
-      if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
-      else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+      if (!r.characteristics) {
+        if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+        else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+      }
       return r
     })
 

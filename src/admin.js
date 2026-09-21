@@ -364,8 +364,10 @@ window.selectMeeting = async (id) => {
   if (state.currentMeeting) {
     let { data } = await supabase.from('records').select('*').eq('meeting_id', id).order('created_at')
     state.records = (data || []).map(r => {
-      if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
-      else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+      if (!r.characteristics) {
+        if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+        else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+      }
       return r
     })
     const { data: a3 } = await supabase.from('agenda3_items').select('*').eq('meeting_id', id).order('order_num')
@@ -478,7 +480,7 @@ function renderRecords(el) {
 function renderExistingRecords() {
   if (state.records.length === 0) return '<p class="text-muted text-center">ยังไม่มีรายการ</p>'
   return `<div class="table-wrap"><table>
-    <thead><tr><th>#</th><th>อำเภอ</th><th>หน่วยงาน</th><th>รายการ</th><th>จำนวน</th><th>รวม (บาท)</th><th>วิธีจัดหา</th><th>แหล่งเงิน</th><th>มติ</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>อำเภอ</th><th>หน่วยงาน</th><th>รายการ</th><th>จำนวน</th><th>รวม (บาท)</th><th>เกณฑ์</th><th>วิธีจัดหา</th><th>แหล่งเงิน</th><th>มติ</th><th></th></tr></thead>
     <tbody>
       ${state.records.map((r, i) => `<tr>
         <td>${i + 1}</td>
@@ -487,6 +489,7 @@ function renderExistingRecords() {
         <td>${escHtml(r.item_name || '')}</td>
         <td>${r.quantity || ''} ${escHtml(r.unit || '')}</td>
         <td>${formatCurrency(r.total_price)}</td>
+        <td>${charBadge(r.characteristics)}</td>
         <td>${escHtml(r.procurement_method || '')}</td>
         <td>${escHtml(r.funding_source || '')}</td>
         <td>${resBadge(r.resolution_type || r.resolution)}</td>
@@ -538,7 +541,13 @@ window.addDtRow = () => {
     <td><input type="number" id="stdprice-${id}" readonly class="form-control" style="font-size:0.8rem;background:#f8fafc;"></td>
     <td><input type="number" id="price-${id}" class="form-control" style="font-size:0.8rem;" oninput="calcTotal(${id})"></td>
     <td><input type="text" id="total-${id}" readonly class="form-control" style="font-size:0.8rem;background:#f8fafc;font-weight:600;"></td>
-    <td><input type="text" id="char-${id}" readonly class="form-control" style="font-size:0.8rem;background:#f8fafc;"></td>
+    <td>
+      <select id="char-${id}" class="form-control" style="font-size:0.8rem;font-weight:600;min-width:115px;" onchange="onCharChange(${id})">
+        <option value="ตรงตามเกณฑ์">ตรงตามเกณฑ์</option>
+        <option value="ไม่ตรงตามเกณฑ์">ไม่ตรงตามเกณฑ์</option>
+        <option value="ไม่มีในเกณฑ์ราคากลาง">ไม่มีในเกณฑ์ราคากลาง</option>
+      </select>
+    </td>
     <td>
       <select id="fund-${id}" class="form-control" style="font-size:0.8rem;" onchange="checkFund(${id})">
         <option value="งบเงินบำรุง">งบเงินบำรุง</option>
@@ -557,6 +566,36 @@ window.addDtRow = () => {
     </td>
     <td><button class="btn btn-danger btn-sm" onclick="removeDtRow(${id})">✕</button></td>`
   tbody.appendChild(tr)
+  updateCharStyle(id)
+}
+
+window.updateCharStyle = (id) => {
+  const el = document.getElementById('char-' + id)
+  if (!el) return
+  const val = el.value || ''
+  if (val.includes('ไม่ตรงเกณฑ์') || val.includes('ไม่ตรงตามเกณฑ์')) {
+    el.style.color = '#b91c1c'
+    el.style.backgroundColor = '#fef2f2'
+    el.style.borderColor = '#fca5a5'
+  } else if (val.includes('ตรงเกณฑ์') || val.includes('ตรงตามเกณฑ์')) {
+    el.style.color = '#15803d'
+    el.style.backgroundColor = '#f0fdf4'
+    el.style.borderColor = '#86efac'
+  } else if (val.includes('ไม่มี')) {
+    el.style.color = '#b45309'
+    el.style.backgroundColor = '#fffbeb'
+    el.style.borderColor = '#fde68a'
+  } else {
+    el.style.color = ''
+    el.style.backgroundColor = ''
+    el.style.borderColor = ''
+  }
+}
+
+window.onCharChange = (id) => {
+  const el = document.getElementById('char-' + id)
+  if (el) el.dataset.manual = 'true'
+  updateCharStyle(id)
 }
 
 window.onItemSelect = (id) => {
@@ -576,9 +615,15 @@ window.onItemSelect = (id) => {
     document.getElementById('stdprice-' + id).value = price
     document.getElementById('price-' + id).value = price
     document.getElementById('total-' + id).value = formatCurrency(price * qty)
-    // Determine characteristics
-    const char = price > 0 ? 'ตรงตามเกณฑ์' : 'ไม่มีในเกณฑ์'
-    document.getElementById('char-' + id).value = char
+    
+    // Auto-detect characteristics
+    const charEl = document.getElementById('char-' + id)
+    if (charEl) {
+      delete charEl.dataset.manual
+      const char = price > 0 ? 'ตรงตามเกณฑ์' : 'ไม่มีในเกณฑ์ราคากลาง'
+      charEl.value = char
+      updateCharStyle(id)
+    }
   }
 }
 
@@ -596,11 +641,15 @@ window.calcTotal = (id) => {
   
   const charEl = document.getElementById('char-' + id)
   if (charEl) {
-    if (stdPrice > 0) {
-      charEl.value = price === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
-    } else {
-      charEl.value = 'ไม่มีในเกณฑ์ราคากลาง'
+    // Only auto-update if the user has not manually changed the dropdown
+    if (!charEl.dataset.manual) {
+      if (stdPrice > 0) {
+        charEl.value = price === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      } else {
+        charEl.value = 'ไม่มีในเกณฑ์ราคากลาง'
+      }
     }
+    updateCharStyle(id)
   }
 }
 
@@ -639,12 +688,8 @@ window.saveRecords = async () => {
     const stdPrice = parseFloat(String(document.getElementById('stdprice-' + id)?.value || '0').replace(/,/g, '')) || 0
     const unitPrice = parseFloat(String(document.getElementById('price-' + id)?.value || '0').replace(/,/g, '')) || 0
     
-    let char = ''
-    if (stdPrice > 0) {
-      char = unitPrice === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
-    } else {
-      char = 'ไม่มีในเกณฑ์ราคากลาง'
-    }
+    const charEl = document.getElementById('char-' + id)
+    const char = charEl?.value || (stdPrice > 0 ? (unitPrice === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์') : 'ไม่มีในเกณฑ์ราคากลาง')
 
     rows.push({
       meeting_id: state.currentMeeting.id,
@@ -677,8 +722,10 @@ window.refreshRecords = async () => {
   if (!state.currentMeeting) return
   let { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id).order('created_at')
   state.records = (data || []).map(r => {
-    if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
-    else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+    if (!r.characteristics) {
+      if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+    }
     return r
   })
   const listEl = document.getElementById('records-list')
@@ -716,10 +763,18 @@ window.editRecord = (id) => {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
         <div><label class="form-label">ราคาต่อหน่วย</label><input type="number" id="edit-price" class="form-control" value="${r.unit_price||''}" oninput="calcEditTotal()"></div>
-        <div><label class="form-label">ราคากลาง</label><input type="number" id="edit-std" class="form-control" value="${r.standard_price||''}"></div>
+        <div><label class="form-label">ราคากลาง</label><input type="number" id="edit-std" class="form-control" value="${r.standard_price||''}" oninput="calcEditTotal()"></div>
         <div><label class="form-label">รวม (บาท)</label><input type="number" id="edit-total" class="form-control" value="${r.total_price||''}" readonly style="background:#f1f5f9;"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label class="form-label">ลักษณะเกณฑ์ราคาและคุณลักษณะ</label>
+          <select id="edit-char" class="form-control" onchange="this.dataset.manual='true'">
+            <option value="ตรงตามเกณฑ์" ${(r.characteristics||'').includes('ตรงตามเกณฑ์') || (r.characteristics||'') === 'ตรงเกณฑ์ฯ' ? 'selected' : ''}>ตรงตามเกณฑ์</option>
+            <option value="ไม่ตรงตามเกณฑ์" ${(r.characteristics||'').includes('ไม่ตรง') ? 'selected' : ''}>ไม่ตรงตามเกณฑ์</option>
+            <option value="ไม่มีในเกณฑ์ราคากลาง" ${(r.characteristics||'').includes('ไม่มี') ? 'selected' : ''}>ไม่มีในเกณฑ์ราคากลาง</option>
+          </select>
+        </div>
         <div>
           <label class="form-label">วิธีจัดหา</label>
           <select id="edit-method" class="form-control">
@@ -729,7 +784,9 @@ window.editRecord = (id) => {
             <option value="รับบริจาค" ${r.procurement_method==='รับบริจาค'?'selected':''}>รับบริจาค</option>
           </select>
         </div>
-        <div><label class="form-label">แหล่งเงิน</label><input type="text" id="edit-fund" class="form-control" value="${escHtml(r.funding_source||'')}"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label class="form-label">แหล่งเงิน</label><input type="text" id="edit-fund" class="form-control" value="${escHtml(r.funding_source||'')}">
       </div>
     </div>
     <div class="modal-footer">
@@ -742,7 +799,17 @@ window.editRecord = (id) => {
 window.calcEditTotal = () => {
   const qty = parseFloat(document.getElementById('edit-qty').value) || 0
   const price = parseFloat(document.getElementById('edit-price').value) || 0
+  const stdPrice = parseFloat(document.getElementById('edit-std')?.value) || 0
   document.getElementById('edit-total').value = qty * price
+
+  const charEl = document.getElementById('edit-char')
+  if (charEl && !charEl.dataset.manual) {
+    if (stdPrice > 0) {
+      charEl.value = price === stdPrice ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+    } else {
+      charEl.value = 'ไม่มีในเกณฑ์ราคากลาง'
+    }
+  }
 }
 
 window.saveEditedRecord = async (id) => {
@@ -755,6 +822,7 @@ window.saveEditedRecord = async (id) => {
     unit_price: parseFloat(document.getElementById('edit-price').value) || 0,
     standard_price: parseFloat(document.getElementById('edit-std').value) || 0,
     total_price: parseFloat(document.getElementById('edit-total').value) || 0,
+    characteristics: document.getElementById('edit-char')?.value || 'ตรงตามเกณฑ์',
     procurement_method: document.getElementById('edit-method').value,
     funding_source: document.getElementById('edit-fund').value,
   }
@@ -1361,8 +1429,10 @@ window.saveAllResolutions = async () => {
   // Reload records
   let { data } = await supabase.from('records').select('*').eq('meeting_id', state.currentMeeting.id)
   data = (data || []).map(r => {
-    if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
-    else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+    if (!r.characteristics) {
+      if (r.standard_price > 0) r.characteristics = r.unit_price === r.standard_price ? 'ตรงตามเกณฑ์' : 'ไม่ตรงตามเกณฑ์'
+      else r.characteristics = 'ไม่มีในเกณฑ์ราคากลาง'
+    }
     return r
   })
   state.records = data || []
