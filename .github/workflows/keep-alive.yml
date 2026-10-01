@@ -1,0 +1,26 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Run every 3 days at 00:00 UTC (07:00 AM Bangkok time)
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: sb_publishable_Lox85wMOgw0OX_9_ggG0_A_a5wyrLk3" \
+            -H "Authorization: Bearer sb_publishable_Lox85wMOgw0OX_9_ggG0_A_a5wyrLk3" \
+            "https://znelgvnwkozbkivwpsxb.supabase.co/rest/v1/items?select=id&limit=1")
+          
+          echo "Supabase HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Successfully pinged Supabase. Project kept active!"
+          else
+            echo "Warning: Received HTTP status $HTTP_STATUS"
+            exit 1
+          fi
