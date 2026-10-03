@@ -8,6 +8,16 @@ import {
   DEFAULT_AUDIT_REPORT_SKO, 
   AUDIT_AGENCIES 
 } from './auditReport.js'
+import {
+  renderRiskAssessmentHtml,
+  bindRiskAssessmentEvents,
+  exportRiskAssessmentToCsv
+} from './riskAssessment.js'
+import {
+  DEFAULT_RISK_METADATA,
+  DEFAULT_UPDATE_LOGS,
+  DEFAULT_RISK_ITEMS
+} from './riskAssessmentData.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
@@ -15,6 +25,7 @@ const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
 const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
 const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
 const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
+const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v1'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -120,6 +131,11 @@ let cyberState = {
   selectedAuditReportAgency: 'สำนักงานสาธารณสุขจังหวัดสระแก้ว',
   activeAuditReportId: {},
   incidents: [],
+  riskAssessment: null,
+  riskAssessmentSubTab: '3-assess',
+  riskClusterFilter: 'all',
+  riskMatrixFilter: null,
+  riskSearchQuery: '',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -287,9 +303,31 @@ function initData() {
   if (!cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'] || cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'].length === 0) {
     cyberState.auditReports['สำนักงานสาธารณสุขจังหวัดสระแก้ว'] = [JSON.parse(JSON.stringify(DEFAULT_AUDIT_REPORT_SKO))]
   }
+
+  // 7. Risk Assessment
+  try {
+    const savedRisk = localStorage.getItem(LOCAL_STORAGE_RISK_ASSESSMENT_KEY)
+    if (savedRisk) {
+      cyberState.riskAssessment = JSON.parse(savedRisk)
+    }
+  } catch (e) {}
+
+  if (!cyberState.riskAssessment || !cyberState.riskAssessment.items || cyberState.riskAssessment.items.length === 0) {
+    cyberState.riskAssessment = {
+      metadata: JSON.parse(JSON.stringify(DEFAULT_RISK_METADATA)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_UPDATE_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_RISK_ITEMS))
+    }
+  }
 }
 
 initData()
+
+function saveRiskAssessment() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_RISK_ASSESSMENT_KEY, JSON.stringify(cyberState.riskAssessment))
+  } catch (e) {}
+}
 
 function saveRounds() {
   try {
@@ -1820,6 +1858,10 @@ function renderPolicyAndFrameworkTab(el) {
   const currentKey = cyberState.selectedDoc.key || '1.1 Audit Plan Procedure'
   const isAuditProgramme = (currentKey === '1.3 Audit Programme' || cyberState.selectedDoc.title === '1.3 Audit Programme')
   const isAuditReport = (currentKey === '1.4 Audit Report' || cyberState.selectedDoc.title === '1.4 Audit Report')
+  const isRiskAssessment = (
+    currentKey.includes('2.3 Risk Assessment') || 
+    cyberState.selectedDoc.title.includes('2.3 Risk Assessment')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -1865,6 +1907,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบจัดทำแผนการตรวจสอบภายใน ประจำปี (Audit Programme) เพิ่ม แก้ไข และกำหนดระยะเวลาการตรวจ' 
               : isAuditReport
               ? 'ระบบจัดทำ พิมพ์ และส่งออกไฟล์ Word รายงานการตรวจสอบด้านความมั่นคงปลอดภัยไซเบอร์ (Audit Report)'
+              : isRiskAssessment
+              ? 'ระบบประเมินและบริหารจัดการความเสี่ยงด้านไซเบอร์ (Risk Assessment and Treatment) 6 แท็บย่อยแบบ Interactive'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -1873,6 +1917,14 @@ function renderPolicyAndFrameworkTab(el) {
           ? renderAuditProgrammeHtml() 
           : isAuditReport
           ? renderAuditReportHtml(cyberState.selectedAuditReportAgency, getAuditReportsList(cyberState.selectedAuditReportAgency), getActiveAuditReport(cyberState.selectedAuditReportAgency).id)
+          : isRiskAssessment
+          ? renderRiskAssessmentHtml(
+              cyberState.riskAssessment,
+              cyberState.riskAssessmentSubTab,
+              cyberState.riskClusterFilter,
+              cyberState.riskMatrixFilter,
+              cyberState.riskSearchQuery
+            )
           : renderGenericDocLinksHtml(savedData)}
 
       </div>
@@ -2044,8 +2096,124 @@ function renderPolicyAndFrameworkTab(el) {
         return
       }
     })
+  } else if (isRiskAssessment) {
+    bindRiskAssessmentEvents(el, cyberState.riskAssessment, (action) => {
+      handleRiskAssessmentAction(action, el)
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
+  }
+}
+
+function handleRiskAssessmentAction(action, el) {
+  if (!cyberState.riskAssessment) return
+
+  if (action.type === 'switch_subtab') {
+    cyberState.riskAssessmentSubTab = action.subtab
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'filter_cluster') {
+    cyberState.riskClusterFilter = action.cluster
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search') {
+    cyberState.riskSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'matrix_filter') {
+    cyberState.riskMatrixFilter = action.matrixFilter
+    cyberState.riskAssessmentSubTab = action.subtab || '3-assess'
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`กรองตามเมทริกซ์ I=${action.matrixFilter.row}, L=${action.matrixFilter.col}`, 'info')
+    return
+  }
+
+  if (action.type === 'clear_matrix_filter') {
+    cyberState.riskMatrixFilter = null
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'update_risk_score') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item) {
+      item[action.field] = action.value
+      item.risk_level = (Number(item.likelihood) || 1) * (Number(item.impact) || 1)
+      saveRiskAssessment()
+      renderPolicyAndFrameworkTab(el)
+    }
+    return
+  }
+
+  if (action.type === 'update_risk_field') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item) {
+      item[action.field] = action.value
+      if (action.field === 'residual_likelihood' || action.field === 'residual_impact') {
+        item.residual_risk_score = (Number(item.residual_likelihood) || 1) * (Number(item.residual_impact) || 1)
+        renderPolicyAndFrameworkTab(el)
+      } else if (action.field === 'progress_percent') {
+        renderPolicyAndFrameworkTab(el)
+      }
+      saveRiskAssessment()
+    }
+    return
+  }
+
+  if (action.type === 'update_risk_cia') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item) {
+      if (!item.impact_cia) item.impact_cia = {}
+      item.impact_cia[action.factor] = action.checked
+      saveRiskAssessment()
+    }
+    return
+  }
+
+  if (action.type === 'add_log_row') {
+    if (!cyberState.riskAssessment.logs) cyberState.riskAssessment.logs = []
+    const newLog = {
+      id: `log_${Date.now()}`,
+      date: new Date().toISOString().slice(0, 10),
+      detail: ''
+    }
+    cyberState.riskAssessment.logs.unshift(newLog)
+    saveRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มรายการบันทึกเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'update_log_date') {
+    const log = (cyberState.riskAssessment.logs || []).find(l => l.id === action.logId)
+    if (log) {
+      log.date = action.date
+      saveRiskAssessment()
+    }
+    return
+  }
+
+  if (action.type === 'update_log_detail') {
+    const log = (cyberState.riskAssessment.logs || []).find(l => l.id === action.logId)
+    if (log) {
+      log.detail = action.detail
+      saveRiskAssessment()
+    }
+    return
+  }
+
+  if (action.type === 'delete_log') {
+    cyberState.riskAssessment.logs = (cyberState.riskAssessment.logs || []).filter(l => l.id !== action.logId)
+    saveRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการบันทึกเรียบร้อยแล้ว', 'info')
+    return
   }
 }
 
