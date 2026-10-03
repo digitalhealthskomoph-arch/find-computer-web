@@ -21,6 +21,13 @@ import {
   DEFAULT_RISK_REPORT_DATA
 } from './riskReport.js'
 import {
+  renderKriDocumentHtml,
+  bindKriDocumentEvents,
+  exportKriToWord,
+  exportKriToCsv,
+  DEFAULT_KRI_DOCUMENT_DATA
+} from './kriDocument.js'
+import {
   DEFAULT_RISK_METADATA,
   DEFAULT_UPDATE_LOGS,
   DEFAULT_RISK_ITEMS
@@ -34,6 +41,7 @@ const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
 const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
 const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v3'
 const LOCAL_STORAGE_RISK_REPORTS_KEY = 'sko_cyber_risk_reports'
+const LOCAL_STORAGE_KRI_DATA_KEY = 'sko_cyber_kri_data'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -147,6 +155,9 @@ let cyberState = {
   riskSearchQuery: '',
   riskReports: [],
   activeRiskReportId: 'report_default_2569',
+  kriData: {},
+  selectedKriYear: '2569',
+  kriViewMode: 'fiscal',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -355,9 +366,49 @@ function initData() {
   if (!cyberState.activeRiskReportId || !cyberState.riskReports.some(r => r.id === cyberState.activeRiskReportId)) {
     cyberState.activeRiskReportId = cyberState.riskReports[0].id
   }
+
+  // 9. KRI Document (2.5 KRI Document)
+  try {
+    const savedKri = localStorage.getItem(LOCAL_STORAGE_KRI_DATA_KEY)
+    if (savedKri) {
+      cyberState.kriData = JSON.parse(savedKri)
+    }
+  } catch (e) {
+    cyberState.kriData = {}
+  }
+  if (!cyberState.kriData || typeof cyberState.kriData !== 'object' || Object.keys(cyberState.kriData).length === 0) {
+    cyberState.kriData = {
+      '2569': JSON.parse(JSON.stringify(DEFAULT_KRI_DOCUMENT_DATA))
+    }
+  }
+  if (!cyberState.kriData['2569']) {
+    cyberState.kriData['2569'] = JSON.parse(JSON.stringify(DEFAULT_KRI_DOCUMENT_DATA))
+  }
+  if (!cyberState.selectedKriYear || !cyberState.kriData[cyberState.selectedKriYear]) {
+    cyberState.selectedKriYear = Object.keys(cyberState.kriData).sort((a, b) => Number(b) - Number(a))[0] || '2569'
+  }
 }
 
 initData()
+
+function saveKriData() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KRI_DATA_KEY, JSON.stringify(cyberState.kriData))
+  } catch (e) {
+    console.error('Error saving KRI data:', e)
+  }
+}
+
+function getActiveKriData() {
+  const years = Object.keys(cyberState.kriData || {})
+  if (years.length === 0) {
+    cyberState.kriData = { '2569': JSON.parse(JSON.stringify(DEFAULT_KRI_DOCUMENT_DATA)) }
+  }
+  if (!cyberState.kriData[cyberState.selectedKriYear]) {
+    cyberState.selectedKriYear = Object.keys(cyberState.kriData).sort((a, b) => Number(b) - Number(a))[0] || '2569'
+  }
+  return cyberState.kriData[cyberState.selectedKriYear]
+}
 
 function saveRiskReports() {
   try {
@@ -1922,6 +1973,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('2.4 Risk Report') || 
     cyberState.selectedDoc.title.includes('2.4 Risk Report')
   )
+  const isKriDocument = (
+    currentKey.includes('2.5 KRI Document') || 
+    cyberState.selectedDoc.title.includes('2.5 KRI Document')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -1971,6 +2026,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบประเมินและบริหารจัดการความเสี่ยงด้านไซเบอร์ (Risk Assessment and Treatment) 6 แท็บย่อยแบบ Interactive'
               : isRiskReport
               ? 'ระบบจัดทำ พิมพ์ และส่งออกไฟล์ Word รายงานการประเมินความเสี่ยงไซเบอร์ (Cybersecurity Risk Assessment Report)'
+              : isKriDocument
+              ? 'ระบบประเมินและรายงานผลดัชนีชี้วัดความเสี่ยงที่สำคัญ (Key Risk Indicators - KRI) Matrix 12 เดือน'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -1990,6 +2047,13 @@ function renderPolicyAndFrameworkTab(el) {
             )
           : isRiskReport
           ? renderRiskReportHtml(getActiveRiskReport(), cyberState.riskReports)
+          : isKriDocument
+          ? renderKriDocumentHtml(
+              getActiveKriData(), 
+              cyberState.kriViewMode || 'fiscal', 
+              cyberState.selectedKriYear || '2569', 
+              Object.keys(cyberState.kriData).sort((a,b) => Number(b) - Number(a))
+            )
           : renderGenericDocLinksHtml(savedData)}
 
       </div>
@@ -2169,8 +2233,126 @@ function renderPolicyAndFrameworkTab(el) {
     bindRiskReportEvents(el, getActiveRiskReport(), cyberState.riskAssessment, (action) => {
       handleRiskReportAction(action, el)
     })
+  } else if (isKriDocument) {
+    bindKriDocumentEvents(el, getActiveKriData(), (action) => {
+      handleKriDocumentAction(action, el)
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
+  }
+}
+
+function handleKriDocumentAction(action, el) {
+  const currentKri = getActiveKriData()
+
+  if (action.type === 'change_year') {
+    cyberState.selectedKriYear = action.year
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`สลับไปยังปีงบประมาณ ${action.year}`, 'info')
+    return
+  }
+
+  if (action.type === 'add_year') {
+    const nextYear = String(Number(cyberState.selectedKriYear || '2569') + 1)
+    const yearInput = prompt('ระบุปีงบประมาณ พ.ศ. ที่ต้องการสร้าง (เช่น ' + nextYear + '):', nextYear)
+    if (!yearInput) return
+    const trimmedYear = yearInput.trim()
+    if (!/^\d{4}$/.test(trimmedYear)) {
+      alert('กรุณาระบุปี พ.ศ. เป็นตัวเลข 4 หลัก (เช่น 2570)')
+      return
+    }
+
+    if (cyberState.kriData[trimmedYear]) {
+      cyberState.selectedKriYear = trimmedYear
+      renderPolicyAndFrameworkTab(el)
+      showNotification(`สลับไปยังปีงบประมาณ ${trimmedYear} เรียบร้อยแล้ว`, 'info')
+      return
+    }
+
+    // Clone from template with cleared months
+    const template = JSON.parse(JSON.stringify(DEFAULT_KRI_DOCUMENT_DATA))
+    template.metadata.effectiveText = `ตามปีงบประมาณ ${trimmedYear}`
+    template.items.forEach(it => {
+      it.months = {}
+    })
+    cyberState.kriData[trimmedYear] = template
+    cyberState.selectedKriYear = trimmedYear
+    saveKriData()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`สร้างข้อมูล KRI ประจำปีงบประมาณ ${trimmedYear} เรียบร้อยแล้ว`, 'success')
+    return
+  }
+
+  if (action.type === 'change_view_mode') {
+    cyberState.kriViewMode = action.mode
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'update_meta') {
+    if (!currentKri.metadata) currentKri.metadata = {}
+    currentKri.metadata[action.field] = action.value
+    saveKriData()
+    return
+  }
+
+  if (action.type === 'update_item') {
+    const it = currentKri.items?.find(item => item.id === action.id)
+    if (it) {
+      it[action.field] = action.value
+      saveKriData()
+    }
+    return
+  }
+
+  if (action.type === 'update_month') {
+    const it = currentKri.items?.find(item => item.id === action.id)
+    if (it) {
+      if (!it.months) it.months = {}
+      it.months[action.month] = action.value
+      saveKriData()
+      renderPolicyAndFrameworkTab(el)
+    }
+    return
+  }
+
+  if (action.type === 'add_item') {
+    if (!currentKri.items) currentKri.items = []
+    const nextId = (currentKri.items.length > 0 ? Math.max(...currentKri.items.map(i => i.id || 0)) : 0) + 1
+    currentKri.items.push({
+      id: nextId,
+      no: String(nextId),
+      name: 'ระบุตัวชี้วัดความเสี่ยง KRI ใหม่',
+      method: 'ระบุวิธีการวัดผล',
+      criteria: '0 ครั้งต่อเดือน',
+      owner: 'ผู้รับผิดชอบ',
+      condition: 'eq_0',
+      months: {}
+    })
+    saveKriData()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มตัวชี้วัด KRI ใหม่เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'delete_item') {
+    if (currentKri.items) {
+      currentKri.items = currentKri.items.filter(i => i.id !== action.id)
+      saveKriData()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('ลบตัวชี้วัด KRI เรียบร้อยแล้ว', 'info')
+    }
+    return
+  }
+
+  if (action.type === 'export_word') {
+    exportKriToWord(currentKri, cyberState.kriViewMode || 'fiscal')
+    return
+  }
+
+  if (action.type === 'export_csv') {
+    exportKriToCsv(currentKri, cyberState.kriViewMode || 'fiscal')
+    return
   }
 }
 
