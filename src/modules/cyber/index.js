@@ -540,6 +540,16 @@ function initData() {
   }
   if (!Array.isArray(cyberState.biaReports) || cyberState.biaReports.length === 0) {
     cyberState.biaReports = [JSON.parse(JSON.stringify(DEFAULT_BIA_REPORT_DATA))]
+  } else {
+    // Self-heal loaded biaReports if missing MTPD/RTO/RPO or if row 5 has old 5,000 THB
+    cyberState.biaReports.forEach(rep => {
+      if (rep && Array.isArray(rep.tableRows)) {
+        const needsHeal = rep.tableRows.some(r => !r.mtpd || !r.rto || !r.rpo || (r.id === 'bia_row_5' && Number(r.financialImpact) === 5000))
+        if (needsHeal && cyberState.biaEvident?.items) {
+          rep.tableRows = mergeBiaEvidentToReportRows(rep.tableRows, cyberState.biaEvident.items)
+        }
+      }
+    })
   }
   if (!cyberState.activeBiaReportId || !cyberState.biaReports.some(r => r.id === cyberState.activeBiaReportId)) {
     cyberState.activeBiaReportId = cyberState.biaReports[0].id
@@ -2415,7 +2425,8 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.biaReports,
               cyberState.activeBiaReportId,
               cyberState.biaReportSubTab || 'report',
-              savedData.pdfLinks || []
+              savedData.pdfLinks || [],
+              cyberState.biaEvident?.items || []
             )
           : renderGenericDocLinksHtml(savedData)}
 

@@ -9,39 +9,175 @@ export function ensureBiaReportPrintStyles() {
     style = document.createElement('style')
     style.id = 'bia-report-print-style'
     style.innerHTML = `
+      /* Screen Compact Styles for Table Cells */
+      .bia-cell-input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 4px 3px !important;
+        margin: 0 !important;
+        font-size: 11.5px !important;
+        font-family: inherit !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        background-color: #fff;
+        line-height: 1.25 !important;
+        transition: border-color 0.15s ease-in-out;
+      }
+      .bia-cell-input:focus {
+        border-color: #2563eb !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.18) !important;
+      }
+      .bia-cell-textarea {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 4px 6px !important;
+        margin: 0 !important;
+        font-size: 11.5px !important;
+        line-height: 1.35 !important;
+        font-family: inherit !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        background-color: #fff;
+        resize: vertical !important;
+      }
+      .bia-cell-textarea:focus {
+        border-color: #2563eb !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.18) !important;
+      }
+      .bia-print-only {
+        display: none !important;
+      }
+
+      /* Base Print Styles */
       @media print {
+        @page {
+          size: A4 portrait;
+          margin: 8mm 8mm 8mm 8mm;
+        }
+
+        html, body {
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #fff !important;
+          font-family: 'Sarabun', -apple-system, sans-serif !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
         body * {
           visibility: hidden !important;
         }
+
         #bia-report-print-sheet, #bia-report-print-sheet * {
           visibility: visible !important;
         }
+
         #bia-report-print-sheet {
           position: absolute !important;
           left: 0 !important;
           top: 0 !important;
           width: 100% !important;
           max-width: 100% !important;
+          box-sizing: border-box !important;
           margin: 0 !important;
-          padding: 10mm 15mm !important;
+          padding: 4mm 6mm !important;
           box-shadow: none !important;
           border: none !important;
           background: #fff !important;
+          font-size: 8.5pt !important;
+          line-height: 1.35 !important;
         }
+
         .no-print {
           display: none !important;
         }
+
+        .bia-screen-only {
+          display: none !important;
+        }
+
+        .bia-print-only {
+          display: inline-block !important;
+          word-break: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+
+        .bia-table-wrapper {
+          overflow: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin-bottom: 12px !important;
+          border: 1px solid #64748b !important;
+          box-sizing: border-box !important;
+        }
+
+        .bia-report-table {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          table-layout: fixed !important;
+          border-collapse: collapse !important;
+          font-size: 7.5pt !important;
+          line-height: 1.25 !important;
+        }
+
+        .bia-report-table th, .bia-report-table td {
+          padding: 3px 2px !important;
+          border: 1px solid #64748b !important;
+          word-break: break-word !important;
+          overflow-wrap: break-word !important;
+          box-sizing: border-box !important;
+        }
+
         .bia-report-input, .bia-report-textarea {
           border: none !important;
           background: transparent !important;
           padding: 0 !important;
           box-shadow: none !important;
           resize: none !important;
+          font-size: 8.5pt !important;
+        }
+
+        .bia-avoid-break, tr {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
         }
       }
     `
     document.head.appendChild(style)
   }
+}
+
+export function printBiaReport(orientation = 'portrait') {
+  let dynStyle = document.getElementById('bia-report-dynamic-print-style')
+  if (!dynStyle) {
+    dynStyle = document.createElement('style')
+    dynStyle.id = 'bia-report-dynamic-print-style'
+    document.head.appendChild(dynStyle)
+  }
+
+  const isLandscape = orientation === 'landscape'
+  dynStyle.innerHTML = `
+    @page {
+      size: A4 ${orientation};
+      margin: 8mm 8mm 8mm 8mm;
+    }
+    @media print {
+      #bia-report-print-sheet {
+        font-size: ${isLandscape ? '9pt' : '8pt'} !important;
+      }
+      .bia-report-table {
+        font-size: ${isLandscape ? '8.5pt' : '7.5pt'} !important;
+      }
+      .bia-report-table th, .bia-report-table td {
+        padding: ${isLandscape ? '4px 3px' : '3px 2px'} !important;
+      }
+    }
+  `
+  window.print()
 }
 
 // Helper: Format embed url for Google Drive or direct PDF
@@ -61,11 +197,21 @@ export function renderBiaReportHtml(
   reports = [DEFAULT_BIA_REPORT_DATA],
   activeReportId = 'bia_report_2569',
   activeSubTab = 'report',
-  docPdfLinks = []
+  docPdfLinks = [],
+  biaEvidentItems = []
 ) {
   ensureBiaReportPrintStyles()
 
   const currentReport = reports.find(r => r.id === activeReportId) || reports[0] || DEFAULT_BIA_REPORT_DATA
+  
+  // Auto-heal tableRows if missing MTPD/RTO/RPO or if row 5 has old 5,000 THB
+  if (Array.isArray(biaEvidentItems) && biaEvidentItems.length > 0 && Array.isArray(currentReport.tableRows)) {
+    const needsHeal = currentReport.tableRows.some(r => !r.mtpd || !r.rto || !r.rpo || (r.id === 'bia_row_5' && Number(r.financialImpact) === 5000))
+    if (needsHeal) {
+      currentReport.tableRows = mergeBiaEvidentToReportRows(currentReport.tableRows, biaEvidentItems)
+    }
+  }
+
   const { header, objective, scope, tableRows, budgetRequests, reEvaluationDate, participants, signatories } = currentReport
 
   // Calculate table metrics
@@ -110,8 +256,11 @@ export function renderBiaReportHtml(
             <button id="btn-export-bia-report-word" class="btn btn-sm btn-primary" style="font-size:12px; font-weight:700; border-radius:6px; padding:6px 14px; background:#2563eb; border:none; display:inline-flex; align-items:center; gap:5px;">
               <span>📄</span> ส่งออก Word (.doc)
             </button>
-            <button id="btn-print-bia-report" class="btn btn-sm btn-outline-dark" style="font-size:12px; font-weight:600; border-radius:6px; padding:6px 12px; display:inline-flex; align-items:center; gap:5px;">
-              <span>🖨️</span> พิมพ์ / PDF
+            <button id="btn-print-bia-portrait" class="btn btn-sm btn-outline-dark" style="font-size:12px; font-weight:600; border-radius:6px; padding:6px 12px; display:inline-flex; align-items:center; gap:5px;" title="พิมพ์รายงานขนาด A4 แนวตั้ง">
+              <span>🖨️</span> พิมพ์ A4 แนวตั้ง
+            </button>
+            <button id="btn-print-bia-landscape" class="btn btn-sm btn-dark" style="font-size:12px; font-weight:700; border-radius:6px; padding:6px 12px; display:inline-flex; align-items:center; gap:5px; background:#0f172a; border-color:#0f172a;" title="พิมพ์รายงานขนาด A4 แนวนอน (แนะนำสำหรับตาราง BIA)">
+              <span>📄</span> พิมพ์ A4 แนวนอน (แนะนำ)
             </button>
           </div>
         ` : ''}
@@ -244,7 +393,8 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
         <h3 style="font-size:1.1rem; font-weight:800; color:#0369a1; margin:0 0 10px 0;">
           2. วัตถุประสงค์ของการวิเคราะห์ (Objective)
         </h3>
-        <textarea class="form-control bia-report-textarea bia-field-edit" data-field="objective" rows="2" style="font-size:14px; line-height:1.6; border-radius:6px;">${objective || ''}</textarea>
+        <textarea class="form-control bia-report-textarea bia-field-edit bia-screen-only" data-field="objective" rows="2" style="font-size:14px; line-height:1.6; border-radius:6px;">${objective || ''}</textarea>
+        <p class="bia-print-only" style="font-size:8.5pt; line-height:1.5; margin:0; text-align:justify; color:#334155;">${objective || ''}</p>
       </div>
 
       <!-- Section 3: ขอบเขตของการวิเคราะห์ -->
@@ -335,47 +485,70 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
           </div>
         </div>
 
-        <!-- Table 4 -->
-        <div style="overflow-x:auto; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:18px;">
-          <table style="width:100%; border-collapse:collapse; font-size:12.5px; min-width:850px;">
+        <!-- Table 4: Fixed Table Layout (No min-width clip) -->
+        <div class="bia-table-wrapper" style="width:100%; overflow-x:auto; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:18px;">
+          <table class="bia-report-table" style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px;">
             <thead>
               <tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1; text-align:center; color:#1e293b; font-weight:700;">
-                <th style="padding:10px 8px; border:1px solid #cbd5e1; width:22%;">กระบวนการทางธุรกิจ (Asset Name)</th>
-                <th style="padding:10px 8px; border:1px solid #cbd5e1; width:12%;">ผลกระทบทางการเงิน (บาท/วัน)</th>
-                <th style="padding:10px 8px; border:1px solid #cbd5e1; width:15%;">ผลกระทบด้านชื่อเสียง</th>
-                <th style="padding:10px 8px; border:1px solid #cbd5e1; width:14%;">ผลกระทบด้านกฎหมาย</th>
-                <th style="padding:10px 6px; border:1px solid #cbd5e1; width:7%;">MTPD</th>
-                <th style="padding:10px 6px; border:1px solid #cbd5e1; width:7%;">RTO</th>
-                <th style="padding:10px 6px; border:1px solid #cbd5e1; width:7%;">RPO</th>
-                <th style="padding:10px 8px; border:1px solid #cbd5e1; width:16%;">ข้อเสนอแนะ (กิจกรรมสำคัญ)</th>
+                <th style="padding:8px 4px; border:1px solid #cbd5e1; width:17%;">กระบวนการทางธุรกิจ (Asset Name)</th>
+                <th style="padding:8px 4px; border:1px solid #cbd5e1; width:11%;">ผลกระทบทางการเงิน (บาท/วัน)</th>
+                <th style="padding:8px 4px; border:1px solid #cbd5e1; width:15%;">ผลกระทบด้านชื่อเสียง</th>
+                <th style="padding:8px 4px; border:1px solid #cbd5e1; width:13%;">ผลกระทบด้านกฎหมาย</th>
+                <th style="padding:8px 2px; border:1px solid #cbd5e1; width:8%; text-align:center;">MTPD</th>
+                <th style="padding:8px 2px; border:1px solid #cbd5e1; width:8%; text-align:center;">RTO</th>
+                <th style="padding:8px 2px; border:1px solid #cbd5e1; width:7%; text-align:center;">RPO</th>
+                <th style="padding:8px 4px; border:1px solid #cbd5e1; width:21%;">ข้อเสนอแนะ (กิจกรรมสำคัญ)</th>
               </tr>
             </thead>
             <tbody>
               ${(tableRows || []).map((row, idx) => `
                 <tr style="background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
-                  <td style="padding:8px 10px; border:1px solid #cbd5e1; font-weight:700; color:#0f172a;">
-                    <input type="text" class="form-control form-control-sm bia-report-input bia-row-input" data-idx="${idx}" data-field="processName" value="${row.processName || ''}" style="font-weight:700; font-size:12.5px;">
+                  <!-- Col 1: Asset Name -->
+                  <td style="padding:4px 6px; border:1px solid #cbd5e1; font-weight:700; color:#0f172a; vertical-align:middle;">
+                    <input type="text" class="bia-cell-input bia-screen-only bia-row-input" data-idx="${idx}" data-field="processName" value="${row.processName || ''}" style="font-weight:700; text-align:left; padding:4px 6px;">
+                    <strong class="bia-print-only" style="font-size:7.5pt; color:#0f172a;">${row.processName || ''}</strong>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">
-                    <input type="number" class="form-control form-control-sm bia-report-input bia-row-input" data-idx="${idx}" data-field="financialImpact" value="${row.financialImpact || 0}" style="text-align:right; font-size:12.5px; font-weight:700; color:#dc2626;">
+
+                  <!-- Col 2: Financial Impact -->
+                  <td style="padding:4px 4px; border:1px solid #cbd5e1; text-align:right; vertical-align:middle;">
+                    <input type="number" class="bia-cell-input bia-screen-only bia-row-input" data-idx="${idx}" data-field="financialImpact" value="${row.financialImpact || 0}" style="text-align:right; font-weight:700; color:#dc2626;">
+                    <span class="bia-print-only" style="font-weight:700; color:#dc2626; font-size:7.5pt;">฿${(Number(row.financialImpact) || 0).toLocaleString()}</span>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1;">
-                    <textarea class="form-control form-control-sm bia-report-textarea bia-row-input" data-idx="${idx}" data-field="reputationImpact" rows="2" style="font-size:12px; line-height:1.4;">${row.reputationImpact || ''}</textarea>
+
+                  <!-- Col 3: Reputation Impact -->
+                  <td style="padding:4px 4px; border:1px solid #cbd5e1; vertical-align:top;">
+                    <textarea class="bia-cell-textarea bia-screen-only bia-row-input" data-idx="${idx}" data-field="reputationImpact" rows="2">${row.reputationImpact || ''}</textarea>
+                    <span class="bia-print-only" style="font-size:7.5pt; color:#334155;">${row.reputationImpact || '-'}</span>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1;">
-                    <textarea class="form-control form-control-sm bia-report-textarea bia-row-input" data-idx="${idx}" data-field="legalImpact" rows="2" style="font-size:12px; line-height:1.4;">${row.legalImpact || ''}</textarea>
+
+                  <!-- Col 4: Legal Impact -->
+                  <td style="padding:4px 4px; border:1px solid #cbd5e1; vertical-align:top;">
+                    <textarea class="bia-cell-textarea bia-screen-only bia-row-input" data-idx="${idx}" data-field="legalImpact" rows="2">${row.legalImpact || ''}</textarea>
+                    <span class="bia-print-only" style="font-size:7.5pt; color:#334155;">${row.legalImpact || '-'}</span>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1; text-align:center;">
-                    <input type="text" class="form-control form-control-sm bia-report-input bia-row-input" data-idx="${idx}" data-field="mtpd" value="${row.mtpd || ''}" style="text-align:center; font-size:12px; font-weight:600;">
+
+                  <!-- Col 5: MTPD -->
+                  <td style="padding:4px 2px; border:1px solid #cbd5e1; text-align:center; vertical-align:middle;">
+                    <input type="text" class="bia-cell-input bia-screen-only bia-row-input" data-idx="${idx}" data-field="mtpd" value="${row.mtpd || ''}" title="MTPD: ${row.mtpd || ''}" style="background:#f8fafc; font-weight:600; color:#334155; text-align:center;">
+                    <span class="bia-print-only" style="font-weight:600; font-size:7.5pt; color:#334155;">${row.mtpd || '-'}</span>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1; text-align:center;">
-                    <input type="text" class="form-control form-control-sm bia-report-input bia-row-input" data-idx="${idx}" data-field="rto" value="${row.rto || ''}" style="text-align:center; font-size:12px; font-weight:700; color:#0284c7;">
+
+                  <!-- Col 6: RTO -->
+                  <td style="padding:4px 2px; border:1px solid #cbd5e1; text-align:center; vertical-align:middle;">
+                    <input type="text" class="bia-cell-input bia-screen-only bia-row-input" data-idx="${idx}" data-field="rto" value="${row.rto || ''}" title="RTO: ${row.rto || ''}" style="background:#eff6ff; font-weight:700; color:#1d4ed8; border-color:#bfdbfe; text-align:center;">
+                    <span class="bia-print-only" style="font-weight:700; font-size:7.5pt; color:#1d4ed8;">${row.rto || '-'}</span>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1; text-align:center;">
-                    <input type="text" class="form-control form-control-sm bia-report-input bia-row-input" data-idx="${idx}" data-field="rpo" value="${row.rpo || ''}" style="text-align:center; font-size:12px; font-weight:600;">
+
+                  <!-- Col 7: RPO -->
+                  <td style="padding:4px 2px; border:1px solid #cbd5e1; text-align:center; vertical-align:middle;">
+                    <input type="text" class="bia-cell-input bia-screen-only bia-row-input" data-idx="${idx}" data-field="rpo" value="${row.rpo || ''}" title="RPO: ${row.rpo || ''}" style="background:#f0fdf4; font-weight:600; color:#15803d; border-color:#bbf7d0; text-align:center;">
+                    <span class="bia-print-only" style="font-weight:600; font-size:7.5pt; color:#15803d;">${row.rpo || '-'}</span>
                   </td>
-                  <td style="padding:8px; border:1px solid #cbd5e1;">
-                    <textarea class="form-control form-control-sm bia-report-textarea bia-row-input" data-idx="${idx}" data-field="recommendation" rows="2" style="font-size:12px; line-height:1.4; color:#166534; font-weight:600;">${row.recommendation || ''}</textarea>
+
+                  <!-- Col 8: Recommendations -->
+                  <td style="padding:4px 4px; border:1px solid #cbd5e1; vertical-align:top;">
+                    <textarea class="bia-cell-textarea bia-screen-only bia-row-input" data-idx="${idx}" data-field="recommendation" rows="2" style="color:#166534; font-weight:600;">${row.recommendation || ''}</textarea>
+                    <span class="bia-print-only" style="font-size:7.5pt; color:#166534; font-weight:600;">${row.recommendation || '-'}</span>
                   </td>
                 </tr>
               `).join('')}
@@ -384,7 +557,7 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
         </div>
 
         <!-- คำอธิบายเพิ่มเติม -->
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:20px; font-size:13px; line-height:1.6; color:#334155;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:20px; font-size:13px; line-height:1.6; color:#334155;" class="bia-avoid-break">
           <h4 style="font-size:0.95rem; font-weight:700; color:#0f172a; margin:0 0 8px 0;">คำอธิบายเพิ่มเติม</h4>
           <p style="margin:0 0 4px 0;"><strong>ผลกระทบทางการเงิน:</strong> มูลค่าความเสียหายทางการเงินที่อาจเกิดขึ้น หากกระบวนการหยุดชะงัก</p>
           <p style="margin:0 0 4px 0;"><strong>ผลกระทบด้านชื่อเสียง:</strong> ระดับความเสียหายต่อความเชื่อมั่นของลูกค้า (สูง, ปานกลาง, ต่ำ)</p>
@@ -395,7 +568,7 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
         </div>
 
         <!-- ข้อเสนอแนะงบประมาณ (Budget Requests) -->
-        <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:18px 20px; margin-bottom:24px;">
+        <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:18px 20px; margin-bottom:24px;" class="bia-avoid-break">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h4 style="font-size:0.95rem; font-weight:800; color:#991b1b; margin:0; display:flex; align-items:center; gap:6px;">
               <span>💡</span> ข้อเสนอแนะ: ต้องการงบประมาณในการปรับปรุงเพื่อลดความเสี่ยงภัยคุกคามไซเบอร์ ดังต่อไปนี้
@@ -406,10 +579,15 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
           </div>
           <div style="display:flex; flex-direction:column; gap:8px;">
             ${(budgetRequests || []).map((b, bIdx) => `
-              <div style="display:flex; align-items:center; gap:10px; font-size:13.5px;">
+              <div style="display:flex; align-items:center; gap:10px; font-size:13.5px;" class="bia-avoid-break">
                 <span style="font-weight:700; color:#b91c1c; min-width:18px;">•</span>
-                <input type="text" class="form-control form-control-sm bia-report-input bia-budget-amount" data-idx="${bIdx}" value="${b.amount || ''}" style="width:130px; font-weight:700; color:#b91c1c; font-size:13.5px;">
-                <input type="text" class="form-control form-control-sm bia-report-input bia-budget-purpose" data-idx="${bIdx}" value="${b.purpose || ''}" style="flex:1; font-size:13.5px;">
+                <span class="bia-screen-only" style="display:flex; align-items:center; gap:10px; flex:1;">
+                  <input type="text" class="form-control form-control-sm bia-report-input bia-budget-amount" data-idx="${bIdx}" value="${b.amount || ''}" style="width:130px; font-weight:700; color:#b91c1c; font-size:13.5px;">
+                  <input type="text" class="form-control form-control-sm bia-report-input bia-budget-purpose" data-idx="${bIdx}" value="${b.purpose || ''}" style="flex:1; font-size:13.5px;">
+                </span>
+                <span class="bia-print-only" style="font-size:8.5pt;">
+                  <strong style="color:#991b1b;">${b.amount || ''}</strong> ${b.purpose || ''}
+                </span>
                 <button class="btn btn-sm text-danger no-print btn-del-budget-row" data-idx="${bIdx}" style="padding:0 6px; font-size:14px; border:none; background:transparent;">×</button>
               </div>
             `).join('')}
@@ -418,17 +596,18 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
       </div>
 
       <!-- Section 5: วันที่ประเมินซ้ำ -->
-      <div style="margin-bottom:28px;">
+      <div style="margin-bottom:28px;" class="bia-avoid-break">
         <h3 style="font-size:1.1rem; font-weight:800; color:#0369a1; margin:0 0 8px 0;">
           5. วันที่ประเมินซ้ำ
         </h3>
         <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
-          <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="reEvaluationDate" value="${reEvaluationDate || ''}" style="max-width:350px; font-weight:600; font-size:14px;">
+          <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit bia-screen-only" data-field="reEvaluationDate" value="${reEvaluationDate || ''}" style="max-width:350px; font-weight:600; font-size:14px;">
+          <p class="bia-print-only" style="font-size:8.5pt; margin:0; font-weight:600;">${reEvaluationDate || 'ตามรอบปีงบประมาณ 2570'}</p>
         </div>
       </div>
 
       <!-- Section 6: รายชื่อผู้เข้าร่วมการวิเคราะห์ -->
-      <div style="margin-bottom:36px;">
+      <div style="margin-bottom:36px;" class="bia-avoid-break">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <h3 style="font-size:1.1rem; font-weight:800; color:#0369a1; margin:0;">
             6. รายชื่อผู้เข้าร่วมการวิเคราะห์
@@ -439,12 +618,17 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
         </div>
         <div style="display:flex; flex-direction:column; gap:8px;">
           ${(participants || []).map((p, pIdx) => `
-            <div style="display:flex; align-items:center; gap:12px; font-size:13.5px;">
+            <div style="display:flex; align-items:center; gap:12px; font-size:13.5px;" class="bia-avoid-break">
               <span style="font-weight:700; color:#0284c7; min-width:18px;">•</span>
-              <input type="text" class="form-control form-control-sm bia-report-input bia-part-name" data-idx="${pIdx}" value="${p.name || ''}" style="width:260px; font-weight:600; font-size:13.5px;">
-              <span style="color:#64748b;">(</span>
-              <input type="text" class="form-control form-control-sm bia-report-input bia-part-role" data-idx="${pIdx}" value="${p.role || ''}" style="width:160px; font-size:13px; color:#475569;">
-              <span style="color:#64748b;">)</span>
+              <span class="bia-screen-only" style="display:flex; align-items:center; gap:8px;">
+                <input type="text" class="form-control form-control-sm bia-report-input bia-part-name" data-idx="${pIdx}" value="${p.name || ''}" style="width:260px; font-weight:600; font-size:13.5px;">
+                <span style="color:#64748b;">(</span>
+                <input type="text" class="form-control form-control-sm bia-report-input bia-part-role" data-idx="${pIdx}" value="${p.role || ''}" style="width:160px; font-size:13px; color:#475569;">
+                <span style="color:#64748b;">)</span>
+              </span>
+              <span class="bia-print-only" style="font-size:8.5pt;">
+                <strong>${p.name || ''}</strong> (${p.role || ''})
+              </span>
               <button class="btn btn-sm text-danger no-print btn-del-part-row" data-idx="${pIdx}" style="padding:0 6px; font-size:14px; border:none; background:transparent;">×</button>
             </div>
           `).join('')}
@@ -452,16 +636,28 @@ function renderBiaReportFormTab(report, totalFinancial, totalRows) {
       </div>
 
       <!-- Signatures -->
-      <div style="margin-top:40px; padding-top:24px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; text-align:center; flex-wrap:wrap; gap:24px; font-size:13.5px;">
+      <div style="margin-top:40px; padding-top:24px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; text-align:center; flex-wrap:wrap; gap:24px; font-size:13.5px;" class="bia-avoid-break">
         <div style="flex:1; min-width:240px;">
-          <p style="margin-bottom:48px; color:#64748b;">ผู้จัดทำรายงาน</p>
-          <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.preparedBy.name" value="${signatories?.preparedBy?.name || ''}" style="text-align:center; font-weight:700; font-size:13.5px; margin-bottom:4px;">
-          <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.preparedBy.position" value="${signatories?.preparedBy?.position || ''}" style="text-align:center; color:#64748b; font-size:12.5px;">
+          <p style="margin-bottom:32px; color:#64748b; font-weight:600;">ผู้จัดทำรายงาน</p>
+          <div class="bia-screen-only">
+            <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.preparedBy.name" value="${signatories?.preparedBy?.name || ''}" style="text-align:center; font-weight:700; font-size:13.5px; margin-bottom:4px;">
+            <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.preparedBy.position" value="${signatories?.preparedBy?.position || ''}" style="text-align:center; color:#64748b; font-size:12.5px;">
+          </div>
+          <div class="bia-print-only" style="margin-top:40px;">
+            <p style="margin:0 0 4px 0; font-weight:700; font-size:8.5pt;">(${signatories?.preparedBy?.name || ''})</p>
+            <p style="margin:0; font-size:8pt; color:#475569;">${signatories?.preparedBy?.position || ''}</p>
+          </div>
         </div>
         <div style="flex:1; min-width:240px;">
-          <p style="margin-bottom:48px; color:#64748b;">ผู้รับทราบรายงาน (CISO)</p>
-          <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.acknowledgedBy.name" value="${signatories?.acknowledgedBy?.name || ''}" style="text-align:center; font-weight:700; font-size:13.5px; margin-bottom:4px;">
-          <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.acknowledgedBy.position" value="${signatories?.acknowledgedBy?.position || ''}" style="text-align:center; color:#64748b; font-size:12.5px;">
+          <p style="margin-bottom:32px; color:#64748b; font-weight:600;">ผู้รับทราบรายงาน (CISO)</p>
+          <div class="bia-screen-only">
+            <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.acknowledgedBy.name" value="${signatories?.acknowledgedBy?.name || ''}" style="text-align:center; font-weight:700; font-size:13.5px; margin-bottom:4px;">
+            <input type="text" class="form-control form-control-sm bia-report-input bia-field-edit" data-field="signatories.acknowledgedBy.position" value="${signatories?.acknowledgedBy?.position || ''}" style="text-align:center; color:#64748b; font-size:12.5px;">
+          </div>
+          <div class="bia-print-only" style="margin-top:40px;">
+            <p style="margin:0 0 4px 0; font-weight:700; font-size:8.5pt;">(${signatories?.acknowledgedBy?.name || ''})</p>
+            <p style="margin:0; font-size:8pt; color:#475569;">${signatories?.acknowledgedBy?.position || ''}</p>
+          </div>
         </div>
       </div>
 
@@ -730,10 +926,20 @@ export function bindBiaReportEvents(el, reports, activeReportId, activeSubTab, b
     }
   }
 
-  // Print
+  // Print Portrait & Landscape
+  const btnPrintPortrait = el.querySelector('#btn-print-bia-portrait')
+  if (btnPrintPortrait) {
+    btnPrintPortrait.onclick = () => printBiaReport('portrait')
+  }
+
+  const btnPrintLandscape = el.querySelector('#btn-print-bia-landscape')
+  if (btnPrintLandscape) {
+    btnPrintLandscape.onclick = () => printBiaReport('landscape')
+  }
+
   const btnPrint = el.querySelector('#btn-print-bia-report')
   if (btnPrint) {
-    btnPrint.onclick = () => window.print()
+    btnPrint.onclick = () => printBiaReport('portrait')
   }
 
   // Header / Field Edits

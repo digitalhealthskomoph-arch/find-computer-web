@@ -190,19 +190,33 @@ export function mergeBiaEvidentToReportRows(currentRows, biaEvidentItems) {
   }
 
   const updatedRows = (currentRows || []).map(row => {
-    // หาคู่เทียบใน 1.6
-    const matched = biaEvidentItems.find(it => {
-      const itName = (it.asset_name || '').toLowerCase()
-      const rowKey = (row.assetKey || '').toLowerCase()
-      const rowName = (row.processName || '').toLowerCase()
-      return itName.includes(rowKey) || rowName.includes(itName) || rowKey.includes(itName)
-    })
+    const key = ((row.assetKey || '') + ' ' + (row.processName || '')).toLowerCase()
+    
+    let matched = null
+    if (key.includes('pay slip') || key.includes('สวัสดิการ')) {
+      matched = biaEvidentItems.find(it => (it.asset_name || '').toLowerCase().includes('pay slip'))
+    } else if (key.includes('plan-d') || key.includes('งบประมาณ')) {
+      matched = biaEvidentItems.find(it => (it.asset_name || '').toLowerCase().includes('plan-d'))
+    } else if (key.includes('สารบรรณ')) {
+      matched = biaEvidentItems.find(it => (it.asset_name || '').toLowerCase().includes('สารบรรณ'))
+    } else if (key.includes('research') || key.includes('วิชาการ')) {
+      matched = biaEvidentItems.find(it => (it.asset_name || '').toLowerCase().includes('research'))
+    } else if (key.includes('web main') || key.includes('บริการประชาชน') || (key.includes('sko.moph.go.th') && !key.includes('research'))) {
+      matched = biaEvidentItems.find(it => {
+        const n = (it.asset_name || '').toLowerCase()
+        return n.includes('sko.moph.go.th') && !n.includes('research')
+      })
+    } else if (key.includes('zyxel') || key.includes('โครงสร้างพื้นฐาน')) {
+      matched = biaEvidentItems.find(it => (it.asset_name || '').toLowerCase().includes('zyxel'))
+    } else if (key.includes('fortigate') || key.includes('ความมั่นคงไซเบอร์')) {
+      matched = biaEvidentItems.find(it => (it.asset_name || '').toLowerCase().includes('fortigate'))
+    }
 
     if (!matched) return row
 
     return {
       ...row,
-      financialImpact: Number(matched.financial_impact) || row.financialImpact,
+      financialImpact: Number(matched.financial_impact) !== undefined ? Number(matched.financial_impact) : row.financialImpact,
       reputationImpact: matched.reputational_impact || row.reputationImpact,
       legalImpact: matched.law_regulatory_impact || row.legalImpact,
       mtpd: matched.mtpd || row.mtpd,
@@ -213,3 +227,4 @@ export function mergeBiaEvidentToReportRows(currentRows, biaEvidentItems) {
 
   return updatedRows
 }
+
