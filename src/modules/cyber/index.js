@@ -1,6 +1,7 @@
 import ciiData from './data/ciiData.json'
 import policyFrameworkData from './data/policyFrameworkData.json'
 import { showNotification, toThaiDate } from '../../lib/utils.js'
+import { supabase } from '../../lib/supabase.js'
 import { 
   renderAuditReportHtml, 
   bindAuditReportEvents, 
@@ -476,10 +477,38 @@ function initData() {
       items: JSON.parse(JSON.stringify(ASSET_RISK_ITEMS))
     }
   }
-  fetchAssetRiskFromSupabase().then(dbState => {
-    if (dbState && dbState.items && dbState.items.length > 0) {
-      cyberState.assetRiskAssessment = dbState
-      localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(dbState))
+  // Background fetch from Supabase for all modules
+  Promise.all([
+    fetchAssetRiskFromSupabase(),
+    fetchModuleFromSupabase('asset_inventory'),
+    fetchModuleFromSupabase('asset_register'),
+    fetchModuleFromSupabase('risk_assessment'),
+    fetchModuleFromSupabase('risk_reports'),
+    fetchModuleFromSupabase('kri_data')
+  ]).then(([assetRisk, inv, reg, risk, rep, kri]) => {
+    if (assetRisk?.items?.length > 0) {
+      cyberState.assetRiskAssessment = assetRisk
+      localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(assetRisk))
+    }
+    if (inv?.items?.length > 0) {
+      cyberState.assetInventory = inv
+      localStorage.setItem(LOCAL_STORAGE_ASSET_INVENTORY_KEY, JSON.stringify(inv))
+    }
+    if (reg?.items?.length > 0) {
+      cyberState.assetRegister = reg
+      localStorage.setItem(LOCAL_STORAGE_ASSET_REGISTER_KEY, JSON.stringify(reg))
+    }
+    if (risk?.items?.length > 0) {
+      cyberState.riskAssessment = risk
+      localStorage.setItem(LOCAL_STORAGE_RISK_ASSESSMENT_KEY, JSON.stringify(risk))
+    }
+    if (Array.isArray(rep) && rep.length > 0) {
+      cyberState.riskReports = rep
+      localStorage.setItem(LOCAL_STORAGE_RISK_REPORTS_KEY, JSON.stringify(rep))
+    }
+    if (kri && Object.keys(kri).length > 0) {
+      cyberState.kriData = kri
+      localStorage.setItem(LOCAL_STORAGE_KRI_DATA_KEY, JSON.stringify(kri))
     }
   }).catch(() => {})
 
@@ -492,9 +521,40 @@ function initData() {
 
 initData()
 
+async function syncModuleToSupabase(moduleKey, data) {
+  try {
+    if (!supabase || !data) return
+    await supabase.from('cyber_module_states').upsert({
+      module_key: moduleKey,
+      data: data,
+      updated_at: new Date().toISOString()
+    })
+  } catch (err) {
+    console.warn(`Supabase sync deferred for ${moduleKey}:`, err.message)
+  }
+}
+
+async function fetchModuleFromSupabase(moduleKey) {
+  try {
+    if (!supabase) return null
+    const { data, error } = await supabase
+      .from('cyber_module_states')
+      .select('data')
+      .eq('module_key', moduleKey)
+      .maybeSingle()
+    if (!error && data?.data) {
+      return data.data
+    }
+  } catch (err) {
+    console.warn(`Supabase fetch deferred for ${moduleKey}:`, err.message)
+  }
+  return null
+}
+
 function saveAssetInventory() {
   try {
     localStorage.setItem(LOCAL_STORAGE_ASSET_INVENTORY_KEY, JSON.stringify(cyberState.assetInventory))
+    syncModuleToSupabase('asset_inventory', cyberState.assetInventory)
   } catch (e) {
     console.error('Error saving Asset Inventory:', e)
   }
@@ -514,6 +574,7 @@ function saveAssetRiskAssessment() {
 function saveAssetRegister() {
   try {
     localStorage.setItem(LOCAL_STORAGE_ASSET_REGISTER_KEY, JSON.stringify(cyberState.assetRegister))
+    syncModuleToSupabase('asset_register', cyberState.assetRegister)
   } catch (e) {
     console.error('Error saving Asset Register:', e)
   }
@@ -522,6 +583,7 @@ function saveAssetRegister() {
 function saveKriData() {
   try {
     localStorage.setItem(LOCAL_STORAGE_KRI_DATA_KEY, JSON.stringify(cyberState.kriData))
+    syncModuleToSupabase('kri_data', cyberState.kriData)
   } catch (e) {
     console.error('Error saving KRI data:', e)
   }
@@ -541,6 +603,7 @@ function getActiveKriData() {
 function saveRiskReports() {
   try {
     localStorage.setItem(LOCAL_STORAGE_RISK_REPORTS_KEY, JSON.stringify(cyberState.riskReports))
+    syncModuleToSupabase('risk_reports', cyberState.riskReports)
   } catch (e) {
     console.error('Error saving risk reports:', e)
   }
@@ -561,6 +624,7 @@ function getActiveRiskReport() {
 function saveRiskAssessment() {
   try {
     localStorage.setItem(LOCAL_STORAGE_RISK_ASSESSMENT_KEY, JSON.stringify(cyberState.riskAssessment))
+    syncModuleToSupabase('risk_assessment', cyberState.riskAssessment)
   } catch (e) {}
 }
 
@@ -579,6 +643,7 @@ function saveUpdateLogs() {
 function saveIncidents() {
   try {
     localStorage.setItem(LOCAL_STORAGE_INCIDENTS_KEY, JSON.stringify(cyberState.incidents))
+    syncModuleToSupabase('incidents', cyberState.incidents)
   } catch (e) {}
 }
 
