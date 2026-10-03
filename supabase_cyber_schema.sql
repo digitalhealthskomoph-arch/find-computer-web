@@ -270,6 +270,14 @@ CREATE TABLE IF NOT EXISTS public.cyber_bia_logs (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 11. [1.7] รายงานการวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis : BIA Report)
+CREATE TABLE IF NOT EXISTS public.cyber_bia_reports (
+    id TEXT PRIMARY KEY,
+    report_code TEXT,
+    report_data JSONB DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ====================================================================================================
 -- กำหนดสิทธิ์และความปลอดภัย (Row Level Security & Permissions)
 -- เพื่อให้ผู้ใช้งานทั้ง authenticated และ anon สามารถอ่าน/เขียน/อัปเดตข้อมูลได้จากทุกเครื่อง
@@ -288,6 +296,7 @@ DECLARE
         'cyber_bia_evident_items',
         'cyber_bia_header',
         'cyber_bia_logs',
+        'cyber_bia_reports',
         'cyber_risk_matrix_items',
         'cyber_risk_matrix_header',
         'cyber_risk_matrix_logs',
