@@ -35,6 +35,13 @@ import {
   DEFAULT_ASSET_INVENTORY_DATA
 } from './assetInventory.js'
 import {
+  renderAssetRegisterHtml,
+  bindAssetRegisterEvents,
+  exportAssetRegisterToWord,
+  exportAssetRegisterToCsv,
+  DEFAULT_ASSET_REGISTER_DATA
+} from './assetRegister.js'
+import {
   DEFAULT_RISK_METADATA,
   DEFAULT_UPDATE_LOGS,
   DEFAULT_RISK_ITEMS
@@ -50,6 +57,7 @@ const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v3'
 const LOCAL_STORAGE_RISK_REPORTS_KEY = 'sko_cyber_risk_reports'
 const LOCAL_STORAGE_KRI_DATA_KEY = 'sko_cyber_kri_data'
 const LOCAL_STORAGE_ASSET_INVENTORY_KEY = 'sko_cyber_asset_inventory'
+const LOCAL_STORAGE_ASSET_REGISTER_KEY = 'sko_cyber_asset_register'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -171,6 +179,10 @@ let cyberState = {
   assetInventorySearchQuery: '',
   assetInventoryCritFilter: 'all',
   assetInventoryGroupFilter: 'all',
+  assetRegister: null,
+  assetRegisterSearchQuery: '',
+  assetRegisterTypeFilter: 'all',
+  assetRegisterCritFilter: 'all',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -416,6 +428,19 @@ function initData() {
     cyberState.assetInventory = JSON.parse(JSON.stringify(DEFAULT_ASSET_INVENTORY_DATA))
   }
 
+  // 11. Asset Register (1.3 Asset Register - ทะเบียนทรัพย์สิน)
+  try {
+    const savedAssetReg = localStorage.getItem(LOCAL_STORAGE_ASSET_REGISTER_KEY)
+    if (savedAssetReg) {
+      cyberState.assetRegister = JSON.parse(savedAssetReg)
+    }
+  } catch (e) {
+    cyberState.assetRegister = null
+  }
+  if (!cyberState.assetRegister || !Array.isArray(cyberState.assetRegister.items) || cyberState.assetRegister.items.length === 0) {
+    cyberState.assetRegister = JSON.parse(JSON.stringify(DEFAULT_ASSET_REGISTER_DATA))
+  }
+
   // If selectedDoc was set to "3.2 รายงานการแจ้งเหตุการณ์", fallback to 3.2.1
   if (cyberState.selectedDoc?.key === '3.2 รายงานการแจ้งเหตุการณ์' || cyberState.selectedDoc?.title === '3.2 รายงานการแจ้งเหตุการณ์') {
     const fallback = allFlatDocs.find(d => d.key === '3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์') || allFlatDocs[0]
@@ -430,6 +455,14 @@ function saveAssetInventory() {
     localStorage.setItem(LOCAL_STORAGE_ASSET_INVENTORY_KEY, JSON.stringify(cyberState.assetInventory))
   } catch (e) {
     console.error('Error saving Asset Inventory:', e)
+  }
+}
+
+function saveAssetRegister() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_ASSET_REGISTER_KEY, JSON.stringify(cyberState.assetRegister))
+  } catch (e) {
+    console.error('Error saving Asset Register:', e)
   }
 }
 
@@ -2023,6 +2056,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('1.2 Asset Inventory List') ||
     cyberState.selectedDoc.title.includes('1.2 Asset Inventory List')
   )
+  const isAssetRegister = (
+    currentKey.includes('1.3 Asset Register') ||
+    cyberState.selectedDoc.title.includes('1.3 Asset Register')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2075,7 +2112,9 @@ function renderPolicyAndFrameworkTab(el) {
               : isKriDocument
               ? 'ระบบประเมินและรายงานผลดัชนีชี้วัดความเสี่ยงที่สำคัญ (Key Risk Indicators - KRI) Matrix 12 เดือน'
               : isAssetInventory
-              ? 'ระบบทะเบียนทรัพย์สินสารสนเทศของบริการที่สำคัญ (IT Asset Register) แบ่งหมวด Hardware vs Software & Applications'
+              ? 'ระบบทะเบียนทรัพย์สินสารสนเทศ (IT Asset/Devices Inventory) ฮาร์ดแวร์ 118 รายการ และซอฟต์แวร์ 4 รายการ'
+              : isAssetRegister
+              ? 'ทะเบียนทรัพย์สินของบริการที่สำคัญของหน่วยงาน (Asset Register) 9 รายการหลัก ปรับปรุงแก้ไขและส่งออก Word/Excel/PDF'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2108,6 +2147,13 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.assetInventorySubTab || 'hardware',
               cyberState.assetInventorySearchQuery || '',
               cyberState.assetInventoryGroupFilter || 'all'
+            )
+          : isAssetRegister
+          ? renderAssetRegisterHtml(
+              cyberState.assetRegister,
+              cyberState.assetRegisterSearchQuery || '',
+              cyberState.assetRegisterTypeFilter || 'all',
+              cyberState.assetRegisterCritFilter || 'all'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2295,6 +2341,10 @@ function renderPolicyAndFrameworkTab(el) {
   } else if (isAssetInventory) {
     bindAssetInventoryEvents(el, cyberState.assetInventory, (action) => {
       handleAssetInventoryAction(action, el)
+    })
+  } else if (isAssetRegister) {
+    bindAssetRegisterEvents(el, cyberState.assetRegister, (action) => {
+      handleAssetRegisterAction(action, el)
     })
   } else {
     bindGenericDocEvents(el, currentKey)
@@ -2525,6 +2575,109 @@ function handleAssetInventoryAction(action, el) {
 
   if (action.type === 'EXPORT_CSV') {
     exportAssetInventoryToCsv(cyberState.assetInventory, cyberState.assetInventorySubTab)
+    showNotification('ส่งออกไฟล์ Excel (.csv) สำเร็จ', 'success')
+    return
+  }
+}
+
+function handleAssetRegisterAction(action, el) {
+  if (!cyberState.assetRegister) {
+    cyberState.assetRegister = JSON.parse(JSON.stringify(DEFAULT_ASSET_REGISTER_DATA))
+  }
+
+  if (action.type === 'SEARCH') {
+    cyberState.assetRegisterSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    const searchInp = el.querySelector('#reg-search-input')
+    if (searchInp) {
+      searchInp.focus()
+      searchInp.selectionStart = searchInp.selectionEnd = searchInp.value.length
+    }
+    return
+  }
+
+  if (action.type === 'FILTER_TYPE') {
+    cyberState.assetRegisterTypeFilter = action.typeFilter
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'FILTER_CRIT') {
+    cyberState.assetRegisterCritFilter = action.critFilter
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'UPDATE_HEADER_DATE') {
+    if (!cyberState.assetRegister.metadata) cyberState.assetRegister.metadata = {}
+    cyberState.assetRegister.metadata.recordDate = action.date
+    saveAssetRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`อัปเดตวันที่ทำการบันทึกเป็น ${action.date} เรียบร้อยแล้ว`, 'success')
+    return
+  }
+
+  if (action.type === 'UPDATE_METADATA') {
+    cyberState.assetRegister.metadata = { ...action.metadata }
+    saveAssetRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('บันทึกข้อมูลส่วนหัวทะเบียนทรัพย์สินเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'ADD_ITEM') {
+    if (!cyberState.assetRegister.items) cyberState.assetRegister.items = []
+    const newNo = cyberState.assetRegister.items.length + 1
+    const newItem = { ...action.item, no: newNo }
+    cyberState.assetRegister.items.push(newItem)
+    saveAssetRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`เพิ่มทรัพย์สิน "${newItem.name}" เรียบร้อยแล้ว`, 'success')
+    return
+  }
+
+  if (action.type === 'UPDATE_ITEM') {
+    const idx = cyberState.assetRegister.items?.findIndex(it => it.id === action.item.id)
+    if (idx !== -1 && idx !== undefined) {
+      const existingNo = cyberState.assetRegister.items[idx].no
+      cyberState.assetRegister.items[idx] = { ...action.item, no: existingNo }
+      saveAssetRegister()
+      renderPolicyAndFrameworkTab(el)
+      showNotification(`แก้ไขข้อมูล "${action.item.name}" เรียบร้อยแล้ว`, 'success')
+    }
+    return
+  }
+
+  if (action.type === 'DELETE_ITEM') {
+    cyberState.assetRegister.items = (cyberState.assetRegister.items || []).filter(it => it.id !== action.id)
+    cyberState.assetRegister.items.forEach((it, i) => {
+      it.no = i + 1
+    })
+    saveAssetRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการทรัพย์สินเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'RESET_DEFAULT') {
+    cyberState.assetRegister = JSON.parse(JSON.stringify(DEFAULT_ASSET_REGISTER_DATA))
+    cyberState.assetRegisterSearchQuery = ''
+    cyberState.assetRegisterTypeFilter = 'all'
+    cyberState.assetRegisterCritFilter = 'all'
+    saveAssetRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('รีเซ็ตข้อมูลทะเบียนทรัพย์สินเป็น 9 รายการตั้งต้นเดิมเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'EXPORT_WORD') {
+    exportAssetRegisterToWord(cyberState.assetRegister)
+    showNotification('ส่งออกไฟล์ Word (.doc) สำเร็จ', 'success')
+    return
+  }
+
+  if (action.type === 'EXPORT_CSV') {
+    exportAssetRegisterToCsv(cyberState.assetRegister)
     showNotification('ส่งออกไฟล์ Excel (.csv) สำเร็จ', 'success')
     return
   }
