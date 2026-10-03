@@ -60,6 +60,19 @@ import {
   DEFAULT_ASSET_RISK_LOGS,
   ASSET_RISK_ITEMS
 } from './assetRiskData.js'
+import {
+  renderBiaEvidentHtml,
+  bindBiaEvents,
+  exportBiaWord,
+  exportBiaCsv,
+  syncBiaToSupabase,
+  fetchBiaFromSupabase
+} from './biaEvident.js'
+import {
+  DEFAULT_BIA_HEADER,
+  DEFAULT_BIA_LOGS,
+  DEFAULT_BIA_ITEMS
+} from './biaData.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
@@ -73,6 +86,7 @@ const LOCAL_STORAGE_KRI_DATA_KEY = 'sko_cyber_kri_data'
 const LOCAL_STORAGE_ASSET_INVENTORY_KEY = 'sko_cyber_asset_inventory'
 const LOCAL_STORAGE_ASSET_REGISTER_KEY = 'sko_cyber_asset_register'
 const LOCAL_STORAGE_ASSET_RISK_KEY = 'sko_cyber_asset_risk_assessment'
+const LOCAL_STORAGE_BIA_EVIDENT_KEY = 'sko_cyber_bia_evident'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -203,6 +217,11 @@ let cyberState = {
   assetRiskClusterFilter: 'all',
   assetRiskSearchQuery: '',
   assetRiskViewMode: 'card',
+  biaEvident: null,
+  biaSubTab: '1-matrix',
+  biaClusterFilter: 'all',
+  biaSearchQuery: '',
+  biaViewMode: 'card',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -477,18 +496,41 @@ function initData() {
       items: JSON.parse(JSON.stringify(ASSET_RISK_ITEMS))
     }
   }
+
+  // 13. BIA Evident (1.6 BIA Evident การวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA))
+  try {
+    const savedBia = localStorage.getItem(LOCAL_STORAGE_BIA_EVIDENT_KEY)
+    if (savedBia) {
+      cyberState.biaEvident = JSON.parse(savedBia)
+    }
+  } catch (e) {
+    cyberState.biaEvident = null
+  }
+  if (!cyberState.biaEvident || !Array.isArray(cyberState.biaEvident.items) || cyberState.biaEvident.items.length === 0) {
+    cyberState.biaEvident = {
+      header: JSON.parse(JSON.stringify(DEFAULT_BIA_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_BIA_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_BIA_ITEMS))
+    }
+  }
+
   // Background fetch from Supabase for all modules
   Promise.all([
     fetchAssetRiskFromSupabase(),
+    fetchBiaFromSupabase(),
     fetchModuleFromSupabase('asset_inventory'),
     fetchModuleFromSupabase('asset_register'),
     fetchModuleFromSupabase('risk_assessment'),
     fetchModuleFromSupabase('risk_reports'),
     fetchModuleFromSupabase('kri_data')
-  ]).then(([assetRisk, inv, reg, risk, rep, kri]) => {
+  ]).then(([assetRisk, bia, inv, reg, risk, rep, kri]) => {
     if (assetRisk?.items?.length > 0) {
       cyberState.assetRiskAssessment = assetRisk
       localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(assetRisk))
+    }
+    if (bia?.items?.length > 0) {
+      cyberState.biaEvident = bia
+      localStorage.setItem(LOCAL_STORAGE_BIA_EVIDENT_KEY, JSON.stringify(bia))
     }
     if (inv?.items?.length > 0) {
       cyberState.assetInventory = inv
@@ -577,6 +619,17 @@ function saveAssetRegister() {
     syncModuleToSupabase('asset_register', cyberState.assetRegister)
   } catch (e) {
     console.error('Error saving Asset Register:', e)
+  }
+}
+
+function saveBiaEvident() {
+  try {
+    if (cyberState.biaEvident) {
+      localStorage.setItem(LOCAL_STORAGE_BIA_EVIDENT_KEY, JSON.stringify(cyberState.biaEvident))
+      syncBiaToSupabase(cyberState.biaEvident)
+    }
+  } catch (e) {
+    console.error('Error saving BIA Evident:', e)
   }
 }
 
@@ -2182,6 +2235,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('1.4 Risk Assessment of Asset') ||
     cyberState.selectedDoc.title.includes('1.4 Risk Assessment of Asset')
   )
+  const isBiaEvident = (
+    currentKey.includes('1.6 BIA Evident') ||
+    cyberState.selectedDoc.title.includes('1.6 BIA Evident')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2239,6 +2296,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ทะเบียนทรัพย์สินของบริการที่สำคัญของหน่วยงาน (Asset Register) 9 รายการหลัก ปรับปรุงแก้ไขและส่งออก Word/Excel/PDF'
               : isAssetRiskAssessment
               ? 'ระบบประเมินและจัดการความเสี่ยงทรัพย์สินและการบริการที่สำคัญ (1.4 Asset Risk Assessment) สสจ.สระแก้ว'
+              : isBiaEvident
+              ? 'ระบบวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA) 9 บริการสำคัญ พร้อมคำนวณ MTPD/RTO/RPO และผลกระทบ 4 มิติ'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2286,6 +2345,14 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.assetRiskClusterFilter || 'all',
               cyberState.assetRiskSearchQuery || '',
               cyberState.assetRiskViewMode || 'card'
+            )
+          : isBiaEvident
+          ? renderBiaEvidentHtml(
+              cyberState.biaEvident,
+              cyberState.biaSubTab || '1-matrix',
+              cyberState.biaClusterFilter || 'all',
+              cyberState.biaSearchQuery || '',
+              cyberState.biaViewMode || 'card'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2481,6 +2548,10 @@ function renderPolicyAndFrameworkTab(el) {
   } else if (isAssetRiskAssessment) {
     bindAssetRiskEvents(el, cyberState.assetRiskAssessment, (action) => {
       handleAssetRiskAction(action, el)
+    })
+  } else if (isBiaEvident) {
+    bindBiaEvents(el, cyberState.biaEvident, (action) => {
+      handleBiaAction(action, el)
     })
   } else {
     bindGenericDocEvents(el, currentKey)
@@ -2855,6 +2926,111 @@ function handleAssetRiskAction(action, el) {
     saveAssetRiskAssessment()
     renderPolicyAndFrameworkTab(el)
     showNotification('รีเซ็ตข้อมูลเป็นค่ามาตรฐานเริ่มต้นเรียบร้อยแล้ว', 'success')
+    return
+  }
+}
+
+function handleBiaAction(action, el) {
+  if (!cyberState.biaEvident) {
+    cyberState.biaEvident = {
+      header: JSON.parse(JSON.stringify(DEFAULT_BIA_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_BIA_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_BIA_ITEMS))
+    }
+  }
+
+  if (action.type === 'change_subtab') {
+    cyberState.biaSubTab = action.subtab
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_view_mode') {
+    cyberState.biaViewMode = action.viewMode
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_cluster') {
+    cyberState.biaClusterFilter = action.cluster
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search') {
+    cyberState.biaSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'update_header') {
+    cyberState.biaEvident.header = { ...action.header }
+    saveBiaEvident()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('บันทึกข้อมูลส่วนหัวรายงาน BIA เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'add_item') {
+    if (!cyberState.biaEvident.items) cyberState.biaEvident.items = []
+    cyberState.biaEvident.items.push(action.item)
+    saveBiaEvident()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มบริการสำคัญ ' + (action.item.asset_name || '') + ' สำเร็จ', 'success')
+    return
+  }
+
+  if (action.type === 'update_item') {
+    const idx = cyberState.biaEvident.items?.findIndex(it => it.id === action.item.id)
+    if (idx !== -1 && idx !== undefined) {
+      cyberState.biaEvident.items[idx] = { ...action.item }
+      saveBiaEvident()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('อัปเดตข้อมูลบริการสำคัญเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_item') {
+    cyberState.biaEvident.items = (cyberState.biaEvident.items || []).filter(it => it.id !== action.id)
+    saveBiaEvident()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการบริการสำคัญเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'add_log') {
+    if (!cyberState.biaEvident.logs) cyberState.biaEvident.logs = []
+    cyberState.biaEvident.logs.unshift({
+      id: 'log_' + Date.now(),
+      date: action.date,
+      detail: action.detail
+    })
+    saveBiaEvident()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มบันทึกประวัติ BIA เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'delete_log') {
+    cyberState.biaEvident.logs = (cyberState.biaEvident.logs || []).filter(l => l.id !== action.id)
+    saveBiaEvident()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบบันทึกประวัติ BIA เรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'reset_default') {
+    cyberState.biaEvident = {
+      header: JSON.parse(JSON.stringify(DEFAULT_BIA_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_BIA_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_BIA_ITEMS))
+    }
+    cyberState.biaClusterFilter = 'all'
+    cyberState.biaSearchQuery = ''
+    saveBiaEvident()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('รีเซ็ตข้อมูล BIA เป็นค่าเริ่มต้นจากเอกสารจริง (9 บริการสำคัญ) สำเร็จ', 'success')
     return
   }
 }

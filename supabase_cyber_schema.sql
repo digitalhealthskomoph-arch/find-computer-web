@@ -227,6 +227,49 @@ CREATE TABLE IF NOT EXISTS public.cyber_module_states (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 10. [1.6] การวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA Evident)
+CREATE TABLE IF NOT EXISTS public.cyber_bia_evident_items (
+    id TEXT PRIMARY KEY,
+    item_no INT,
+    cluster TEXT NOT NULL,
+    asset_name TEXT NOT NULL,
+    description TEXT,
+    critical_service TEXT,
+    likelihood NUMERIC DEFAULT 1,
+    impact NUMERIC DEFAULT 1,
+    risk_level NUMERIC DEFAULT 1,
+    impact_c TEXT DEFAULT 'ต่ำ', -- 'สูง', 'กลาง', 'ต่ำ'
+    impact_i TEXT DEFAULT 'ต่ำ',
+    impact_a TEXT DEFAULT 'ต่ำ',
+    financial_impact NUMERIC DEFAULT 0,
+    operational_impact TEXT,
+    law_regulatory_impact TEXT,
+    reputational_impact TEXT,
+    mtpd TEXT,
+    rto TEXT,
+    rpo TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.cyber_bia_header (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    recorder TEXT,
+    record_date TEXT,
+    location TEXT,
+    address TEXT,
+    critical_service TEXT,
+    overall_score NUMERIC DEFAULT 8.44,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.cyber_bia_logs (
+    id TEXT PRIMARY KEY,
+    log_date TEXT,
+    detail TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ====================================================================================================
 -- กำหนดสิทธิ์และความปลอดภัย (Row Level Security & Permissions)
 -- เพื่อให้ผู้ใช้งานทั้ง authenticated และ anon สามารถอ่าน/เขียน/อัปเดตข้อมูลได้จากทุกเครื่อง
@@ -242,6 +285,9 @@ DECLARE
         'cyber_asset_risk_items',
         'cyber_asset_risk_header',
         'cyber_asset_risk_logs',
+        'cyber_bia_evident_items',
+        'cyber_bia_header',
+        'cyber_bia_logs',
         'cyber_risk_matrix_items',
         'cyber_risk_matrix_header',
         'cyber_risk_matrix_logs',
