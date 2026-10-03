@@ -25,7 +25,7 @@ const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
 const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
 const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
 const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
-const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v1'
+const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v2'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -312,12 +312,20 @@ function initData() {
     }
   } catch (e) {}
 
-  if (!cyberState.riskAssessment || !cyberState.riskAssessment.items || cyberState.riskAssessment.items.length === 0) {
+  const needsReset = !cyberState.riskAssessment ||
+    !cyberState.riskAssessment.items ||
+    cyberState.riskAssessment.items.length < 80 ||
+    !cyberState.riskAssessment.metadata ||
+    cyberState.riskAssessment.schema_version !== 2
+
+  if (needsReset) {
     cyberState.riskAssessment = {
+      schema_version: 2,
       metadata: JSON.parse(JSON.stringify(DEFAULT_RISK_METADATA)),
       logs: JSON.parse(JSON.stringify(DEFAULT_UPDATE_LOGS)),
       items: JSON.parse(JSON.stringify(DEFAULT_RISK_ITEMS))
     }
+    saveRiskAssessment()
   }
 }
 
@@ -2108,6 +2116,7 @@ function renderPolicyAndFrameworkTab(el) {
 function handleRiskAssessmentAction(action, el) {
   if (!cyberState.riskAssessment) return
 
+  // 1. Navigation / View filters
   if (action.type === 'switch_subtab') {
     cyberState.riskAssessmentSubTab = action.subtab
     renderPolicyAndFrameworkTab(el)
@@ -2140,6 +2149,17 @@ function handleRiskAssessmentAction(action, el) {
     return
   }
 
+  // 2. Metadata Updates (Editable Header Card)
+  if (action.type === 'update_risk_metadata') {
+    if (!cyberState.riskAssessment.metadata) {
+      cyberState.riskAssessment.metadata = JSON.parse(JSON.stringify(DEFAULT_RISK_METADATA))
+    }
+    cyberState.riskAssessment.metadata[action.field] = action.value
+    saveRiskAssessment()
+    return
+  }
+
+  // 3. Risk Item Cell Updates
   if (action.type === 'update_risk_score') {
     const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
     if (item) {
@@ -2157,25 +2177,163 @@ function handleRiskAssessmentAction(action, el) {
       item[action.field] = action.value
       if (action.field === 'residual_likelihood' || action.field === 'residual_impact') {
         item.residual_risk_score = (Number(item.residual_likelihood) || 1) * (Number(item.residual_impact) || 1)
+        saveRiskAssessment()
         renderPolicyAndFrameworkTab(el)
       } else if (action.field === 'progress_percent') {
+        saveRiskAssessment()
         renderPolicyAndFrameworkTab(el)
+      } else {
+        saveRiskAssessment()
       }
-      saveRiskAssessment()
     }
     return
   }
 
+  // 4. CIA & FSRILO Checkboxes (Part 1 Initial & Part 4 Residual)
   if (action.type === 'update_risk_cia') {
     const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
     if (item) {
-      if (!item.impact_cia) item.impact_cia = {}
-      item.impact_cia[action.factor] = action.checked
+      const field = action.part === 'residual' ? 'residual_cia' : 'impact_cia'
+      if (!item[field]) item[field] = {}
+      item[field][action.factor] = !!action.checked
       saveRiskAssessment()
     }
     return
   }
 
+  if (action.type === 'update_risk_fsrilo') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item) {
+      const field = action.part === 'residual' ? 'residual_fsrilo' : 'severity_fsrilo'
+      if (!item[field]) item[field] = {}
+      item[field][action.factor] = !!action.checked
+      saveRiskAssessment()
+    }
+    return
+  }
+
+  // 5. Sub-actions Management (Part 2 & Part 3)
+  if (action.type === 'add_sub_action') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item) {
+      if (!item.sub_actions) item.sub_actions = []
+      const nextIdx = item.sub_actions.length + 1
+      item.sub_actions.push({
+        id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        name: `มาตรการย่อย ${nextIdx}`,
+        expected_date_part2: '',
+        progress_percent: 0,
+        expected_date_part3: ''
+      })
+      const totalProg = item.sub_actions.reduce((acc, cur) => acc + (Number(cur.progress_percent) || 0), 0)
+      item.progress_percent = Math.round(totalProg / item.sub_actions.length)
+      saveRiskAssessment()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('เพิ่มมาตรการย่อยเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_sub_action') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item && item.sub_actions) {
+      item.sub_actions = item.sub_actions.filter(s => s.id !== action.subId)
+      if (item.sub_actions.length > 0) {
+        const totalProg = item.sub_actions.reduce((acc, cur) => acc + (Number(cur.progress_percent) || 0), 0)
+        item.progress_percent = Math.round(totalProg / item.sub_actions.length)
+      } else {
+        item.progress_percent = 0
+      }
+      saveRiskAssessment()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('ลบมาตรการย่อยเรียบร้อยแล้ว', 'info')
+    }
+    return
+  }
+
+  if (action.type === 'update_sub_action_field') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item && item.sub_actions) {
+      const sub = item.sub_actions.find(s => s.id === action.subId)
+      if (sub) {
+        sub[action.field] = action.value
+        saveRiskAssessment()
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_sub_action_prog') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item && item.sub_actions) {
+      const sub = item.sub_actions.find(s => s.id === action.subId)
+      if (sub) {
+        sub.progress_percent = Number(action.value) || 0
+        const totalProg = item.sub_actions.reduce((acc, cur) => acc + (Number(cur.progress_percent) || 0), 0)
+        item.progress_percent = Math.round(totalProg / item.sub_actions.length)
+        saveRiskAssessment()
+        renderPolicyAndFrameworkTab(el)
+      }
+    }
+    return
+  }
+
+  // 6. Custom Risk Items
+  if (action.type === 'add_risk_item') {
+    if (!cyberState.riskAssessment.items) cyberState.riskAssessment.items = []
+    const newNo = cyberState.riskAssessment.items.length + 1
+    const newItem = {
+      id: `risk_${Date.now()}`,
+      no: newNo,
+      cluster: 'Govern (GV)',
+      threat: '',
+      vulnerability: '',
+      current_control: '',
+      impact_cia: { c: false, i: false, a: false },
+      severity_fsrilo: { f: false, s: false, r: false, i: false, l: false, o: false },
+      likelihood: 3,
+      impact: 3,
+      risk_level: 9,
+      risk_owner: 'สสจ.สระแก้ว',
+      treatment_option: 'Mitigate',
+      treatment_plan: '',
+      sub_actions: [
+        {
+          id: `sub_${Date.now()}_1`,
+          name: '',
+          expected_date_part2: '',
+          progress_percent: 0,
+          expected_date_part3: ''
+        }
+      ],
+      expected_finish_date: '',
+      progress_percent: 0,
+      residual_cia: { c: false, i: false, a: false },
+      residual_fsrilo: { f: false, s: false, r: false, i: false, l: false, o: false },
+      residual_likelihood: 2,
+      residual_impact: 2,
+      residual_risk_score: 4,
+      further_actions: ''
+    }
+    cyberState.riskAssessment.items.push(newItem)
+    saveRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มข้อความเสี่ยงใหม่เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'delete_risk_item') {
+    cyberState.riskAssessment.items = (cyberState.riskAssessment.items || []).filter(i => i.id !== action.riskId)
+    cyberState.riskAssessment.items.forEach((item, idx) => {
+      item.no = idx + 1
+    })
+    saveRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบข้อความเสี่ยงเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  // 7. Update Logs Tab
   if (action.type === 'add_log_row') {
     if (!cyberState.riskAssessment.logs) cyberState.riskAssessment.logs = []
     const newLog = {

@@ -36,7 +36,7 @@ export function calculateRiskMetrics(riskState) {
   // Cluster stats
   const clusterStats = {}
   RISK_CLUSTERS.forEach(c => {
-    clusterStats[c] = { count: 0, sumScore: 0, sumProgress: 0 }
+    clusterStats[c] = { count: 0, sumScore: 0, sumProgress: 0, avgScore: 0 }
   })
 
   items.forEach(item => {
@@ -49,6 +49,12 @@ export function calculateRiskMetrics(riskState) {
     const ri = Number(item.residual_impact) || 1
     const resScore = rl * ri
     item.residual_risk_score = resScore
+
+    // Recalculate average progress from sub_actions if present
+    if (item.sub_actions && item.sub_actions.length > 0) {
+      const subSum = item.sub_actions.reduce((acc, s) => acc + (Number(s.progress_percent) || 0), 0)
+      item.progress_percent = Math.round(subSum / item.sub_actions.length)
+    }
 
     sumScore += score
     sumResidual += resScore
@@ -69,11 +75,17 @@ export function calculateRiskMetrics(riskState) {
 
     // Cluster stats
     if (!clusterStats[item.cluster]) {
-      clusterStats[item.cluster] = { count: 0, sumScore: 0, sumProgress: 0 }
+      clusterStats[item.cluster] = { count: 0, sumScore: 0, sumProgress: 0, avgScore: 0 }
     }
     clusterStats[item.cluster].count++
     clusterStats[item.cluster].sumScore += score
     clusterStats[item.cluster].sumProgress += Number(item.progress_percent) || 0
+  })
+
+  // Compute average per cluster
+  Object.keys(clusterStats).forEach(cName => {
+    const cs = clusterStats[cName]
+    cs.avgScore = cs.count > 0 ? Number((cs.sumScore / cs.count).toFixed(2)) : 0
   })
 
   const avgScore = total > 0 ? Number((sumScore / total).toFixed(2)) : 0
@@ -142,19 +154,19 @@ export function calculateRiskMetrics(riskState) {
 }
 
 export function getScoreBadge(score) {
-  if (score >= 15) return { text: `${score} (Very High)`, bg: 'bg-rose-600 text-white', ring: 'ring-rose-500' }
-  if (score >= 10) return { text: `${score} (High)`, bg: 'bg-orange-500 text-white', ring: 'ring-orange-400' }
-  if (score >= 4) return { text: `${score} (Moderate)`, bg: 'bg-amber-400 text-amber-950 font-bold', ring: 'ring-amber-400' }
-  return { text: `${score} (Low)`, bg: 'bg-emerald-600 text-white', ring: 'ring-emerald-500' }
+  if (score >= 15) return { text: `${score} (Very High)`, bg: 'background:#fee2e2; color:#991b1b; border:1px solid #f87171;' }
+  if (score >= 10) return { text: `${score} (High)`, bg: 'background:#ffedd5; color:#9a3412; border:1px solid #fb923c;' }
+  if (score >= 4) return { text: `${score} (Moderate)`, bg: 'background:#fef9c3; color:#854d0e; border:1px solid #facc15;' }
+  return { text: `${score} (Low)`, bg: 'background:#dcfce7; color:#166534; border:1px solid #4ade80;' }
 }
 
 export function getProgressBadge(pct) {
-  if (pct > 80) return { color: 'bg-emerald-600', text: 'text-emerald-700', bgText: 'bg-emerald-50', label: 'ปลอดภัย (81-100%)' }
-  if (pct >= 51) return { color: 'bg-amber-500', text: 'text-amber-800', bgText: 'bg-amber-50', label: 'ต้องเร่งดำเนินการ (51-80%)' }
-  return { color: 'bg-rose-500', text: 'text-rose-700', bgText: 'bg-rose-50', label: 'เร่งด่วน (1-50%)' }
+  if (pct > 80) return { color: 'background:#16a34a; color:#fff;', label: 'ปลอดภัย (81-100%)' }
+  if (pct >= 51) return { color: 'background:#eab308; color:#fff;', label: 'ต้องเร่งดำเนินการ (51-80%)' }
+  return { color: 'background:#ef4444; color:#fff;', label: 'เร่งด่วน (1-50%)' }
 }
 
-// Render Master HTML
+// Master HTML
 export function renderRiskAssessmentHtml(riskState, activeSubTab = '3-assess', clusterFilter = 'all', matrixFilter = null, searchQuery = '') {
   const metrics = calculateRiskMetrics(riskState)
   ensureRiskAssessmentStyles()
@@ -182,7 +194,7 @@ export function renderRiskAssessmentHtml(riskState, activeSubTab = '3-assess', c
               </h2>
             </div>
             <p style="margin:4px 0 0 0; font-size:13px; color:#64748b;">
-              ระบบประเมินและบริหารจัดการความเสี่ยงด้านความมั่นคงปลอดภัยทางไซเบอร์ พร้อมแบบจำลองเมทริกซ์และเกณฑ์มาตรฐาน
+              ระบบประเมินและบริหารจัดการความเสี่ยงด้านความมั่นคงปลอดภัยทางไซเบอร์ พร้อมตาราง Data Grid 4 พาร์ท และแบบจำลองเมทริกซ์
             </p>
           </div>
 
@@ -227,7 +239,7 @@ export function renderRiskAssessmentHtml(riskState, activeSubTab = '3-assess', c
           </div>
         </div>
 
-        <!-- Subtab Pills Navigation -->
+        <!-- Subtab Navigation -->
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; border-top:1px solid #e2e8f0; padding-top:14px;">
           ${tabs.map(t => {
             const isActive = activeSubTab === t.id
@@ -365,8 +377,6 @@ function renderModelMatrixTab(riskState, metrics) {
       <!-- Matrix Container -->
       <div style="overflow-x:auto; margin-bottom:24px;">
         <table style="margin:0 auto; border-collapse:collapse; min-width:750px; font-size:13px; text-align:center; border:2px solid #334155;">
-          
-          <!-- Column Headers -->
           <thead>
             <tr>
               <th colspan="2" rowspan="2" style="background:#e2e8f0; border:1px solid #94a3b8; padding:10px; color:#1e293b; font-weight:700;">
@@ -382,14 +392,11 @@ function renderModelMatrixTab(riskState, metrics) {
               `).join('')}
             </tr>
           </thead>
-
-          <!-- Rows -->
           <tbody>
             ${cfg.rows.map(r => {
               const rId = r.id
               return `
                 <tr>
-                  <!-- Row Header -->
                   <td style="background:#e0e7ff; border:1px solid #94a3b8; font-size:16px; font-weight:700; color:#1e3a8a; width:40px; padding:6px;">
                     ${rId}
                   </td>
@@ -397,19 +404,11 @@ function renderModelMatrixTab(riskState, metrics) {
                     ${r.nameEn}<br/>
                     <span style="font-size:11px; font-weight:500; color:#475569;">${r.nameTh}</span>
                   </td>
-
-                  <!-- 5 Columns Cells -->
                   ${cfg.cols.map(c => {
                     const cId = c.id
                     const cellInfo = cfg.cells[rId][cId]
                     const countInCell = metrics.matrixCounts[rId][cId] || 0
                     
-                    // Appetite border calculation (Exact matching screenshot red step boundary line)
-                    // The step line in the screenshot:
-                    // Under Row 4 Col 1 (so Row 4 Col 1 bottom border is red)
-                    // Down between Col 1 and Col 2 for Row 3 (Row 3 Col 1 right border is red)
-                    // Under Row 3 Col 2 (Row 3 Col 2 bottom border is red)
-                    // Down between Col 2 and Col 3 for Row 2 & Row 1 (Row 2 Col 2 right border & Row 1 Col 2 right border is red)
                     let borderTop = '1px solid #94a3b8'
                     let borderBottom = '1px solid #94a3b8'
                     let borderLeft = '1px solid #94a3b8'
@@ -476,7 +475,6 @@ function renderModelMatrixTab(riskState, metrics) {
           </tbody>
         </table>
 
-        <!-- Appetite Footnote Marker -->
         <div style="display:flex; justify-content:center; margin-top:10px;">
           <div style="display:inline-flex; align-items:center; gap:8px; background:#fff1f2; border:1px solid #fecdd3; padding:6px 14px; border-radius:20px; font-size:12px;">
             <span style="display:inline-block; width:20px; height:4px; background:#ef4444; border-radius:2px;"></span>
@@ -582,8 +580,6 @@ function renderRiskCriteriaTab() {
 
       <!-- 1.3 & 1.4 Risk Scoring & Average Grid -->
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(400px, 1fr)); gap:20px; margin-bottom:28px;">
-        
-        <!-- 1.3 Scoring -->
         <div>
           <h4 style="font-size:15px; font-weight:700; color:#0f172a; margin:0 0 10px 0; border-left:4px solid #2563eb; padding-left:10px;">
             1.3 ระดับความเสี่ยง (Risk Level & Scoring)
@@ -613,7 +609,6 @@ function renderRiskCriteriaTab() {
           </table>
         </div>
 
-        <!-- 1.4 Average -->
         <div>
           <h4 style="font-size:15px; font-weight:700; color:#0f172a; margin:0 0 10px 0; border-left:4px solid #2563eb; padding-left:10px;">
             1.4 ค่าเฉลี่ยของระดับความเสี่ยง (Risk Level Average)
@@ -646,8 +641,6 @@ function renderRiskCriteriaTab() {
 
       <!-- 1.5, 1.6 & 1.7 Grid -->
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
-        
-        <!-- 1.5 Minimum Controls -->
         <div>
           <h4 style="font-size:14px; font-weight:700; color:#0f172a; margin:0 0 8px 0; border-left:4px solid #2563eb; padding-left:10px;">
             1.5 มาตรการไซเบอร์ขั้นต่ำ (ตามเกณฑ์ พรบ.)
@@ -674,7 +667,6 @@ function renderRiskCriteriaTab() {
           </table>
         </div>
 
-        <!-- 1.6 Progress Status -->
         <div>
           <h4 style="font-size:14px; font-weight:700; color:#0f172a; margin:0 0 8px 0; border-left:4px solid #2563eb; padding-left:10px;">
             1.6 สถานะความคืบหน้า (Progress)
@@ -699,7 +691,6 @@ function renderRiskCriteriaTab() {
           </table>
         </div>
 
-        <!-- 1.7 Residual Risk -->
         <div>
           <h4 style="font-size:14px; font-weight:700; color:#0f172a; margin:0 0 8px 0; border-left:4px solid #2563eb; padding-left:10px;">
             1.7 ความเสี่ยงคงเหลือ (Residual Risk)
@@ -723,56 +714,41 @@ function renderRiskCriteriaTab() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   `
 }
 
-// SUBTAB 3: Risk assess (Threat and Vul) - CORE ASSESSMENT SYSTEM
+// SUBTAB 3: Risk assess (Threat and Vul) - CORE ASSESSMENT DATA GRID TABLE (4 PARTS)
 function renderRiskAssessTab(riskState, metrics, clusterFilter = 'all', matrixFilter = null, searchQuery = '') {
   const meta = riskState.metadata || DEFAULT_RISK_METADATA
   const items = riskState.items || []
 
   // Filter items
   const filteredItems = items.filter(item => {
-    // Cluster filter
-    if (clusterFilter !== 'all' && item.cluster !== clusterFilter) {
-      return false
-    }
-    // Matrix cell filter
-    if (matrixFilter && (item.impact !== matrixFilter.row || item.likelihood !== matrixFilter.col)) {
-      return false
-    }
-    // Search query
+    if (clusterFilter !== 'all' && item.cluster !== clusterFilter) return false
+    if (matrixFilter && (item.impact !== matrixFilter.row || item.likelihood !== matrixFilter.col)) return false
     if (searchQuery && searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase().trim()
       const inThreat = (item.threat || '').toLowerCase().includes(q)
       const inVul = (item.vulnerability || '').toLowerCase().includes(q)
       const inPlan = (item.treatment_plan || '').toLowerCase().includes(q)
       const inCluster = (item.cluster || '').toLowerCase().includes(q)
-      if (!inThreat && !inVul && !inPlan && !inCluster) return false
+      const inSub = (item.sub_actions || []).some(s => (s.name || '').toLowerCase().includes(q))
+      if (!inThreat && !inVul && !inPlan && !inCluster && !inSub) return false
     }
     return true
-  })
-
-  // Group filtered items by cluster
-  const clusterGroups = {}
-  filteredItems.forEach(item => {
-    if (!clusterGroups[item.cluster]) {
-      clusterGroups[item.cluster] = []
-    }
-    clusterGroups[item.cluster].push(item)
   })
 
   return `
     <div style="display:flex; flex-direction:column; gap:20px;">
       
-      <!-- Top Metadata Header Box -->
+      <!-- 1. EDITABLE HEADER CARD (ตรงตามภาพ Screenshot & ความต้องการของผู้ใช้) -->
       <div style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:16px;">
+        
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:1px solid #e2e8f0; padding-bottom:14px; margin-bottom:16px;">
           <div>
-            <h3 style="margin:0; font-size:18px; font-weight:700; color:#1e293b;">
+            <h3 style="margin:0; font-size:18px; font-weight:800; color:#1e293b;">
               การประเมินและการจัดการความเสี่ยงด้านการรักษาความมั่นคงปลอดภัยไซเบอร์
             </h3>
             <p style="margin:4px 0 0 0; font-size:13px; color:#64748b;">
@@ -780,87 +756,100 @@ function renderRiskAssessTab(riskState, metrics, clusterFilter = 'all', matrixFi
             </p>
           </div>
           <div style="text-align:right;">
-            <span style="font-size:12px; color:#64748b;">หน่วยงานที่รับการประเมิน:</span>
-            <div style="font-size:16px; font-weight:700; color:#0f766e;">${meta.orgName}</div>
+            <div style="font-size:12px; color:#64748b; margin-bottom:2px;">หน่วยงานที่รับการประเมิน:</div>
+            <div style="font-size:16px; font-weight:800; color:#0f766e;">
+              ${meta.orgName || 'สำนักงานสาธารณสุขจังหวัดสระแก้ว'}
+            </div>
           </div>
         </div>
 
-        <!-- Meta fields grid -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; font-size:13px;">
+        <!-- Editable Metadata Form Grid -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; font-size:13px;">
           <div>
-            <strong style="color:#475569;">ผู้พิจารณาประเมิน:</strong>
-            <span style="color:#1e293b;">${meta.reviewer}</span>
+            <label style="display:block; font-weight:700; color:#475569; margin-bottom:4px;">
+              ผู้พิจารณาประเมิน:
+            </label>
+            <input 
+              type="text" 
+              class="risk-meta-input form-control" 
+              data-field="reviewer"
+              value="${meta.reviewer || ''}"
+              placeholder="เช่น สมาชิกคณะกรรมการพิจารณาความเสี่ยง"
+              style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;"
+            />
           </div>
+
           <div>
-            <strong style="color:#475569;">ผู้บันทึก:</strong>
-            <span style="color:#1e293b;">${meta.recorder}</span>
+            <label style="display:block; font-weight:700; color:#475569; margin-bottom:4px;">
+              ผู้บันทึก:
+            </label>
+            <input 
+              type="text" 
+              class="risk-meta-input form-control" 
+              data-field="recorder"
+              value="${meta.recorder || ''}"
+              placeholder="เช่น นายธนกฤต นิธิตันติปัญญา, สมาชิกคณะกรรมการพิจารณาความเสี่ยง"
+              style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;"
+            />
           </div>
+
           <div>
-            <strong style="color:#475569;">วันที่ประชุมบันทึก:</strong>
-            <span style="color:#1e293b; font-weight:600;">${meta.meetingDate}</span>
+            <label style="display:block; font-weight:700; color:#475569; margin-bottom:4px;">
+              วันที่ประชุมบันทึก:
+            </label>
+            <input 
+              type="text" 
+              class="risk-meta-input form-control" 
+              data-field="meetingDate"
+              value="${meta.meetingDate || ''}"
+              placeholder="เช่น 23 ก.พ. 69"
+              style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;"
+            />
           </div>
+
           <div>
-            <strong style="color:#475569;">สถานที่:</strong>
-            <span style="color:#1e293b;">${meta.location}</span>
+            <label style="display:block; font-weight:700; color:#475569; margin-bottom:4px;">
+              สถานที่:
+            </label>
+            <input 
+              type="text" 
+              class="risk-meta-input form-control" 
+              data-field="location"
+              value="${meta.location || ''}"
+              placeholder="เช่น ห้องประชุม Cockpit สำนักงานสาธารณสุขจังหวัดสระแก้ว"
+              style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;"
+            />
           </div>
-          <div style="grid-column: span 2;">
-            <strong style="color:#475569;">ระบบบริการที่สำคัญ:</strong>
-            <span style="color:#2563eb; font-weight:600;">${meta.mainSystem}</span>
+
+          <div>
+            <label style="display:block; font-weight:700; color:#475569; margin-bottom:4px;">
+              ระบบบริการที่สำคัญ:
+            </label>
+            <input 
+              type="text" 
+              class="risk-meta-input form-control" 
+              data-field="mainSystem"
+              value="${meta.mainSystem || ''}"
+              placeholder="เช่น All application as HIS"
+              style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; font-weight:600; color:#2563eb;"
+            />
+          </div>
+
+          <div class="no-print" style="display:flex; align-items:flex-end;">
+            <div style="font-size:12px; color:#10b981; font-weight:600; background:#ecfdf5; padding:6px 12px; border-radius:6px; border:1px solid #a7f3d0; width:100%;">
+              ✓ ข้อมูลส่วนหัวจะถูกบันทึกอัตโนมัติทันทีที่พิมพ์
+            </div>
           </div>
         </div>
+
       </div>
 
-      <!-- KPI Executive Summary Cards -->
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
-        <div style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; padding:16px; border-left:5px solid #2563eb; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size:12px; font-weight:600; color:#64748b;">คะแนนความเสี่ยงเฉลี่ยองค์กร</div>
-          <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
-            <span style="font-size:26px; font-weight:800; color:#1e293b;">${metrics.avgScore}</span>
-            <span class="inline-block px-2 py-0.5 rounded text-xs font-bold ${metrics.overallBadge}">
-              ${metrics.overallLevel}
-            </span>
-          </div>
-          <div style="font-size:11px; color:#64748b; margin-top:4px;">จาก 16 Clusters (80 ข้อ)</div>
-        </div>
-
-        <div style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; padding:16px; border-left:5px solid #0d9488; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size:12px; font-weight:600; color:#64748b;">เอกสารมาตรการขั้นต่ำตามเกณฑ์</div>
-          <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
-            <span style="font-size:26px; font-weight:800; color:#0f766e;">${metrics.mandatoryDocsCount}</span>
-            <span style="font-size:13px; font-weight:600; color:#0f766e;">ฉบับ (${metrics.mandatoryTierName})</span>
-          </div>
-          <div style="font-size:11px; color:#64748b; margin-top:4px;">ตาม พรบ.ไซเบอร์ ฉบับที่ 12</div>
-        </div>
-
-        <div style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; padding:16px; border-left:5px solid #ea580c; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size:12px; font-weight:600; color:#64748b;">การกระจายระดับความเสี่ยง</div>
-          <div style="display:flex; gap:10px; margin-top:8px; font-size:12px; font-weight:700;">
-            <span style="color:#dc2626;">🔴 ${metrics.countVeryHigh}</span>
-            <span style="color:#ea580c;">🟠 ${metrics.countHigh}</span>
-            <span style="color:#d97706;">🟡 ${metrics.countModerate}</span>
-            <span style="color:#16a34a;">🟢 ${metrics.countLow}</span>
-          </div>
-          <div style="font-size:11px; color:#64748b; margin-top:4px;">ข้อความเสี่ยงเริ่มต้น</div>
-        </div>
-
-        <div style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; padding:16px; border-left:5px solid #16a34a; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size:12px; font-weight:600; color:#64748b;">ความคืบหน้าการจัดการภาพรวม</div>
-          <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
-            <span style="font-size:26px; font-weight:800; color:#16a34a;">${metrics.avgProgress}%</span>
-            <span style="font-size:11px; color:#64748b;">ความเสี่ยงคงเหลือ: ${metrics.avgResidual}</span>
-          </div>
-          <div style="background:#e2e8f0; border-radius:10px; height:6px; margin-top:6px; overflow:hidden;">
-            <div style="background:#16a34a; height:100%; width:${metrics.avgProgress}%;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filters & Search Toolbar -->
+      <!-- Filters & Toolbar -->
       <div class="no-print" style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; padding:14px 18px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;">
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px;">
           <div>
-            <label style="font-size:12px; font-weight:600; color:#64748b; display:block; margin-bottom:2px;">กรองตามหมวดหมู่ (Cluster):</label>
-            <select id="select-risk-cluster" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; min-width:240px; max-width:320px;">
+            <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:2px;">กรองตามหมวดหมู่ (Cluster):</label>
+            <select id="select-risk-cluster" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; min-width:260px; max-width:340px;">
               <option value="all" ${clusterFilter === 'all' ? 'selected' : ''}>-- แสดงทั้งหมด (16 Clusters, ${metrics.total} ข้อ) --</option>
               ${RISK_CLUSTERS.map(c => `
                 <option value="${c}" ${clusterFilter === c ? 'selected' : ''}>${c}</option>
@@ -869,13 +858,13 @@ function renderRiskAssessTab(riskState, metrics, clusterFilter = 'all', matrixFi
           </div>
 
           <div>
-            <label style="font-size:12px; font-weight:600; color:#64748b; display:block; margin-bottom:2px;">ค้นหาภัยคุกคาม / ช่องโหว่:</label>
+            <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:2px;">ค้นหาภัยคุกคาม / ช่องโหว่ / แผน:</label>
             <input 
               type="text" 
               id="input-risk-search" 
               value="${searchQuery || ''}" 
-              placeholder="พิมพ์คำค้นหา..." 
-              style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; width:200px;"
+              placeholder="พิมพ์ข้อความค้นหา..." 
+              style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; width:220px;"
             />
           </div>
 
@@ -889,282 +878,445 @@ function renderRiskAssessTab(riskState, metrics, clusterFilter = 'all', matrixFi
           ` : ''}
         </div>
 
-        <div style="font-size:13px; color:#64748b;">
-          แสดงผล <strong>${filteredItems.length}</strong> จาก <strong>${metrics.total}</strong> ข้อ
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:13px; color:#64748b;">
+            แสดงผล <strong>${filteredItems.length}</strong> จาก <strong>${metrics.total}</strong> ข้อ
+          </span>
+          <button id="btn-add-new-risk-item" class="btn-action" style="background:#2563eb; color:#ffffff; border:none; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">
+            ➕ เพิ่มข้อความเสี่ยงใหม่
+          </button>
         </div>
       </div>
 
-      <!-- Cluster Accordion / Groups -->
-      <div style="display:flex; flex-direction:column; gap:20px;">
-        ${Object.keys(clusterGroups).length === 0 ? `
-          <div style="background:#ffffff; border-radius:10px; padding:40px; text-align:center; color:#94a3b8; border:1px solid #e2e8f0;">
-            <div style="font-size:32px; margin-bottom:8px;">🔍</div>
-            <div style="font-size:16px; font-weight:600; color:#64748b;">ไม่พบรายการความเสี่ยงที่ตรงกับเงื่อนไขการค้นหา</div>
-          </div>
-        ` : Object.keys(clusterGroups).map((clusterName, cIdx) => {
-          const cItems = clusterGroups[clusterName]
-          const cStats = metrics.clusterStats[clusterName] || { count: cItems.length, sumScore: 0, sumProgress: 0 }
-          const cAvg = cStats.count > 0 ? (cStats.sumScore / cStats.count).toFixed(1) : 0
-          const cProg = cStats.count > 0 ? Math.round(cStats.sumProgress / cStats.count) : 0
-
-          return `
-            <div class="cluster-card" style="background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <!-- 2. FULL EXCEL DATA GRID TABLE (4 PARTS) -->
+      <div class="risk-datagrid-scroll" style="overflow-x:auto; max-width:100%; border:1px solid #cbd5e1; border-radius:8px; background:#ffffff;">
+        <table class="risk-datagrid-table" style="width:100%; min-width:2200px; border-collapse:collapse; font-size:12px; text-align:left;">
+          
+          <!-- TIER 1 HEADER: 4 PARTS -->
+          <thead>
+            <tr style="text-align:center; font-weight:800; font-size:13px; color:#ffffff;">
+              <th rowspan="2" class="sticky-col-1" style="background:#0f172a; border:1px solid #334155; padding:10px 6px; width:50px;">
+                No.
+              </th>
+              <th rowspan="2" class="sticky-col-2" style="background:#0f172a; border:1px solid #334155; padding:10px 8px; width:150px; text-align:left;">
+                หมวดหมู่ความเสี่ยง (Risk Cluster)
+              </th>
               
-              <!-- Cluster Header -->
-              <div style="background:#1e293b; color:#ffffff; padding:12px 20px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <span style="background:#3b82f6; color:#ffffff; font-size:12px; font-weight:700; padding:2px 8px; border-radius:12px;">
-                    Cluster ${RISK_CLUSTERS.indexOf(clusterName) + 1}
-                  </span>
-                  <h4 style="margin:0; font-size:15px; font-weight:700; color:#f8fafc;">
-                    ${clusterName}
-                  </h4>
-                </div>
-                <div style="display:flex; align-items:center; gap:14px; font-size:12px;">
-                  <span>จำนวน: <strong>${cItems.length}</strong> ข้อ</span>
-                  <span>คะแนนเฉลี่ย: <strong style="color:#fde047;">${cAvg}</strong></span>
-                  <span>คืบหน้า: <strong style="color:#86efac;">${cProg}%</strong></span>
-                </div>
-              </div>
+              <!-- PART 1 -->
+              <th colspan="17" style="background:#1e3a8a; border:1px solid #1e40af; padding:10px;">
+                PART 1 : RISK ASSESSMENT (การประเมินความเสี่ยงก่อนจัดการ)
+              </th>
 
-              <!-- Risk Items in this Cluster -->
-              <div style="padding:16px; display:flex; flex-direction:column; gap:16px; background:#f8fafc;">
-                ${cItems.map((item, iIdx) => renderSingleRiskCard(item, iIdx)).join('')}
-              </div>
+              <!-- PART 2 -->
+              <th colspan="4" style="background:#0f766e; border:1px solid #115e59; padding:10px;">
+                PART 2 : RISK TREATMENT (การจัดการความเสี่ยง)
+              </th>
 
-            </div>
-          `
-        }).join('')}
+              <!-- PART 3 -->
+              <th colspan="2" style="background:#15803d; border:1px solid #166534; padding:10px;">
+                PART 3 : PROGRESS (ความคืบหน้า)
+              </th>
+
+              <!-- PART 4 -->
+              <th colspan="13" style="background:#4338ca; border:1px solid #3730a3; padding:10px;">
+                PART 4 : RISK EVALUATION AFTER RESOLVED 100 % (การประเมินหลังจัดการ)
+              </th>
+
+              <th rowspan="2" class="no-print" style="background:#0f172a; border:1px solid #334155; padding:10px; width:60px;">
+                ลบ
+              </th>
+            </tr>
+
+            <!-- TIER 2 HEADER: SUB-COLUMNS -->
+            <tr style="text-align:center; font-weight:700; font-size:11px; background:#f1f5f9; color:#1e293b;">
+              <!-- Under PART 1 -->
+              <th style="padding:8px; border:1px solid #cbd5e1; width:220px; text-align:left;">ภัยคุกคาม (Threat)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:220px; text-align:left;">ช่องโหว่ (Vulner.)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:200px; text-align:left;">มาตรการควบคุมในปัจจุบัน</th>
+              
+              <!-- Impact C, I, A -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px; background:#dbeafe;" title="Confidentiality">C</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px; background:#dbeafe;" title="Integrity">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px; background:#dbeafe;" title="Availability">A</th>
+
+              <!-- Severity F, S, R, I, L, O -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#fed7aa;" title="Financial">F</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#fed7aa;" title="Safety/Service">S</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#fed7aa;" title="Reputation">R</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#fed7aa;" title="Image">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#fed7aa;" title="Legal">L</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#fed7aa;" title="Other CII">O</th>
+
+              <!-- Scoring -->
+              <th style="padding:8px; border:1px solid #cbd5e1; width:65px;">A: โอกาส (L)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:65px;">B: รุนแรง (I)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:90px; background:#fef08a;">C = A*B (Risk Level)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:130px;">เจ้าของความเสี่ยง (Owner)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:110px; background:#fef9c3;">ค่าเฉลี่ย Cluster</th>
+
+              <!-- Under PART 2 -->
+              <th style="padding:8px; border:1px solid #cbd5e1; width:130px;">ตัวเลือกการตอบสนอง</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:220px; text-align:left;">แผนจัดการความเสี่ยง (ข้อใหญ่)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:320px; text-align:left;">แผนจัดการ มาตรการย่อย</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:110px;">คาดว่าเสร็จ (Part 2)</th>
+
+              <!-- Under PART 3 -->
+              <th style="padding:8px; border:1px solid #cbd5e1; width:120px; background:#dcfce7;">สถานะคืบหน้า (%)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:110px;">คาดว่าเสร็จ (Part 3)</th>
+
+              <!-- Under PART 4 -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px; background:#e0e7ff;" title="Residual C">C</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px; background:#e0e7ff;" title="Residual I">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px; background:#e0e7ff;" title="Residual A">A</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#ffedd5;" title="Residual F">F</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#ffedd5;" title="Residual S">S</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#ffedd5;" title="Residual R">R</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#ffedd5;" title="Residual I">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#ffedd5;" title="Residual L">L</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px; background:#ffedd5;" title="Residual O">O</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:65px;">A: โอกาส (RL)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:65px;">B: รุนแรง (RI)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:90px; background:#fef08a;">ระดับคงเหลือ (RL*RI)</th>
+              <th style="padding:8px; border:1px solid #cbd5e1; width:200px; text-align:left;">ดำเนินการเพิ่มเติม (Further Actions)</th>
+            </tr>
+          </thead>
+
+          <!-- TABLE BODY -->
+          <tbody>
+            ${filteredItems.length === 0 ? `
+              <tr>
+                <td colspan="40" style="text-align:center; padding:40px; color:#94a3b8; font-size:14px;">
+                  ไม่พบรายการความเสี่ยงที่ตรงกับเงื่อนไขการค้นหา
+                </td>
+              </tr>
+            ` : filteredItems.map((item, idx) => {
+              const clusterAvg = metrics.clusterStats[item.cluster]?.avgScore || 0
+              const scoreBadge = getScoreBadge(item.risk_level)
+              const resBadge = getScoreBadge(item.residual_risk_score)
+              const progBadge = getProgressBadge(item.progress_percent)
+              const subActions = item.sub_actions || []
+
+              return `
+                <tr class="risk-table-row" data-risk-id="${item.id}" style="background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}; vertical-align:top;">
+                  
+                  <!-- Sticky No. -->
+                  <td class="sticky-col-1" style="padding:8px 4px; border:1px solid #e2e8f0; text-align:center; font-weight:700; background:inherit;">
+                    ${item.no || (idx + 1)}
+                  </td>
+
+                  <!-- Sticky Cluster -->
+                  <td class="sticky-col-2" style="padding:8px; border:1px solid #e2e8f0; font-size:11px; font-weight:600; color:#334155; background:inherit;">
+                    ${item.cluster}
+                  </td>
+
+                  <!-- PART 1: Threat, Vul, Control -->
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <textarea 
+                      class="risk-cell-input form-control" 
+                      data-field="threat" 
+                      data-risk-id="${item.id}"
+                      rows="3" 
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; resize:vertical;"
+                    >${item.threat || ''}</textarea>
+                  </td>
+
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <textarea 
+                      class="risk-cell-input form-control" 
+                      data-field="vulnerability" 
+                      data-risk-id="${item.id}"
+                      rows="3" 
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; resize:vertical;"
+                    >${item.vulnerability || ''}</textarea>
+                  </td>
+
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <textarea 
+                      class="risk-cell-input form-control" 
+                      data-field="current_control" 
+                      data-risk-id="${item.id}"
+                      rows="3" 
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; resize:vertical;"
+                    >${item.current_control || ''}</textarea>
+                  </td>
+
+                  <!-- CIA Part 1 -->
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-cia-chk" data-factor="c" data-part="initial" data-risk-id="${item.id}" ${item.impact_cia?.c ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-cia-chk" data-factor="i" data-part="initial" data-risk-id="${item.id}" ${item.impact_cia?.i ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-cia-chk" data-factor="a" data-part="initial" data-risk-id="${item.id}" ${item.impact_cia?.a ? 'checked' : ''} />
+                  </td>
+
+                  <!-- FSRILO Part 1 -->
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="f" data-part="initial" data-risk-id="${item.id}" ${item.severity_fsrilo?.f ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="s" data-part="initial" data-risk-id="${item.id}" ${item.severity_fsrilo?.s ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="r" data-part="initial" data-risk-id="${item.id}" ${item.severity_fsrilo?.r ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="i" data-part="initial" data-risk-id="${item.id}" ${item.severity_fsrilo?.i ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="l" data-part="initial" data-risk-id="${item.id}" ${item.severity_fsrilo?.l ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="o" data-part="initial" data-risk-id="${item.id}" ${item.severity_fsrilo?.o ? 'checked' : ''} />
+                  </td>
+
+                  <!-- Likelihood (A) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">
+                    <select class="risk-score-select" data-field="likelihood" data-risk-id="${item.id}" style="padding:4px; font-size:12px; font-weight:700; border-radius:4px; border:1px solid #cbd5e1;">
+                      ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.likelihood === v ? 'selected' : ''}>${v}</option>`).join('')}
+                    </select>
+                  </td>
+
+                  <!-- Impact (B) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">
+                    <select class="risk-score-select" data-field="impact" data-risk-id="${item.id}" style="padding:4px; font-size:12px; font-weight:700; border-radius:4px; border:1px solid #cbd5e1;">
+                      ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.impact === v ? 'selected' : ''}>${v}</option>`).join('')}
+                    </select>
+                  </td>
+
+                  <!-- C = A*B (Risk Level) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">
+                    <span style="display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800; ${scoreBadge.bg}">
+                      ${scoreBadge.text}
+                    </span>
+                  </td>
+
+                  <!-- Risk Owner -->
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <input 
+                      type="text" 
+                      class="risk-cell-input form-control" 
+                      data-field="risk_owner" 
+                      data-risk-id="${item.id}"
+                      value="${item.risk_owner || ''}"
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px;"
+                    />
+                  </td>
+
+                  <!-- Cluster Risk Level Average (คิดคะแนนเฉลี่ยจากข้อย่อยรายหมวดหมู่ความเสี่ยง) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center; background:#fef9c3;">
+                    <span style="font-size:13px; font-weight:800; color:#854d0e;">
+                      ${clusterAvg}
+                    </span>
+                  </td>
+
+                  <!-- PART 2: Treatment Option, Plan, Sub-actions, Expected Date -->
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <select 
+                      class="risk-cell-input form-control" 
+                      data-field="treatment_option" 
+                      data-risk-id="${item.id}"
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; font-weight:600;"
+                    >
+                      ${['Mitigate Risk', 'Transfer Risk', 'Accept Risk', 'Avoid Risk', 'Continue Monitoring'].map(opt => `
+                        <option value="${opt}" ${item.treatment_option === opt ? 'selected' : ''}>${opt}</option>
+                      `).join('')}
+                    </select>
+                  </td>
+
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <textarea 
+                      class="risk-cell-input form-control" 
+                      data-field="treatment_plan" 
+                      data-risk-id="${item.id}"
+                      rows="3" 
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; resize:vertical;"
+                    >${item.treatment_plan || ''}</textarea>
+                  </td>
+
+                  <!-- มาตรการย่อย (Part 2) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                      ${subActions.map((sub, sIdx) => `
+                        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:6px; position:relative;">
+                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-weight:700; color:#0f766e; font-size:10px;">มาตรการย่อย ${sIdx + 1}:</span>
+                            <button 
+                              class="btn-delete-subaction" 
+                              data-risk-id="${item.id}" 
+                              data-sub-id="${sub.id}"
+                              title="ลบมาตรการย่อยนี้"
+                              style="background:#fee2e2; color:#dc2626; border:none; padding:1px 5px; border-radius:3px; font-size:10px; cursor:pointer;"
+                            >✕</button>
+                          </div>
+                          <textarea 
+                            class="subaction-name-input form-control" 
+                            data-risk-id="${item.id}" 
+                            data-sub-id="${sub.id}"
+                            rows="2" 
+                            style="width:100%; font-size:11px; padding:3px 5px; border:1px solid #e2e8f0; border-radius:3px; resize:vertical;"
+                          >${sub.name || ''}</textarea>
+                        </div>
+                      `).join('')}
+                      <button 
+                        class="btn-add-subaction" 
+                        data-risk-id="${item.id}"
+                        style="background:#e0f2fe; color:#0369a1; border:1px dashed #7dd3fc; border-radius:4px; padding:4px; font-size:10px; font-weight:700; cursor:pointer;"
+                      >
+                        ➕ เพิ่มมาตรการย่อย
+                      </button>
+                    </div>
+                  </td>
+
+                  <!-- Expected Finish Date (Part 2) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <input 
+                      type="text" 
+                      class="risk-cell-input form-control" 
+                      data-field="expected_finish_date" 
+                      data-risk-id="${item.id}"
+                      value="${item.expected_finish_date || ''}"
+                      placeholder="เช่น ภายใน 30 ก.ย. 69"
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px;"
+                    />
+                  </td>
+
+                  <!-- PART 3: PROGRESS (ต่อเนื่องจากมาตรการย่อย) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4;">
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                      <!-- Average Progress Badge -->
+                      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #bbf7d0; padding-bottom:4px;">
+                        <span style="font-size:10px; font-weight:700; color:#166534;">เฉลี่ยรวม:</span>
+                        <span style="font-size:11px; font-weight:800; padding:1px 6px; border-radius:10px; ${progBadge.color}">
+                          ${item.progress_percent || 0}%
+                        </span>
+                      </div>
+                      <!-- Per sub-action progress input -->
+                      ${subActions.map((sub, sIdx) => `
+                        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:4px 6px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
+                          <span style="font-size:10px; color:#475569;">ย่อย ${sIdx + 1}:</span>
+                          <div style="display:flex; align-items:center; gap:2px;">
+                            <input 
+                              type="number" 
+                              min="0" 
+                              max="100" 
+                              class="subaction-prog-input" 
+                              data-risk-id="${item.id}" 
+                              data-sub-id="${sub.id}"
+                              value="${sub.progress_percent || 0}"
+                              style="width:45px; font-size:11px; padding:2px 4px; text-align:center; border:1px solid #cbd5e1; border-radius:3px;"
+                            />
+                            <span style="font-size:10px;">%</span>
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </td>
+
+                  <!-- Expected Finish Date (Part 3) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; background:#f0fdf4;">
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                      ${subActions.map((sub, sIdx) => `
+                        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:3px 5px;">
+                          <div style="font-size:9px; color:#64748b;">ย่อย ${sIdx + 1}:</div>
+                          <input 
+                            type="text" 
+                            class="subaction-p3date-input form-control" 
+                            data-risk-id="${item.id}" 
+                            data-sub-id="${sub.id}"
+                            value="${sub.expected_date_part3 || ''}"
+                            placeholder="วันที่เสร็จ..."
+                            style="width:100%; font-size:10px; padding:2px 4px; border:1px solid #e2e8f0; border-radius:3px;"
+                          />
+                        </div>
+                      `).join('')}
+                    </div>
+                  </td>
+
+                  <!-- PART 4: Residual CIA, FSRILO, RL, RI, Residual Level, Further Actions -->
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-cia-chk" data-factor="c" data-part="residual" data-risk-id="${item.id}" ${item.residual_cia?.c ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-cia-chk" data-factor="i" data-part="residual" data-risk-id="${item.id}" ${item.residual_cia?.i ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-cia-chk" data-factor="a" data-part="residual" data-risk-id="${item.id}" ${item.residual_cia?.a ? 'checked' : ''} />
+                  </td>
+
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="f" data-part="residual" data-risk-id="${item.id}" ${item.residual_fsrilo?.f ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="s" data-part="residual" data-risk-id="${item.id}" ${item.residual_fsrilo?.s ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="r" data-part="residual" data-risk-id="${item.id}" ${item.residual_fsrilo?.r ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="i" data-part="residual" data-risk-id="${item.id}" ${item.residual_fsrilo?.i ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="l" data-part="residual" data-risk-id="${item.id}" ${item.residual_fsrilo?.l ? 'checked' : ''} />
+                  </td>
+                  <td style="padding:4px; border:1px solid #e2e8f0; text-align:center;">
+                    <input type="checkbox" class="risk-fsrilo-chk" data-factor="o" data-part="residual" data-risk-id="${item.id}" ${item.residual_fsrilo?.o ? 'checked' : ''} />
+                  </td>
+
+                  <!-- Residual Likelihood (A) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">
+                    <select class="risk-score-select" data-field="residual_likelihood" data-risk-id="${item.id}" style="padding:4px; font-size:12px; font-weight:700; border-radius:4px; border:1px solid #cbd5e1;">
+                      ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.residual_likelihood === v ? 'selected' : ''}>${v}</option>`).join('')}
+                    </select>
+                  </td>
+
+                  <!-- Residual Impact (B) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">
+                    <select class="risk-score-select" data-field="residual_impact" data-risk-id="${item.id}" style="padding:4px; font-size:12px; font-weight:700; border-radius:4px; border:1px solid #cbd5e1;">
+                      ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.residual_impact === v ? 'selected' : ''}>${v}</option>`).join('')}
+                    </select>
+                  </td>
+
+                  <!-- Residual Risk Level (C = A*B) -->
+                  <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">
+                    <span style="display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800; ${resBadge.bg}">
+                      ${resBadge.text}
+                    </span>
+                  </td>
+
+                  <!-- Further Actions -->
+                  <td style="padding:6px; border:1px solid #e2e8f0;">
+                    <textarea 
+                      class="risk-cell-input form-control" 
+                      data-field="further_actions" 
+                      data-risk-id="${item.id}"
+                      rows="3" 
+                      placeholder="มาตรการลดความเสี่ยงเพิ่มเติม..."
+                      style="width:100%; font-size:11px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; resize:vertical;"
+                    >${item.further_actions || ''}</textarea>
+                  </td>
+
+                  <!-- Action: Delete -->
+                  <td class="no-print" style="padding:6px; border:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
+                    <button 
+                      class="btn-delete-risk-item" 
+                      data-risk-id="${item.id}"
+                      title="ลบข้อความเสี่ยงนี้"
+                      style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:4px 8px; border-radius:4px; font-size:12px; cursor:pointer;"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+
+                </tr>
+              `
+            }).join('')}
+          </tbody>
+
+        </table>
       </div>
 
-    </div>
-  `
-}
-
-// Single Risk Item Component (4 Parts Layout)
-function renderSingleRiskCard(item, idx) {
-  const scoreBadge = getScoreBadge(item.risk_level)
-  const resBadge = getScoreBadge(item.residual_risk_score)
-  const progBadge = getProgressBadge(item.progress_percent)
-
-  return `
-    <div 
-      class="risk-item-row" 
-      data-risk-id="${item.id}"
-      style="background:#ffffff; border-radius:8px; border:1px solid #e2e8f0; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,0.04);"
-    >
-      <!-- Item Header -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span style="background:#e2e8f0; color:#334155; font-size:12px; font-weight:700; padding:3px 8px; border-radius:4px;">
-            ลำดับ ${item.no || (idx + 1)}
-          </span>
-          <span style="font-size:14px; font-weight:700; color:#1e293b;">
-            ${item.threat}
-          </span>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span class="inline-block px-2.5 py-1 rounded text-xs font-bold ${scoreBadge.bg}">
-            ระดับความเสี่ยง: ${scoreBadge.text}
-          </span>
-        </div>
-      </div>
-
-      <!-- 4-Parts Grid -->
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:16px; font-size:13px;">
-        
-        <!-- PART 1: RISK ASSESSMENT -->
-        <div style="background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; padding:12px;">
-          <div style="font-weight:700; font-size:12px; color:#1e3a8a; margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">
-            PART 1: การประเมินความเสี่ยงเริ่มต้น
-          </div>
-
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">ช่องโหว่ (Vulnerability):</label>
-            <div style="color:#334155;">${item.vulnerability || '-'}</div>
-          </div>
-
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">มาตรการควบคุมในปัจจุบัน:</label>
-            <input 
-              type="text" 
-              class="risk-input" 
-              data-field="current_control" 
-              data-risk-id="${item.id}"
-              value="${item.current_control || ''}" 
-              style="width:100%; padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px;"
-            />
-          </div>
-
-          <!-- Impact Factors C, I, A -->
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-            <span style="font-size:11px; font-weight:600; color:#64748b;">ผลกระทบต่อ:</span>
-            <label style="display:inline-flex; align-items:center; gap:2px; font-size:12px; cursor:pointer;">
-              <input type="checkbox" class="risk-cia-chk" data-factor="c" data-risk-id="${item.id}" ${item.impact_cia.c ? 'checked' : ''} /> C
-            </label>
-            <label style="display:inline-flex; align-items:center; gap:2px; font-size:12px; cursor:pointer;">
-              <input type="checkbox" class="risk-cia-chk" data-factor="i" data-risk-id="${item.id}" ${item.impact_cia.i ? 'checked' : ''} /> I
-            </label>
-            <label style="display:inline-flex; align-items:center; gap:2px; font-size:12px; cursor:pointer;">
-              <input type="checkbox" class="risk-cia-chk" data-factor="a" data-risk-id="${item.id}" ${item.impact_cia.a ? 'checked' : ''} /> A
-            </label>
-          </div>
-
-          <!-- Likelihood & Impact Selectors -->
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
-            <div>
-              <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">โอกาสเกิด (L 1-5):</label>
-              <select class="risk-score-select" data-field="likelihood" data-risk-id="${item.id}" style="width:100%; padding:4px 6px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; font-weight:700;">
-                ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.likelihood === v ? 'selected' : ''}>${v} - ${MODEL_MATRIX_CONFIG.cols[v-1].nameEn}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">ความรุนแรง (I 1-5):</label>
-              <select class="risk-score-select" data-field="impact" data-risk-id="${item.id}" style="width:100%; padding:4px 6px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; font-weight:700;">
-                ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.impact === v ? 'selected' : ''}>${v} - ${MODEL_MATRIX_CONFIG.rows[5-v].nameEn}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- PART 2: RISK TREATMENT -->
-        <div style="background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; padding:12px;">
-          <div style="font-weight:700; font-size:12px; color:#1e3a8a; margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">
-            PART 2: การจัดการความเสี่ยง (Risk Treatment)
-          </div>
-
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">ตัวเลือกการตอบสนอง:</label>
-            <select class="risk-input" data-field="treatment_option" data-risk-id="${item.id}" style="width:100%; padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; font-weight:600;">
-              ${['Mitigate Risk', 'Transfer Risk', 'Accept Risk', 'Avoid Risk', 'Continue Monitoring'].map(opt => `
-                <option value="${opt}" ${item.treatment_option === opt ? 'selected' : ''}>${opt}</option>
-              `).join('')}
-            </select>
-          </div>
-
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">แผนจัดการความเสี่ยง (Treatment Plan):</label>
-            <textarea 
-              class="risk-input" 
-              data-field="treatment_plan" 
-              data-risk-id="${item.id}" 
-              rows="2"
-              style="width:100%; padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; resize:vertical;"
-            >${item.treatment_plan || ''}</textarea>
-          </div>
-
-          ${item.sub_actions && item.sub_actions.length > 0 ? `
-            <div>
-              <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">มาตรการย่อย:</label>
-              <ul style="margin:2px 0 0 0; padding-left:16px; font-size:11px; color:#475569;">
-                ${item.sub_actions.map(s => `<li>${s}</li>`).join('')}
-              </ul>
-            </div>
-          ` : ''}
-        </div>
-
-        <!-- PART 3: PROGRESS -->
-        <div style="background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; padding:12px;">
-          <div style="font-weight:700; font-size:12px; color:#1e3a8a; margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">
-            PART 3: ความคืบหน้า (Progress)
-          </div>
-
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">คาดว่าดำเนินการแล้วเสร็จ (Expected Date):</label>
-            <input 
-              type="text" 
-              class="risk-input" 
-              data-field="expected_finish_date" 
-              data-risk-id="${item.id}"
-              value="${item.expected_finish_date || ''}" 
-              style="width:100%; padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px;"
-            />
-          </div>
-
-          <div style="margin-bottom:8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-              <label style="font-size:11px; font-weight:600; color:#64748b;">ความคืบหน้า (%):</label>
-              <span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold ${progBadge.bgText} ${progBadge.text}">
-                ${item.progress_percent}% - ${progBadge.label}
-              </span>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <input 
-                type="range" 
-                class="risk-progress-slider" 
-                data-risk-id="${item.id}"
-                min="0" 
-                max="100" 
-                step="5"
-                value="${item.progress_percent || 0}" 
-                style="flex:1;"
-              />
-              <input 
-                type="number" 
-                class="risk-progress-num" 
-                data-risk-id="${item.id}"
-                min="0" 
-                max="100" 
-                value="${item.progress_percent || 0}" 
-                style="width:55px; padding:2px 4px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; text-align:center;"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">เจ้าของความเสี่ยง (Risk Owner):</label>
-            <input 
-              type="text" 
-              class="risk-input" 
-              data-field="risk_owner" 
-              data-risk-id="${item.id}"
-              value="${item.risk_owner || ''}" 
-              style="width:100%; padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px;"
-            />
-          </div>
-        </div>
-
-        <!-- PART 4: RESIDUAL RISK -->
-        <div style="background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; padding:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">
-            <span style="font-weight:700; font-size:12px; color:#1e3a8a;">
-              PART 4: ความเสี่ยงคงเหลือ (Residual Risk)
-            </span>
-            <span class="inline-block px-2 py-0.5 rounded text-xs font-bold ${resBadge.bg}">
-              คะแนนคงเหลือ: ${resBadge.text}
-            </span>
-          </div>
-
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-            <div>
-              <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">โอกาสคงเหลือ (RL):</label>
-              <select class="risk-score-select" data-field="residual_likelihood" data-risk-id="${item.id}" style="width:100%; padding:4px 6px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; font-weight:700;">
-                ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.residual_likelihood === v ? 'selected' : ''}>${v}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">ความรุนแรงคงเหลือ (RI):</label>
-              <select class="risk-score-select" data-field="residual_impact" data-risk-id="${item.id}" style="width:100%; padding:4px 6px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; font-weight:700;">
-                ${[1, 2, 3, 4, 5].map(v => `<option value="${v}" ${item.residual_impact === v ? 'selected' : ''}>${v}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label style="font-size:11px; font-weight:600; color:#64748b; display:block;">การดำเนินการเพิ่มเติม (Further Actions):</label>
-            <input 
-              type="text" 
-              class="risk-input" 
-              data-field="further_actions" 
-              data-risk-id="${item.id}"
-              placeholder="แนวทางลดความเสี่ยงเพิ่มเติม..."
-              value="${item.further_actions || ''}" 
-              style="width:100%; padding:4px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px;"
-            />
-          </div>
-        </div>
-
-      </div>
     </div>
   `
 }
@@ -1183,7 +1335,6 @@ function renderMandatoryDocTab(metrics) {
         </p>
       </div>
 
-      <!-- 3 Columns Layout matching screenshot Screenshot 2569-10-03 at 14.23.31.png -->
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
         ${docData.tiers.map(tier => {
           const isActive = metrics.mandatoryTier === tier.id
@@ -1198,7 +1349,6 @@ function renderMandatoryDocTab(metrics) {
                 position:relative;
               "
             >
-              <!-- Card Header -->
               <div style="background:${isActive ? '#1e40af' : '#0f172a'}; color:#ffffff; padding:12px 16px; text-align:center;">
                 <h4 style="margin:0; font-size:15px; font-weight:700;">
                   ${tier.title}
@@ -1214,7 +1364,6 @@ function renderMandatoryDocTab(metrics) {
                 </div>
               ` : ''}
 
-              <!-- Items list -->
               <div style="padding:16px;">
                 ${tier.parentNote ? `
                   <div style="background:#f1f5f9; padding:8px 12px; border-radius:6px; font-size:13px; font-weight:700; color:#334155; margin-bottom:12px; border-left:4px solid #3b82f6;">
@@ -1233,7 +1382,6 @@ function renderMandatoryDocTab(metrics) {
         }).join('')}
       </div>
 
-      <!-- Footnote -->
       <div style="margin-top:24px; padding:12px 16px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:12px; color:#64748b; text-align:center;">
         * อ้างอิงตามประกาศการกำหนดมาตรการควบคุมความมั่นคงปลอดภัยไซเบอร์ขั้นต่ำ ฉบับที่ 12 สำหรับหน่วยงานโครงสร้างพื้นฐานสำคัญทางสารสนเทศ (CII)
       </div>
@@ -1280,40 +1428,34 @@ function renderCompareTab() {
             </tr>
           </thead>
           <tbody>
-            ${data.map((row, idx) => {
-              // Group phase rowspan simulation or label
-              return `
-                <tr style="background:#ffffff;">
-                  <td style="padding:8px 12px; border:1px solid #000000; text-align:center; width:45px; font-weight:700;">
-                    ${row.no}
-                  </td>
-                  <td style="padding:8px 12px; border:1px solid #000000; font-weight:700; width:220px;">
-                    ${row.en}
-                  </td>
-                  <td style="padding:8px 12px; border:1px solid #000000; color:#334155;">
-                    ${row.th}
-                  </td>
-                  <td style="padding:8px 12px; border:1px solid #000000; font-weight:700; text-align:center; background:#f8fafc; font-size:12px;">
-                    ${row.phase}
-                  </td>
-                  
-                  <!-- Register Cell -->
-                  <td style="padding:8px 12px; border:1px solid #000000; text-align:center; ${getCellStyle(row.register)}">
-                    ${renderMarker(row.register)}
-                  </td>
+            ${data.map((row) => `
+              <tr style="background:#ffffff;">
+                <td style="padding:8px 12px; border:1px solid #000000; text-align:center; width:45px; font-weight:700;">
+                  ${row.no}
+                </td>
+                <td style="padding:8px 12px; border:1px solid #000000; font-weight:700; width:220px;">
+                  ${row.en}
+                </td>
+                <td style="padding:8px 12px; border:1px solid #000000; color:#334155;">
+                  ${row.th}
+                </td>
+                <td style="padding:8px 12px; border:1px solid #000000; font-weight:700; text-align:center; background:#f8fafc; font-size:12px;">
+                  ${row.phase}
+                </td>
+                
+                <td style="padding:8px 12px; border:1px solid #000000; text-align:center; ${getCellStyle(row.register)}">
+                  ${renderMarker(row.register)}
+                </td>
 
-                  <!-- Assess Cell -->
-                  <td style="padding:8px 12px; border:1px solid #000000; text-align:center; ${getCellStyle(row.assess)}">
-                    ${renderMarker(row.assess)}
-                  </td>
+                <td style="padding:8px 12px; border:1px solid #000000; text-align:center; ${getCellStyle(row.assess)}">
+                  ${renderMarker(row.assess)}
+                </td>
 
-                  <!-- Profile Cell -->
-                  <td style="padding:8px 12px; border:1px solid #000000; text-align:center; ${getCellStyle(row.profile)}">
-                    ${renderMarker(row.profile)}
-                  </td>
-                </tr>
-              `
-            }).join('')}
+                <td style="padding:8px 12px; border:1px solid #000000; text-align:center; ${getCellStyle(row.profile)}">
+                  ${renderMarker(row.profile)}
+                </td>
+              </tr>
+            `).join('')}
           </tbody>
         </table>
       </div>
@@ -1342,15 +1484,22 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
 
   // 1. Subtab Switching
   containerEl.querySelectorAll('.subtab-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const tabId = btn.getAttribute('data-subtab')
-      if (tabId && onUpdate) {
-        onUpdate({ type: 'switch_subtab', subtab: tabId })
-      }
+      if (tabId && onUpdate) onUpdate({ type: 'switch_subtab', subtab: tabId })
     })
   })
 
-  // 2. Cluster Filter
+  // 2. Editable Header Card Inputs
+  containerEl.querySelectorAll('.risk-meta-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const field = input.getAttribute('data-field')
+      const val = e.target.value
+      if (onUpdate) onUpdate({ type: 'update_risk_metadata', field, value: val })
+    })
+  })
+
+  // 3. Cluster Filter
   const clusterSelect = containerEl.querySelector('#select-risk-cluster')
   if (clusterSelect) {
     clusterSelect.addEventListener('change', (e) => {
@@ -1358,7 +1507,7 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   }
 
-  // 3. Search Filter
+  // 4. Search Filter
   const searchInput = containerEl.querySelector('#input-risk-search')
   if (searchInput) {
     let debounceTimer
@@ -1370,7 +1519,7 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   }
 
-  // 4. Matrix Click Cell -> Jump to Tab 3 with filter
+  // 5. Matrix Cell Click
   containerEl.querySelectorAll('.matrix-clickable-cell').forEach(cell => {
     cell.addEventListener('click', () => {
       const row = Number(cell.getAttribute('data-row'))
@@ -1385,7 +1534,6 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   })
 
-  // Clear Matrix filter
   const clearMatrixBtn = containerEl.querySelector('#btn-clear-matrix-filter')
   if (clearMatrixBtn) {
     clearMatrixBtn.addEventListener('click', () => {
@@ -1393,7 +1541,7 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   }
 
-  // 5. Update Risk Fields (L, I, Scores, CIA, etc)
+  // 6. Risk Cell Inputs & Scores
   containerEl.querySelectorAll('.risk-score-select').forEach(sel => {
     sel.addEventListener('change', (e) => {
       const riskId = sel.getAttribute('data-risk-id')
@@ -1403,52 +1551,99 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   })
 
-  containerEl.querySelectorAll('.risk-input').forEach(input => {
+  containerEl.querySelectorAll('.risk-cell-input').forEach(input => {
     input.addEventListener('change', (e) => {
       const riskId = input.getAttribute('data-risk-id')
       const field = input.getAttribute('data-field')
-      const val = input.value
+      const val = e.target.value
       if (onUpdate) onUpdate({ type: 'update_risk_field', riskId, field, value: val })
     })
   })
 
-  // Progress sliders
-  containerEl.querySelectorAll('.risk-progress-slider').forEach(slider => {
-    slider.addEventListener('input', (e) => {
-      const riskId = slider.getAttribute('data-risk-id')
-      const val = Number(e.target.value)
-      // Sync number box
-      const numInput = containerEl.querySelector(`.risk-progress-num[data-risk-id="${riskId}"]`)
-      if (numInput) numInput.value = val
-    })
-    slider.addEventListener('change', (e) => {
-      const riskId = slider.getAttribute('data-risk-id')
-      const val = Number(e.target.value)
-      if (onUpdate) onUpdate({ type: 'update_risk_field', riskId, field: 'progress_percent', value: val })
-    })
-  })
-
-  containerEl.querySelectorAll('.risk-progress-num').forEach(num => {
-    num.addEventListener('change', (e) => {
-      const riskId = num.getAttribute('data-risk-id')
-      let val = Number(e.target.value) || 0
-      val = Math.max(0, Math.min(100, val))
-      num.value = val
-      if (onUpdate) onUpdate({ type: 'update_risk_field', riskId, field: 'progress_percent', value: val })
-    })
-  })
-
-  // CIA checkboxes
+  // 7. Checkboxes: CIA & FSRILO (Initial & Residual)
   containerEl.querySelectorAll('.risk-cia-chk').forEach(chk => {
-    chk.addEventListener('change', (e) => {
+    chk.addEventListener('change', () => {
       const riskId = chk.getAttribute('data-risk-id')
       const factor = chk.getAttribute('data-factor')
+      const part = chk.getAttribute('data-part') // 'initial' | 'residual'
       const checked = chk.checked
-      if (onUpdate) onUpdate({ type: 'update_risk_cia', riskId, factor, checked })
+      if (onUpdate) onUpdate({ type: 'update_risk_cia', riskId, factor, part, checked })
     })
   })
 
-  // 6. Update Log Events
+  containerEl.querySelectorAll('.risk-fsrilo-chk').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const riskId = chk.getAttribute('data-risk-id')
+      const factor = chk.getAttribute('data-factor')
+      const part = chk.getAttribute('data-part') // 'initial' | 'residual'
+      const checked = chk.checked
+      if (onUpdate) onUpdate({ type: 'update_risk_fsrilo', riskId, factor, part, checked })
+    })
+  })
+
+  // 8. Sub-actions Management
+  containerEl.querySelectorAll('.btn-add-subaction').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const riskId = btn.getAttribute('data-risk-id')
+      if (onUpdate) onUpdate({ type: 'add_sub_action', riskId })
+    })
+  })
+
+  containerEl.querySelectorAll('.btn-delete-subaction').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const riskId = btn.getAttribute('data-risk-id')
+      const subId = btn.getAttribute('data-sub-id')
+      if (confirm('คุณต้องการลบมาตรการย่อยนี้หรือไม่?') && onUpdate) {
+        onUpdate({ type: 'delete_sub_action', riskId, subId })
+      }
+    })
+  })
+
+  containerEl.querySelectorAll('.subaction-name-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const riskId = input.getAttribute('data-risk-id')
+      const subId = input.getAttribute('data-sub-id')
+      if (onUpdate) onUpdate({ type: 'update_sub_action_field', riskId, subId, field: 'name', value: e.target.value })
+    })
+  })
+
+  containerEl.querySelectorAll('.subaction-p3date-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const riskId = input.getAttribute('data-risk-id')
+      const subId = input.getAttribute('data-sub-id')
+      if (onUpdate) onUpdate({ type: 'update_sub_action_field', riskId, subId, field: 'expected_date_part3', value: e.target.value })
+    })
+  })
+
+  containerEl.querySelectorAll('.subaction-prog-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const riskId = input.getAttribute('data-risk-id')
+      const subId = input.getAttribute('data-sub-id')
+      let val = Number(e.target.value) || 0
+      val = Math.max(0, Math.min(100, val))
+      input.value = val
+      if (onUpdate) onUpdate({ type: 'update_sub_action_prog', riskId, subId, value: val })
+    })
+  })
+
+  // 9. Add / Delete Custom Risk Item
+  const addRiskBtn = containerEl.querySelector('#btn-add-new-risk-item')
+  if (addRiskBtn) {
+    addRiskBtn.addEventListener('click', () => {
+      if (onUpdate) onUpdate({ type: 'add_risk_item' })
+    })
+  }
+
+  containerEl.querySelectorAll('.btn-delete-risk-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const riskId = btn.getAttribute('data-risk-id')
+      if (confirm('คุณต้องการลบข้อความเสี่ยงนี้หรือไม่?') && onUpdate) {
+        onUpdate({ type: 'delete_risk_item', riskId })
+      }
+    })
+  })
+
+  // 10. Update Log Events
   const addLogBtn = containerEl.querySelector('#btn-add-log-row')
   if (addLogBtn) {
     addLogBtn.addEventListener('click', () => {
@@ -1479,7 +1674,7 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   })
 
-  // 7. Print Report
+  // 11. Print Report
   const printBtn = containerEl.querySelector('#btn-print-risk')
   if (printBtn) {
     printBtn.addEventListener('click', () => {
@@ -1487,7 +1682,7 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
     })
   }
 
-  // 8. Export CSV
+  // 12. Export CSV
   const exportBtn = containerEl.querySelector('#btn-export-risk-csv')
   if (exportBtn) {
     exportBtn.addEventListener('click', () => {
@@ -1496,7 +1691,7 @@ export function bindRiskAssessmentEvents(containerEl, riskState, onUpdate) {
   }
 }
 
-// Export CSV / Excel Compatible
+// Export CSV / Excel
 export function exportRiskAssessmentToCsv(riskState) {
   const items = riskState.items || []
   const metrics = calculateRiskMetrics(riskState)
@@ -1504,10 +1699,11 @@ export function exportRiskAssessmentToCsv(riskState) {
   let csv = '\uFEFF' // UTF-8 BOM
   csv += 'การประเมินและการจัดการความเสี่ยงด้านการรักษาความมั่นคงปลอดภัยไซเบอร์ (Risk Assessment & Treatment)\n'
   csv += `หน่วยงาน,${riskState.metadata?.orgName || 'สสจ.สระแก้ว'}\n`
+  csv += `ผู้พิจารณาประเมิน,${riskState.metadata?.reviewer || ''},ผู้บันทึก,${riskState.metadata?.recorder || ''}\n`
+  csv += `วันที่ประชุมบันทึก,${riskState.metadata?.meetingDate || ''},สถานที่,${riskState.metadata?.location || ''}\n`
   csv += `คะแนนเฉลี่ยภาพรวม,${metrics.avgScore},ระดับ,${metrics.overallLevel}\n`
   csv += `เอกสารมาตรการขั้นต่ำ,${metrics.mandatoryDocsCount} ฉบับ (${metrics.mandatoryTierName})\n\n`
 
-  // Table Headers
   const headers = [
     'No',
     'หมวดหมู่ (Cluster)',
@@ -1515,14 +1711,20 @@ export function exportRiskAssessmentToCsv(riskState) {
     'ช่องโหว่ (Vulnerability)',
     'มาตรการควบคุมปัจจุบัน',
     'C', 'I', 'A',
+    'F', 'S', 'R', 'I', 'L', 'O',
     'โอกาสเกิด (L)',
     'ความรุนแรง (I)',
-    'ระดับความเสี่ยงเริ่มต้น (Risk Level)',
+    'ระดับความเสี่ยง (Risk Level)',
     'เจ้าของความเสี่ยง (Risk Owner)',
+    'ค่าเฉลี่ยระดับความเสี่ยงของ Cluster',
     'ตัวเลือกการตอบสนอง (Treatment Option)',
     'แผนจัดการความเสี่ยง (Treatment Plan)',
-    'กำหนดแล้วเสร็จ (Expected Date)',
+    'มาตรการย่อย',
+    'กำหนดแล้วเสร็จ (Part 2)',
     'ความคืบหน้า (%)',
+    'กำหนดแล้วเสร็จ (Part 3)',
+    'Residual C', 'Residual I', 'Residual A',
+    'Residual F', 'Residual S', 'Residual R', 'Residual I', 'Residual L', 'Residual O',
     'โอกาสคงเหลือ (RL)',
     'ความรุนแรงคงเหลือ (RI)',
     'คะแนนคงเหลือ (Residual Score)',
@@ -1531,6 +1733,10 @@ export function exportRiskAssessmentToCsv(riskState) {
   csv += headers.map(h => `"${h}"`).join(',') + '\n'
 
   items.forEach((item, idx) => {
+    const clusterAvg = metrics.clusterStats[item.cluster]?.avgScore || 0
+    const subNames = (item.sub_actions || []).map((s, si) => `${si + 1}. ${s.name}`).join(' | ')
+    const subDates = (item.sub_actions || []).map((s, si) => `${si + 1}. ${s.expected_date_part3 || '-'}`).join(' | ')
+
     const row = [
       item.no || (idx + 1),
       item.cluster,
@@ -1540,14 +1746,32 @@ export function exportRiskAssessmentToCsv(riskState) {
       item.impact_cia?.c ? 'X' : '-',
       item.impact_cia?.i ? 'X' : '-',
       item.impact_cia?.a ? 'X' : '-',
+      item.severity_fsrilo?.f ? 'X' : '-',
+      item.severity_fsrilo?.s ? 'X' : '-',
+      item.severity_fsrilo?.r ? 'X' : '-',
+      item.severity_fsrilo?.i ? 'X' : '-',
+      item.severity_fsrilo?.l ? 'X' : '-',
+      item.severity_fsrilo?.o ? 'X' : '-',
       item.likelihood,
       item.impact,
       item.risk_level,
       item.risk_owner,
+      clusterAvg,
       item.treatment_option,
       item.treatment_plan,
+      subNames,
       item.expected_finish_date,
       item.progress_percent,
+      subDates,
+      item.residual_cia?.c ? 'X' : '-',
+      item.residual_cia?.i ? 'X' : '-',
+      item.residual_cia?.a ? 'X' : '-',
+      item.residual_fsrilo?.f ? 'X' : '-',
+      item.residual_fsrilo?.s ? 'X' : '-',
+      item.residual_fsrilo?.r ? 'X' : '-',
+      item.residual_fsrilo?.i ? 'X' : '-',
+      item.residual_fsrilo?.l ? 'X' : '-',
+      item.residual_fsrilo?.o ? 'X' : '-',
       item.residual_likelihood,
       item.residual_impact,
       item.residual_risk_score,
@@ -1575,6 +1799,19 @@ function ensureRiskAssessmentStyles() {
   const style = document.createElement('style')
   style.id = 'risk-assessment-styles'
   style.textContent = `
+    .sticky-col-1 {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+    }
+    .sticky-col-2 {
+      position: sticky;
+      left: 50px;
+      z-index: 5;
+    }
+    thead th.sticky-col-1, thead th.sticky-col-2 {
+      z-index: 10;
+    }
     .matrix-clickable-cell:hover {
       transform: scale(1.04);
       z-index: 10;
@@ -1582,6 +1819,12 @@ function ensureRiskAssessmentStyles() {
     }
     .subtab-btn:hover {
       opacity: 0.9;
+    }
+    .risk-datagrid-table td {
+      border: 1px solid #e2e8f0;
+    }
+    .risk-datagrid-table tr:hover {
+      background-color: #f1f5f9 !important;
     }
     @media print {
       body * {
@@ -1602,8 +1845,8 @@ function ensureRiskAssessmentStyles() {
         display: none !important;
       }
       @page {
-        size: A4 portrait;
-        margin: 15mm;
+        size: A4 landscape;
+        margin: 10mm;
       }
     }
   `
