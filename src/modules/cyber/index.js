@@ -162,6 +162,8 @@ let cyberState = {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
     'แผนการตรวจสอบ (Cybersecurity Audit Plan) ด้านการรักษาความมั่นคงปลอดภัยไซเบอร์': true,
+    'แผนการรับมือภัยคุกคามไซเบอร์ (IR Plan)': true,
+    '3.2 รายงานการแจ้งเหตุการณ์': true,
     'Govern': true,
     'Identify': true,
     '1.Asset Management': true
@@ -386,6 +388,12 @@ function initData() {
   }
   if (!cyberState.selectedKriYear || !cyberState.kriData[cyberState.selectedKriYear]) {
     cyberState.selectedKriYear = Object.keys(cyberState.kriData).sort((a, b) => Number(b) - Number(a))[0] || '2569'
+  }
+
+  // If selectedDoc was set to "3.2 รายงานการแจ้งเหตุการณ์", fallback to 3.2.1
+  if (cyberState.selectedDoc?.key === '3.2 รายงานการแจ้งเหตุการณ์' || cyberState.selectedDoc?.title === '3.2 รายงานการแจ้งเหตุการณ์') {
+    const fallback = allFlatDocs.find(d => d.key === '3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์') || allFlatDocs[0]
+    if (fallback) cyberState.selectedDoc = fallback
   }
 }
 
