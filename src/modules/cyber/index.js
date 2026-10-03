@@ -46,6 +46,19 @@ import {
   DEFAULT_UPDATE_LOGS,
   DEFAULT_RISK_ITEMS
 } from './riskAssessmentData.js'
+import {
+  renderAssetRiskAssessmentHtml,
+  bindAssetRiskEvents,
+  exportAssetRiskWord,
+  exportAssetRiskCsv,
+  syncAssetRiskToSupabase,
+  fetchAssetRiskFromSupabase
+} from './assetRiskAssessment.js'
+import {
+  DEFAULT_ASSET_RISK_HEADER,
+  DEFAULT_ASSET_RISK_LOGS,
+  ASSET_RISK_ITEMS
+} from './assetRiskData.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
@@ -58,6 +71,7 @@ const LOCAL_STORAGE_RISK_REPORTS_KEY = 'sko_cyber_risk_reports'
 const LOCAL_STORAGE_KRI_DATA_KEY = 'sko_cyber_kri_data'
 const LOCAL_STORAGE_ASSET_INVENTORY_KEY = 'sko_cyber_asset_inventory'
 const LOCAL_STORAGE_ASSET_REGISTER_KEY = 'sko_cyber_asset_register'
+const LOCAL_STORAGE_ASSET_RISK_KEY = 'sko_cyber_asset_risk_assessment'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -183,6 +197,11 @@ let cyberState = {
   assetRegisterSearchQuery: '',
   assetRegisterTypeFilter: 'all',
   assetRegisterCritFilter: 'all',
+  assetRiskAssessment: null,
+  assetRiskSubTab: '1-assess',
+  assetRiskClusterFilter: 'all',
+  assetRiskSearchQuery: '',
+  assetRiskViewMode: 'card',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -441,6 +460,29 @@ function initData() {
     cyberState.assetRegister = JSON.parse(JSON.stringify(DEFAULT_ASSET_REGISTER_DATA))
   }
 
+  // 12. Asset Risk Assessment (1.4 Risk Assessment of Asset - ประเมินความเสี่ยง)
+  try {
+    const savedAssetRisk = localStorage.getItem(LOCAL_STORAGE_ASSET_RISK_KEY)
+    if (savedAssetRisk) {
+      cyberState.assetRiskAssessment = JSON.parse(savedAssetRisk)
+    }
+  } catch (e) {
+    cyberState.assetRiskAssessment = null
+  }
+  if (!cyberState.assetRiskAssessment || !Array.isArray(cyberState.assetRiskAssessment.items) || cyberState.assetRiskAssessment.items.length === 0) {
+    cyberState.assetRiskAssessment = {
+      header: JSON.parse(JSON.stringify(DEFAULT_ASSET_RISK_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_ASSET_RISK_LOGS)),
+      items: JSON.parse(JSON.stringify(ASSET_RISK_ITEMS))
+    }
+  }
+  fetchAssetRiskFromSupabase().then(dbState => {
+    if (dbState && dbState.items && dbState.items.length > 0) {
+      cyberState.assetRiskAssessment = dbState
+      localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(dbState))
+    }
+  }).catch(() => {})
+
   // If selectedDoc was set to "3.2 รายงานการแจ้งเหตุการณ์", fallback to 3.2.1
   if (cyberState.selectedDoc?.key === '3.2 รายงานการแจ้งเหตุการณ์' || cyberState.selectedDoc?.title === '3.2 รายงานการแจ้งเหตุการณ์') {
     const fallback = allFlatDocs.find(d => d.key === '3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์') || allFlatDocs[0]
@@ -455,6 +497,17 @@ function saveAssetInventory() {
     localStorage.setItem(LOCAL_STORAGE_ASSET_INVENTORY_KEY, JSON.stringify(cyberState.assetInventory))
   } catch (e) {
     console.error('Error saving Asset Inventory:', e)
+  }
+}
+
+function saveAssetRiskAssessment() {
+  try {
+    if (cyberState.assetRiskAssessment) {
+      localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(cyberState.assetRiskAssessment))
+      syncAssetRiskToSupabase(cyberState.assetRiskAssessment)
+    }
+  } catch (e) {
+    console.error('Error saving Asset Risk Assessment:', e)
   }
 }
 
@@ -2060,6 +2113,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('1.3 Asset Register') ||
     cyberState.selectedDoc.title.includes('1.3 Asset Register')
   )
+  const isAssetRiskAssessment = (
+    currentKey.includes('1.4 Risk Assessment of Asset') ||
+    cyberState.selectedDoc.title.includes('1.4 Risk Assessment of Asset')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2115,6 +2172,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบทะเบียนทรัพย์สินสารสนเทศ (IT Asset/Devices Inventory) ฮาร์ดแวร์ 118 รายการ และซอฟต์แวร์ 4 รายการ'
               : isAssetRegister
               ? 'ทะเบียนทรัพย์สินของบริการที่สำคัญของหน่วยงาน (Asset Register) 9 รายการหลัก ปรับปรุงแก้ไขและส่งออก Word/Excel/PDF'
+              : isAssetRiskAssessment
+              ? 'ระบบประเมินและจัดการความเสี่ยงทรัพย์สินและการบริการที่สำคัญ (1.4 Asset Risk Assessment) สสจ.สระแก้ว'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2154,6 +2213,14 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.assetRegisterSearchQuery || '',
               cyberState.assetRegisterTypeFilter || 'all',
               cyberState.assetRegisterCritFilter || 'all'
+            )
+          : isAssetRiskAssessment
+          ? renderAssetRiskAssessmentHtml(
+              cyberState.assetRiskAssessment,
+              cyberState.assetRiskSubTab || '1-assess',
+              cyberState.assetRiskClusterFilter || 'all',
+              cyberState.assetRiskSearchQuery || '',
+              cyberState.assetRiskViewMode || 'card'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2345,6 +2412,10 @@ function renderPolicyAndFrameworkTab(el) {
   } else if (isAssetRegister) {
     bindAssetRegisterEvents(el, cyberState.assetRegister, (action) => {
       handleAssetRegisterAction(action, el)
+    })
+  } else if (isAssetRiskAssessment) {
+    bindAssetRiskEvents(el, cyberState.assetRiskAssessment, (action) => {
+      handleAssetRiskAction(action, el)
     })
   } else {
     bindGenericDocEvents(el, currentKey)
@@ -2576,6 +2647,149 @@ function handleAssetInventoryAction(action, el) {
   if (action.type === 'EXPORT_CSV') {
     exportAssetInventoryToCsv(cyberState.assetInventory, cyberState.assetInventorySubTab)
     showNotification('ส่งออกไฟล์ Excel (.csv) สำเร็จ', 'success')
+    return
+  }
+}
+
+
+function handleAssetRiskAction(action, el) {
+  if (!cyberState.assetRiskAssessment) {
+    cyberState.assetRiskAssessment = {
+      header: JSON.parse(JSON.stringify(DEFAULT_ASSET_RISK_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_ASSET_RISK_LOGS)),
+      items: JSON.parse(JSON.stringify(ASSET_RISK_ITEMS))
+    }
+  }
+
+  if (action.type === 'change_subtab') {
+    cyberState.assetRiskSubTab = action.subtab
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_view_mode') {
+    cyberState.assetRiskViewMode = action.viewMode
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_cluster') {
+    cyberState.assetRiskClusterFilter = action.cluster
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search') {
+    cyberState.assetRiskSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'update_header') {
+    cyberState.assetRiskAssessment.header = { ...action.header }
+    saveAssetRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('บันทึกข้อมูลส่วนหัวรายงานเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'add_item') {
+    if (!cyberState.assetRiskAssessment.items) cyberState.assetRiskAssessment.items = []
+    cyberState.assetRiskAssessment.items.push(action.item)
+    saveAssetRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มทรัพย์สิน ' + (action.item.asset_name || '') + ' สำเร็จ', 'success')
+    return
+  }
+
+  if (action.type === 'update_item') {
+    const idx = cyberState.assetRiskAssessment.items?.findIndex(it => it.id === action.item.id)
+    if (idx !== -1 && idx !== undefined) {
+      cyberState.assetRiskAssessment.items[idx] = { ...action.item }
+      saveAssetRiskAssessment()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('อัปเดตข้อมูลทรัพย์สินเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_item') {
+    cyberState.assetRiskAssessment.items = (cyberState.assetRiskAssessment.items || []).filter(it => it.id !== action.id)
+    saveAssetRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการทรัพย์สินเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'add_subaction') {
+    const item = (cyberState.assetRiskAssessment.items || []).find(it => it.id === action.itemId)
+    if (item) {
+      if (!item.sub_actions) item.sub_actions = []
+      item.sub_actions.push(action.subAction)
+      saveAssetRiskAssessment()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('เพิ่มมาตรการย่อยเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'update_subaction') {
+    const item = (cyberState.assetRiskAssessment.items || []).find(it => it.id === action.itemId)
+    if (item && item.sub_actions) {
+      const sIdx = item.sub_actions.findIndex(s => s.id === action.subId)
+      if (sIdx !== -1) {
+        item.sub_actions[sIdx] = { ...action.subAction }
+        saveAssetRiskAssessment()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('อัปเดตมาตรการย่อยเรียบร้อยแล้ว', 'success')
+      }
+    }
+    return
+  }
+
+  if (action.type === 'delete_subaction') {
+    const item = (cyberState.assetRiskAssessment.items || []).find(it => it.id === action.itemId)
+    if (item && item.sub_actions) {
+      item.sub_actions = item.sub_actions.filter(s => s.id !== action.subId)
+      saveAssetRiskAssessment()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('ลบมาตรการย่อยเรียบร้อยแล้ว', 'info')
+    }
+    return
+  }
+
+  if (action.type === 'add_log') {
+    if (!cyberState.assetRiskAssessment.logs) cyberState.assetRiskAssessment.logs = []
+    cyberState.assetRiskAssessment.logs.unshift({
+      id: 'log_' + Date.now(),
+      date: action.date,
+      detail: action.detail
+    })
+    saveAssetRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มบันทึกประวัติเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'delete_log') {
+    cyberState.assetRiskAssessment.logs = (cyberState.assetRiskAssessment.logs || []).filter(l => l.id !== action.id)
+    saveAssetRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบบันทึกประวัติเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'reset_default') {
+    cyberState.assetRiskAssessment = {
+      header: JSON.parse(JSON.stringify(DEFAULT_ASSET_RISK_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_ASSET_RISK_LOGS)),
+      items: JSON.parse(JSON.stringify(ASSET_RISK_ITEMS))
+    }
+    cyberState.assetRiskClusterFilter = 'all'
+    cyberState.assetRiskSearchQuery = ''
+    saveAssetRiskAssessment()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('รีเซ็ตข้อมูลเป็นค่ามาตรฐานเริ่มต้นเรียบร้อยแล้ว', 'success')
     return
   }
 }
