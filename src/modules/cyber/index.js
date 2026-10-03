@@ -170,6 +170,7 @@ let cyberState = {
   assetInventorySubTab: 'hardware',
   assetInventorySearchQuery: '',
   assetInventoryCritFilter: 'all',
+  assetInventoryGroupFilter: 'all',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -411,7 +412,7 @@ function initData() {
   } catch (e) {
     cyberState.assetInventory = null
   }
-  if (!cyberState.assetInventory || !Array.isArray(cyberState.assetInventory.items) || cyberState.assetInventory.items.length === 0) {
+  if (!cyberState.assetInventory || !Array.isArray(cyberState.assetInventory.items) || cyberState.assetInventory.items.length < 120) {
     cyberState.assetInventory = JSON.parse(JSON.stringify(DEFAULT_ASSET_INVENTORY_DATA))
   }
 
@@ -2106,7 +2107,7 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.assetInventory,
               cyberState.assetInventorySubTab || 'hardware',
               cyberState.assetInventorySearchQuery || '',
-              cyberState.assetInventoryCritFilter || 'all'
+              cyberState.assetInventoryGroupFilter || 'all'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2421,6 +2422,7 @@ function handleAssetInventoryAction(action, el) {
 
   if (action.type === 'SWITCH_SUBTAB') {
     cyberState.assetInventorySubTab = action.subtab
+    cyberState.assetInventoryGroupFilter = 'all'
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -2436,8 +2438,8 @@ function handleAssetInventoryAction(action, el) {
     return
   }
 
-  if (action.type === 'FILTER_CRIT') {
-    cyberState.assetInventoryCritFilter = action.critFilter
+  if (action.type === 'FILTER_GROUP') {
+    cyberState.assetInventoryGroupFilter = action.groupFilter
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -2508,10 +2510,10 @@ function handleAssetInventoryAction(action, el) {
   if (action.type === 'RESET_DEFAULT') {
     cyberState.assetInventory = JSON.parse(JSON.stringify(DEFAULT_ASSET_INVENTORY_DATA))
     cyberState.assetInventorySearchQuery = ''
-    cyberState.assetInventoryCritFilter = 'all'
+    cyberState.assetInventoryGroupFilter = 'all'
     saveAssetInventory()
     renderPolicyAndFrameworkTab(el)
-    showNotification('รีเซ็ตข้อมูลทะเบียนทรัพย์สินเป็นค่าเริ่มต้นเรียบร้อยแล้ว', 'success')
+    showNotification('รีเซ็ตข้อมูลทะเบียนทรัพย์สินเป็นค่าเริ่มต้น (118 HW + 4 SW) เรียบร้อยแล้ว', 'success')
     return
   }
 
