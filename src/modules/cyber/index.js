@@ -25,7 +25,7 @@ const LOCAL_STORAGE_DOCS_KEY = 'sko_cyber_docs_links'
 const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
 const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
 const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
-const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v2'
+const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v3'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -133,6 +133,7 @@ let cyberState = {
   incidents: [],
   riskAssessment: null,
   riskAssessmentSubTab: '3-assess',
+  riskAssessmentViewMode: 'card',
   riskClusterFilter: 'all',
   riskMatrixFilter: null,
   riskSearchQuery: '',
@@ -316,11 +317,12 @@ function initData() {
     !cyberState.riskAssessment.items ||
     cyberState.riskAssessment.items.length < 80 ||
     !cyberState.riskAssessment.metadata ||
-    cyberState.riskAssessment.schema_version !== 2
+    cyberState.riskAssessment.schema_version !== 3 ||
+    !cyberState.riskAssessment.items[0]?.sub_actions?.[0]?.residual_risk_score
 
   if (needsReset) {
     cyberState.riskAssessment = {
-      schema_version: 2,
+      schema_version: 3,
       metadata: JSON.parse(JSON.stringify(DEFAULT_RISK_METADATA)),
       logs: JSON.parse(JSON.stringify(DEFAULT_UPDATE_LOGS)),
       items: JSON.parse(JSON.stringify(DEFAULT_RISK_ITEMS))
@@ -1931,7 +1933,8 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.riskAssessmentSubTab,
               cyberState.riskClusterFilter,
               cyberState.riskMatrixFilter,
-              cyberState.riskSearchQuery
+              cyberState.riskSearchQuery,
+              cyberState.riskAssessmentViewMode || 'card'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2123,6 +2126,12 @@ function handleRiskAssessmentAction(action, el) {
     return
   }
 
+  if (action.type === 'switch_view_mode') {
+    cyberState.riskAssessmentViewMode = action.mode
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
   if (action.type === 'filter_cluster') {
     cyberState.riskClusterFilter = action.cluster
     renderPolicyAndFrameworkTab(el)
@@ -2212,18 +2221,24 @@ function handleRiskAssessmentAction(action, el) {
     return
   }
 
-  // 5. Sub-actions Management (Part 2 & Part 3)
+  // 5. Sub-actions Management (Part 2, 3 & 4)
   if (action.type === 'add_sub_action') {
     const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
     if (item) {
       if (!item.sub_actions) item.sub_actions = []
       const nextIdx = item.sub_actions.length + 1
       item.sub_actions.push({
-        id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        id: `${item.id}_sub_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
         name: `มาตรการย่อย ${nextIdx}`,
-        expected_date_part2: '',
+        expected_date_part2: 'ภายใน 30 ก.ย. 69',
         progress_percent: 0,
-        expected_date_part3: ''
+        expected_date_part3: '15 ก.ย. 69',
+        residual_cia: { c: false, i: false, a: false },
+        residual_fsrilo: { f: false, s: false, r: false, i: false, l: false, o: false },
+        residual_likelihood: 1,
+        residual_impact: 2,
+        residual_risk_score: 2,
+        further_actions: 'เฝ้าติดตามเป็นระยะ'
       })
       const totalProg = item.sub_actions.reduce((acc, cur) => acc + (Number(cur.progress_percent) || 0), 0)
       item.progress_percent = Math.round(totalProg / item.sub_actions.length)
@@ -2241,8 +2256,11 @@ function handleRiskAssessmentAction(action, el) {
       if (item.sub_actions.length > 0) {
         const totalProg = item.sub_actions.reduce((acc, cur) => acc + (Number(cur.progress_percent) || 0), 0)
         item.progress_percent = Math.round(totalProg / item.sub_actions.length)
+        const avgSubRes = item.sub_actions.reduce((acc, s) => acc + (s.residual_risk_score || 0), 0) / item.sub_actions.length
+        item.residual_risk_score = Number(avgSubRes.toFixed(1))
       } else {
         item.progress_percent = 0
+        item.residual_risk_score = 0
       }
       saveRiskAssessment()
       renderPolicyAndFrameworkTab(el)
@@ -2273,6 +2291,48 @@ function handleRiskAssessmentAction(action, el) {
         item.progress_percent = Math.round(totalProg / item.sub_actions.length)
         saveRiskAssessment()
         renderPolicyAndFrameworkTab(el)
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_sub_action_score') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item && item.sub_actions) {
+      const sub = item.sub_actions.find(s => s.id === action.subId)
+      if (sub) {
+        sub[action.field] = Number(action.value) || 1
+        sub.residual_risk_score = (Number(sub.residual_likelihood) || 1) * (Number(sub.residual_impact) || 1)
+        const avgSubRes = item.sub_actions.reduce((acc, s) => acc + (s.residual_risk_score || 0), 0) / item.sub_actions.length
+        item.residual_risk_score = Number(avgSubRes.toFixed(1))
+        saveRiskAssessment()
+        renderPolicyAndFrameworkTab(el)
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_sub_action_cia') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item && item.sub_actions) {
+      const sub = item.sub_actions.find(s => s.id === action.subId)
+      if (sub) {
+        if (!sub.residual_cia) sub.residual_cia = {}
+        sub.residual_cia[action.factor] = !!action.checked
+        saveRiskAssessment()
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_sub_action_fsrilo') {
+    const item = cyberState.riskAssessment.items.find(i => i.id === action.riskId)
+    if (item && item.sub_actions) {
+      const sub = item.sub_actions.find(s => s.id === action.subId)
+      if (sub) {
+        if (!sub.residual_fsrilo) sub.residual_fsrilo = {}
+        sub.residual_fsrilo[action.factor] = !!action.checked
+        saveRiskAssessment()
       }
     }
     return

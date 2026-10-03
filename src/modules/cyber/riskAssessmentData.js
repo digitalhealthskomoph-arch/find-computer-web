@@ -51,7 +51,7 @@ export const RISK_CLUSTERS = [
 export const DEFAULT_RISK_ITEMS = [
   {
     "id": "risk_1",
-    "no": "1.0",
+    "no": 1,
     "cluster": "การโจมตีด้วยมัลแวร์ (Malware Attacks)",
     "threat": "1. มีการดาวน์โหลดไฟล์จากเว็บไซต์ที่ไม่น่าเชื่อถือ ซึ่งอาจแฝงด้วยมัลแวร์",
     "vulnerability": "1. ไม่มีระบบหรือมาตรการควบคุมการดาวน์โหลดและติดตั้งซอฟต์แวร์ในองค์กร",
@@ -75,45 +75,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "Cyber security managemrnt representative",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "การควบคุมการดาวน์โหลดและติดตั้งซอฟต์แวร์ในองค์กร(Application Control)",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_1_1",
-        "name": "ปรับปรุงสิทธิ์ผู้ใช้งานคอมพิวเตอร์เป็น Standard User (จำกัดสิทธิ์ Admin) เพื่อไม่ให้สามารถดาวน์โหลดหรือติดตั้งซอฟต์แวร์เองได้โดยไม่ผ่านความเห็นชอบจากเจ้าหน้าที่ไอที",
+        "id": "risk_1_sub_1",
+        "name": "การควบคุมการดาวน์โหลดและติดตั้งซอฟต์แวร์ในองค์กร(Application Control)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 10,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_1_2",
+        "id": "risk_1_sub_2",
         "name": "จัดทำบัญชีซอฟต์แวร์มาตรฐาน (Standard Software List) ที่ได้รับอนุญาตให้ใช้งานใน สสจ. และตรวจสอบการติดตั้งโปรแกรมในเครื่องคอมพิวเตอร์เป็นรายไตรมาส",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 5,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 5
   },
   {
     "id": "risk_2",
-    "no": "",
+    "no": 2,
     "cluster": "การโจมตีด้วยมัลแวร์ (Malware Attacks)",
     "threat": "2. มีการติดมัลแวร์ที่มาจากการใช้อุปกรณ์ USB Storage หรือสื่อเก็บข้อมูลภายนอก",
     "vulnerability": "2. ไม่มีการติดตั้งหรืออัปเดตโปรแกรมป้องกันไวรัสเมื่อใช้อุปกรณ์ USB Storage",
@@ -137,45 +153,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ควบคุมอุปกรณ์สื่อบันทึกข้อมูลภายนอก (USB Storage Control)",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_2_1",
-        "name": "ติดตั้งระบบ Endpoint Security ที่มีฟังก์ชันบังคับสแกนไวรัสอัตโนมัติทันทีเมื่อมีการเชื่อมต่อ USB Storage กับเครื่องคอมพิวเตอร์ในสำนักงาน",
+        "id": "risk_2_sub_1",
+        "name": "ควบคุมอุปกรณ์สื่อบันทึกข้อมูลภายนอก (USB Storage Control)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_2_2",
+        "id": "risk_2_sub_2",
         "name": "กำหนดนโยบายห้ามใช้ USB ส่วนตัวกับเครื่องคอมพิวเตอร์ที่เข้าถึงระบบฐานข้อมูลสำคัญ (เช่น ERP หรือระบบข้อมูลบุคลากร) โดยให้ใช้การส่งงานผ่าน Cloud Storage ขององค์กรที่ปลอดภัยแทน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_3",
-    "no": "",
+    "no": 3,
     "cluster": "การโจมตีด้วยมัลแวร์ (Malware Attacks)",
     "threat": "3. ไฟล์แนบในอีเมล์่มีฟิชชิงและแฝงด้วยมัลแวร์",
     "vulnerability": "3. ขาดระบบหรือมาตรการหรือนโยบายการควบคุมการใช้งาน อีเมล์ที่มีไฟล์แนบ",
@@ -199,45 +231,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "คัดกรองและเฝ้าระวังไฟล์แนบในอีเมล (Email Security)",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_3_1",
-        "name": "จัดอบรมเกี่ยวกับการหลีกเลี่ยงการดาวน์โหลดไฟล์หรือจากอีเมลที่ไม่น่าเชื่อถือ",
+        "id": "risk_3_sub_1",
+        "name": "คัดกรองและเฝ้าระวังไฟล์แนบในอีเมล (Email Security)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_3_2",
+        "id": "risk_3_sub_2",
         "name": "จัดทำแนวปฏิบัติและสื่อประชาสัมพันธ์ (Infographic) วิธีการตรวจสอบอีเมลฟิชชิงเบื้องต้น เพื่อให้เจ้าหน้าที่ระมัดระวังก่อนคลิกลิงก์หรือโหลดไฟล์",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_4",
-    "no": "",
+    "no": 4,
     "cluster": "การโจมตีด้วยมัลแวร์ (Malware Attacks)",
     "threat": "4. การติดตั้งซอฟต์แวร์ที่ละเมิดลิขสิทธิ์ที่ฝังด้วยมัลแวร์",
     "vulnerability": "4. พนักงานขาดความรู้ในการติดตั้งุไฟล์หรือเว็บไซต์ที่มีความเสี่ยงไซเบอร์",
@@ -261,45 +309,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ส่งเสริมการใช้ซอฟต์แวร์ที่ถูกต้องและสร้างความตระหนัก (Compliance & Awareness)",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_4_1",
-        "name": "สำรวจและเปลี่ยนมาใช้ซอฟต์แวร์ Open Source หรือซอฟต์แวร์ที่มีลิขสิทธิ์ถูกต้อง เพื่อทดแทนโปรแกรมละเมิดลิขสิทธิ์ที่มักมีมัลแวร์ฝังตัวมาด้วย",
+        "id": "risk_4_sub_1",
+        "name": "ส่งเสริมการใช้ซอฟต์แวร์ที่ถูกต้องและสร้างความตระหนัก (Compliance & Awareness)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 50,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_4_2",
+        "id": "risk_4_sub_2",
         "name": "จัดอบรมสั้น ๆ (Micro-learning) ในที่ประชุมประจำเดือน เพื่อสาธิตอันตรายจากการติดตั้งไฟล์จากแหล่งที่ไม่น่าเชื่อถือและวิธีการดาวน์โหลดที่ปลอดภัย",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 25,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 25
   },
   {
     "id": "risk_5",
-    "no": "",
+    "no": 5,
     "cluster": "การโจมตีด้วยมัลแวร์ (Malware Attacks)",
     "threat": "5. พนักงานเข้าถึงโฆษณาออนไลน์ (Malvertising) ตามเว็บต่างๆ ที่พาไปยังเว็บไซต์ที่มีมัลแวร์",
     "vulnerability": "5. ไม่มีระบบกรองเว็บไซด์ \nที่ป้องกันมัลแวร์ และอัพเดทเป็นประจำ",
@@ -323,45 +387,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ระบบกรองเนื้อหาและการเข้าถึงเว็บไซต์ (Web Filtering)",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_5_1",
-        "name": "ติดตั้งและตั้งค่าระบบ Web Filtering หรือ Firewall เพื่อบล็อกการเข้าถึงเว็บไซต์ที่มีความเสี่ยงสูงและโฆษณาแฝงมัลแวร์ (Malvertising)",
+        "id": "risk_5_sub_1",
+        "name": "ระบบกรองเนื้อหาและการเข้าถึงเว็บไซต์ (Web Filtering)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_5_2",
+        "id": "risk_5_sub_2",
         "name": "อัปเดตฐานข้อมูลเว็บไซต์อันตราย (Blacklist) ในระบบเครือข่ายของสำนักงานเป็นประจำทุกวันเพื่อให้ทันต่อภัยคุกคามใหม่ ๆ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 100,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 100
   },
   {
     "id": "risk_6",
-    "no": "2.0",
+    "no": 6,
     "cluster": "การโจมตีด้วยฟิชชิง (Phishing Attacks)",
     "threat": "1. การรับอีเมล์ที่มีฟิชชิง่หลอกให้ผู้ใช้กรอกข้อมูลสำคัญ เช่น รหัสผ่าน หรือข้อมูลทางการเงิน",
     "vulnerability": "1. ขาดการฝึกอบรมพนักงาน เช่น พนักงานไม่สามารถแยกแยะอีเมล์หรือเว็บไซต์ปลอมได้",
@@ -385,45 +465,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "เสริมสร้างความตระหนักรู้และทักษะการคัดกรอง",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_6_1",
-        "name": "จัดอบรม Cyber Awareness ประจำปี เน้นการสังเกตชื่อผู้ส่งและลิงก์ปลอม",
+        "id": "risk_6_sub_1",
+        "name": "เสริมสร้างความตระหนักรู้และทักษะการคัดกรอง",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_6_2",
+        "id": "risk_6_sub_2",
         "name": "ทดสอบส่งอีเมลฟิชชิงจำลอง (Phishing Simulation) เพื่อประเมินผลและฝึกเจ้าหน้าที่",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_7",
-    "no": "",
+    "no": 7,
     "cluster": "การโจมตีด้วยฟิชชิง (Phishing Attacks)",
     "threat": "2. Spear Phishing ที่กำหนดเป้าหมายเจาะจงบุคคลหรือหน่วยงาน หลุดเข้ามาในระบบ",
     "vulnerability": "2. ไม่มีระบบตรวจจับอีเมล์ฟิชชิง เช่น ไม่มีการใช้ตัวกรองอีเมล์เพื่อบล็อกอีเมล์ที่เป็นอันตราย",
@@ -447,45 +543,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ใช้ระบบตรวจสอบเชิงเทคนิคเพื่อคัดกรองภัยคุกคามที่มุ่งเป้าไปยังผู้บริหารหรือผู้มีอำนาจตัดสินใจ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_7_1",
-        "name": "อบรมตั้งค่าการปรับปรุงตัวกรองอีเมล (Email Filter) ของผู้ใช้งานให้เข้มขวดเป็นพิเศษ",
+        "id": "risk_7_sub_1",
+        "name": "ใช้ระบบตรวจสอบเชิงเทคนิคเพื่อคัดกรองภัยคุกคามที่มุ่งเป้าไปยังผู้บริหารหรือผู้มีอำนาจตัดสินใจ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_7_2",
+        "id": "risk_7_sub_2",
         "name": "ตรวจสอบ Log การเข้าใช้ระบบที่ผิดปกติ (Anomaly Detection) ของบัญชีระดับสูง",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_8",
-    "no": "",
+    "no": 8,
     "cluster": "การโจมตีด้วยฟิชชิง (Phishing Attacks)",
     "threat": "3. มีการรับส่งลิงก์ที่มีฟิชชิงผ่าน SMS หรือโซเชียลมีเดีย",
     "vulnerability": "3. การใช้รหัสผ่านซ้ำหรือไม่ปลอดภัย เช่น ผู้ใช้ตั้งรหัสผ่านที่เดาง่ายหรือใช้ซ้ำในหลายระบบ",
@@ -509,45 +621,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "จัดการความปลอดภัยส่วนบุคคลและการแจ้งข่าวสารภัยคุกคามอย่างรวดเร็ว",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_8_1",
-        "name": "กำหนด Password Policy บังคับใช้รหัสผ่านซับซ้อนและห้ามใช้ซ้ำกับสื่อโซเชียล",
+        "id": "risk_8_sub_1",
+        "name": "จัดการความปลอดภัยส่วนบุคคลและการแจ้งข่าวสารภัยคุกคามอย่างรวดเร็ว",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_8_2",
+        "id": "risk_8_sub_2",
         "name": "ประชาสัมพันธ์แจ้งเตือนภัยไซเบอร์รูปแบบใหม่ผ่านกลุ่ม LINE เครือข่ายสาธารณสุข",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_9",
-    "no": "",
+    "no": 9,
     "cluster": "การโจมตีด้วยฟิชชิง (Phishing Attacks)",
     "threat": "4. เข้าเว็บไซต์ปลอมที่เลียนแบบหน้าล็อกอินขององค์กรหรือบริการออนไลน์",
     "vulnerability": "4. ขาดการใช้การยืนยันตัวตนแบบหลายปัจจัย (MFA) เช่น ระบบไม่มีการยืนยันตัวตนเพิ่มเติมสำหรับการเข้าถึงข้อมูลสำคัญ",
@@ -571,45 +699,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "บังคับใช้เทคโนโลยีการยืนยันตัวตนหลายชั้นเพื่อป้องกันการถูกขโมยบัญชีผู้ใช้งาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_9_1",
-        "name": "บังคับใช้การยืนยันตัวตนแบบหลายปัจจัย (MFA) ในระบบ Email และ ERP",
+        "id": "risk_9_sub_1",
+        "name": "บังคับใช้เทคโนโลยีการยืนยันตัวตนหลายชั้นเพื่อป้องกันการถูกขโมยบัญชีผู้ใช้งาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_9_2",
+        "id": "risk_9_sub_2",
         "name": "รวบรวมรายชื่อ URL ทางการของระบบงานทั้งหมดให้เจ้าหน้าที่ปักหมุดใช้งาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 30,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 65,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 65
   },
   {
     "id": "risk_10",
-    "no": "",
+    "no": 10,
     "cluster": "การโจมตีด้วยฟิชชิง (Phishing Attacks)",
     "threat": "5. ถูกระบบโทรศัพท์ปลอม (Call center) หลอกขอข้อมูลส่วนตัว",
     "vulnerability": "5. ไม่มีกระบวนการยืนยันการสื่อสารที่ปลอดภัย เช่น ขาดนโยบายการยืนยันตัวตนของผู้ส่งอีเมล์หรือข้อความ",
@@ -633,45 +777,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "สร้างขั้นตอนการปฏิบัติที่เป็นทางการเพื่อป้องกันการหลอกลวงผ่านโทรศัพท์และเพิ่มความเชื่อมั่นในการประสานงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_10_1",
-        "name": "ออกนโยบาย (SOP) ห้ามขอรหัสผ่านหรือข้อมูลส่วนตัวทางโทรศัพท์เด็ดขาด",
+        "id": "risk_10_sub_1",
+        "name": "สร้างขั้นตอนการปฏิบัติที่เป็นทางการเพื่อป้องกันการหลอกลวงผ่านโทรศัพท์และเพิ่มความเชื่อมั่นในการประสานงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_10_2",
+        "id": "risk_10_sub_2",
         "name": "สร้างช่องทางตรวจสอบเจ้าหน้าที่และรับแจ้งเหตุผ่าน LINE OA ทางการของ สสจ.",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_11",
-    "no": "3.0",
+    "no": 11,
     "cluster": "ภัยคุกคามจากบุคคลภายใน (Insider Threats)",
     "threat": "1. การใช้งานข้อมูลโดยใช้อำนาจมิชอบ เช่น พนักงานที่มีสิทธิ์เข้าถึงข้อมูลสำคัญอาจนำข้อมูลไปใช้โดยไม่ได้รับอนุญาต",
     "vulnerability": "1. การควบคุมสิทธิ์การเข้าถึงที่ไม่เหมาะสม เช่น พนักงานบางคนได้รับสิทธิ์เข้าถึงข้อมูลมากเกินความจำเป็น",
@@ -695,45 +855,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปรับปรุงโครงสร้างสิทธิ์การเข้าถึงข้อมูลให้ตรงตามบทบาทภาระงานจริงของเจ้าหน้าที่แต่ละกลุ่มงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_11_1",
-        "name": "จัดทำทะเบียนสิทธิ์การเข้าถึงระบบ (Access Matrix) ตามโครงสร้างกลุ่มงานใน สสจ.",
+        "id": "risk_11_sub_1",
+        "name": "ปรับปรุงโครงสร้างสิทธิ์การเข้าถึงข้อมูลให้ตรงตามบทบาทภาระงานจริงของเจ้าหน้าที่แต่ละกลุ่มงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_11_2",
+        "id": "risk_11_sub_2",
         "name": "กำหนดการทบทวนสิทธิ์การเข้าถึงข้อมูลสำคัญ (Privilege Review) ทุก 6 เดือน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_12",
-    "no": "",
+    "no": 12,
     "cluster": "ภัยคุกคามจากบุคคลภายใน (Insider Threats)",
     "threat": "2. การรั่วไหลของข้อมูลโดยเจตนา เช่น พนักงานที่ไม่พอใจองค์กรส่งข้อมูลสำคัญให้คู่แข่งหรือบุคคลภายนอก",
     "vulnerability": "2. ขาดระบบตรวจสอบพฤติกรรม เช่น ไม่มีการติดตามกิจกรรมที่ผิดปกติในระบบของพนักงาน",
@@ -757,45 +933,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "เพิ่มศักยภาพในการตรวจจับกิจกรรมที่ผิดปกติเพื่อยับยั้งการกระทำผิดได้อย่างทันท่วงที",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_12_1",
-        "name": "เปิดใช้งานระบบบันทึกเหตุการณ์ (Audit Logs) ในฐานข้อมูลสำคัญและตรวจสอบย้อนหลังอย่างสม่ำเสมอ",
+        "id": "risk_12_sub_1",
+        "name": "เพิ่มศักยภาพในการตรวจจับกิจกรรมที่ผิดปกติเพื่อยับยั้งการกระทำผิดได้อย่างทันท่วงที",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_12_2",
+        "id": "risk_12_sub_2",
         "name": "ติดตั้งระบบแจ้งเตือนเมื่อมีการส่งออกไฟล์ข้อมูลจำนวนมาก (Massive Data Export) ผิดปกติ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_13",
-    "no": "",
+    "no": 13,
     "cluster": "ภัยคุกคามจากบุคคลภายใน (Insider Threats)",
     "threat": "3. กระทำผิดพลาดโดยไม่ได้ตั้งใจ เช่น การลบข้อมูลสำคัญหรือแชร์ข้อมูลให้บุคคลที่ไม่เกี่ยวข้อง",
     "vulnerability": "3. ขาดการฝึกอบรมเกี่ยวกับการปกป้องข้อมูล เช่น พนักงานไม่เข้าใจถึงความสำคัญของการปกป้องข้อมูล",
@@ -819,45 +1011,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ลดโอกาสการเกิด Human Error ด้วยการให้ความรู้และใช้เครื่องมือช่วยป้องกัน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_13_1",
-        "name": "จัดอบรมเชิงปฏิบัติการเรื่องการจัดการข้อมูลตามมาตรฐาน PDPA สำหรับเจ้าหน้าที่ทุกระดับ",
+        "id": "risk_13_sub_1",
+        "name": "ลดโอกาสการเกิด Human Error ด้วยการให้ความรู้และใช้เครื่องมือช่วยป้องกัน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_13_2",
+        "id": "risk_13_sub_2",
         "name": "ติดตั้งระบบหรือซอฟต์แวร์แจ้งเตือน (Confirmation Pop-up) ก่อนการลบหรือแชร์ข้อมูลสำคัญออกนอกหน่วยงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_14",
-    "no": "",
+    "no": 14,
     "cluster": "ภัยคุกคามจากบุคคลภายใน (Insider Threats)",
     "threat": "4. การใช้บัญชีที่ถูกยึดหรือถูกแฮ็ก (Inactive users) เช่น  บัญชีของพนักงานที่ถูกยึดหรือแฮ็กมีการนำไปใช้ในการกระทำที่ไม่เหมาะสม",
     "vulnerability": "4. ไม่มีการจัดการบัญชีผู้ใช้งานที่ออกจากองค์กร เช่น บัญชีของพนักงานที่ลาออกยังคงสามารถเข้าถึงระบบได้",
@@ -881,45 +1089,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปิดช่องโหว่จากบัญชีที่ตกค้างในระบบหลังเจ้าหน้าที่เปลี่ยนแปลงสถานะการทำงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_14_1",
-        "name": "เชื่อมโยงข้อมูลงานบุคคลกับฝ่ายไอทีเพื่อทำการปิดบัญชี (Disable Account) ทันทีเมื่อเจ้าหน้าที่ลาออกหรือย้ายหน่วยงาน",
+        "id": "risk_14_sub_1",
+        "name": "ปิดช่องโหว่จากบัญชีที่ตกค้างในระบบหลังเจ้าหน้าที่เปลี่ยนแปลงสถานะการทำงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_14_2",
+        "id": "risk_14_sub_2",
         "name": "สุ่มตรวจสอบบัญชีที่ไม่มีการเคลื่อนไหว (Inactive Accounts) เกิน 90 วัน เพื่อทำการระงับการใช้งานชั่วคราว",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 100,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 100
   },
   {
     "id": "risk_15",
-    "no": "",
+    "no": 15,
     "cluster": "ภัยคุกคามจากบุคคลภายใน (Insider Threats)",
     "threat": "5. มีการปลอมตัวเป็นบุคคลภายใน เช่น บุคคลภายนอกแฝงตัวเข้ามาในองค์กรผ่านการร่วมมือของพนักงานภายใน",
     "vulnerability": "5. ไม่มีการเข้ารหัสข้อมูลสำคัญ เช่น  ข้อมูลที่สำคัญไม่ได้รับการป้องกัน ทำให้ง่ายต่อการคัดลอกหรือส่งออก",
@@ -943,45 +1167,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันการนำข้อมูลไปใช้ประโยชน์แม้จะมีการเข้าถึงทางกายภาพหรือได้รับไฟล์ไปโดยมิชอบ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_15_1",
-        "name": "บังคับใช้การเข้ารหัสไฟล์ข้อมูล (Encryption) ที่มีความอ่อนไหวสูงก่อนการจัดเก็บหรือรับส่ง",
+        "id": "risk_15_sub_1",
+        "name": "ป้องกันการนำข้อมูลไปใช้ประโยชน์แม้จะมีการเข้าถึงทางกายภาพหรือได้รับไฟล์ไปโดยมิชอบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_15_2",
+        "id": "risk_15_sub_2",
         "name": "ปรับปรุงมาตรการควบคุมการเข้า-ออกห้อง Server และจุดเก็บข้อมูลสำคัญด้วยระบบ Biometrics หรือ Keycard",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_16",
-    "no": "4.0",
+    "no": 16,
     "cluster": "การละเมิดข้อมูล (Data Breaches)",
     "threat": "1. มีการแฮ็กระบบเพื่อเข้าถึงข้อมูลสำคัญ เช่น ข้อมูลลูกค้า หรือข้อมูลทางการเงิน",
     "vulnerability": "1. การขาดการเข้ารหัสข้อมูล (Encryption) เช่น ข้อมูลสำคัญไม่ได้รับการเข้ารหัสทั้งในขณะส่งและจัดเก็บข้อมูล",
@@ -1005,45 +1245,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ทำให้ข้อมูลที่ถูกโจรกรรมไปไม่สามารถนำไปใช้งานต่อได้หากไม่มีกุญแจถอดรหัส",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_16_1",
-        "name": "ติดตั้งใบรับรองความปลอดภัย (SSL/TLS) ให้กับทุกเว็บแอปพลิเคชันของ สสจ.สระแก้ว",
+        "id": "risk_16_sub_1",
+        "name": "ทำให้ข้อมูลที่ถูกโจรกรรมไปไม่สามารถนำไปใช้งานต่อได้หากไม่มีกุญแจถอดรหัส",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_16_2",
+        "id": "risk_16_sub_2",
         "name": "เข้ารหัสไฟล์ข้อมูลที่มีความอ่อนไหวสูง (Sensitive Data) ก่อนทำการจัดเก็บหรือส่งต่อตามมาตรฐาน PDPA",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_17",
-    "no": "",
+    "no": 17,
     "cluster": "การละเมิดข้อมูล (Data Breaches)",
     "threat": "2. มีการละเมิดข้อมูลจากการตั้งรหัสผ่านที่อ่อนแอ",
     "vulnerability": "2. ระบบที่ไม่ได้อัปเดต (Outdated Systems) เช่น ระบบปฏิบัติการและซอฟต์แวร์ที่ไม่ได้อัปเดตเป็นผลเปิดช่องโหว่ให้ถูกโจมตี",
@@ -1067,45 +1323,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปิดโอกาสการถูกแฮ็กผ่านช่องโหว่ของซอฟต์แวร์และระบบปฏิบัติการที่ใช้ในสำนักงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_17_1",
-        "name": "ติดตั้งระบบจัดการแพตช์ (Patch Management) เพื่ออัปเดตซอฟต์แวร์และ OS อัตโนมัติ",
+        "id": "risk_17_sub_1",
+        "name": "ปิดโอกาสการถูกแฮ็กผ่านช่องโหว่ของซอฟต์แวร์และระบบปฏิบัติการที่ใช้ในสำนักงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 50,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_17_2",
+        "id": "risk_17_sub_2",
         "name": "ตรวจสอบช่องโหว่ (Vulnerability Assessment) ของระบบจังหวัดเป็นรายปี",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 75,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 75
   },
   {
     "id": "risk_18",
-    "no": "",
+    "no": 18,
     "cluster": "การละเมิดข้อมูล (Data Breaches)",
     "threat": "3. มีการรั่วไหลของข้อมูลผ่านพนักงาน (โดยเจตนาหรือไม่เจตนา)",
     "vulnerability": "3. การตั้งรหัสผ่านที่ไม่ปลอดภัย เช่น ผู้ใช้ตั้งรหัสผ่านที่เดาง่ายหรือใช้รหัสผ่านซ้ำกันในหลายระบบ",
@@ -1129,45 +1401,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันการเดารหัสผ่านและการใช้รหัสผ่านซ้ำในหลายระบบงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_18_1",
-        "name": "ประกาศใช้ Password Policy ที่บังคับความซับซ้อนและห้ามใช้รหัสผ่านซ้ำกับระบบส่วนตัว",
+        "id": "risk_18_sub_1",
+        "name": "ป้องกันการเดารหัสผ่านและการใช้รหัสผ่านซ้ำในหลายระบบงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_18_2",
+        "id": "risk_18_sub_2",
         "name": "สุ่มตรวจสอบความมั่นคงปลอดภัยของรหัสผ่านในระบบงานสำคัญเป็นระยะ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_19",
-    "no": "",
+    "no": 19,
     "cluster": "การละเมิดข้อมูล (Data Breaches)",
     "threat": "4. มีการส่งข้อมูลสำคัญผ่านช่องทางที่ไม่ปลอดภัย เช่น อีเมล์ที่ไม่มีการเข้ารหัส",
     "vulnerability": "4. ขาดระบบตรวจสอบการเข้าถึง (Access Control):  ไม่มีการควบคุมสิทธิ์การเข้าถึงข้อมูลที่เหมาะสม",
@@ -1191,45 +1479,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "กำหนดสิทธิ์ให้เฉพาะผู้ที่เกี่ยวข้องและใช้ช่องทางที่ปลอดภัยในการสื่อสารข้อมูลสำคัญ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_19_1",
-        "name": "บังคับใช้การยืนยันตัวตนผ่าน VPN หรือ SSL สำหรับการเข้าถึงระบบภายในจากนอกสำนักงาน",
+        "id": "risk_19_sub_1",
+        "name": "กำหนดสิทธิ์ให้เฉพาะผู้ที่เกี่ยวข้องและใช้ช่องทางที่ปลอดภัยในการสื่อสารข้อมูลสำคัญ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_19_2",
+        "id": "risk_19_sub_2",
         "name": "กำหนดสิทธิ์การเข้าถึงข้อมูลตามบทบาทหน้าที่ (RBAC) ในระบบ ERP และฐานข้อมูลยุทธศาสตร์",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 100,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 100
   },
   {
     "id": "risk_20",
-    "no": "",
+    "no": 20,
     "cluster": "การละเมิดข้อมูล (Data Breaches)",
     "threat": "5. มีการโจมตีผ่าน API หรือระบบที่ไม่ได้รับการตรวจสอบความปลอดภัย",
     "vulnerability": "5. ขาดการตรวจสอบกิจกรรมในระบบ เช่น ไม่มีการตรวจสอบกิจกรรมที่น่าสงสัยในระบบหรือการแจ้งเตือน",
@@ -1253,45 +1557,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "เพิ่มศักยภาพในการตรวจพบการพยายามบุกรุกผ่านช่องทางเชื่อมต่อระบบ (API)",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_20_1",
-        "name": "เปิดใช้งานและจัดเก็บ Log การใช้งาน API เชื่อมโยงข้อมูลระหว่างหน่วยงานอย่างเป็นระบบ",
+        "id": "risk_20_sub_1",
+        "name": "เพิ่มศักยภาพในการตรวจพบการพยายามบุกรุกผ่านช่องทางเชื่อมต่อระบบ (API)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_20_2",
+        "id": "risk_20_sub_2",
         "name": "ตั้งค่าระบบแจ้งเตือน (Alert) เมื่อพบพฤติกรรมการเรียกใช้ข้อมูลที่ผิดปกติหรือมีปริมาณมากเกินเกณฑ์",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_21",
-    "no": "5.0",
+    "no": 21,
     "cluster": "การโจมตีแบบ Denial of Service (DoS) และ Distributed Denial of Service (DDoS)",
     "threat": "1. พบว่ามีการส่งคำขอแปลกปลอมจำนวนมหาศาลเพื่อทำให้ระบบหยุดชะงัก",
     "vulnerability": "1. ไม่มีการกำหนดขีดจำกัดคำขอหรือกรองคำขอ เช่น  ระบบไม่สามารถจำกัดจำนวนคำขอที่ส่งเข้ามาภายในช่วงเวลาที่กำหนดได้",
@@ -1315,45 +1635,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันการทำงานหนักเกินไปของ Server โดยการจำกัดจำนวนคำขอจากแหล่งเดียว",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_21_1",
-        "name": "ตั้งค่า Rate Limiting บน Firewall หรือ Gateway ของสำนักงานเพื่อจำกัดจำนวนคำขอ",
+        "id": "risk_21_sub_1",
+        "name": "ป้องกันการทำงานหนักเกินไปของ Server โดยการจำกัดจำนวนคำขอจากแหล่งเดียว",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_21_2",
+        "id": "risk_21_sub_2",
         "name": "ติดตั้ง Web Application Firewall (WAF) เพื่อกรอง Request ที่ผิดปกติก่อนถึง Server Dashboard จังหวัด",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_22",
-    "no": "",
+    "no": 22,
     "cluster": "การโจมตีแบบ Denial of Service (DoS) และ Distributed Denial of Service (DDoS)",
     "threat": "2. ถูกการโจมตีแบบ DNS Amplification ที่เพิ่มปริมาณคำขอเพื่อให้ระบบของเรา (จุดเป้าหมาย) รับภาระเกินกำลัง",
     "vulnerability": "2. ระบบตรวจจับการโจมตีที่ไม่เพียงพอ เช่น ไม่มีเครื่องมือในการตรวจจับและตอบสนองต่อพฤติกรรมที่ผิดปกติ",
@@ -1377,45 +1713,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันการถูกใช้เป็นเครื่องมือหรือถูกโจมตีผ่านระบบ DNS",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_22_1",
-        "name": "ตั้งค่า DNS Server ของสำนักงานให้ปฏิเสธคำขอแบบ Recursive จากภายนอกที่ไม่มีสิทธิ์",
+        "id": "risk_22_sub_1",
+        "name": "ป้องกันการถูกใช้เป็นเครื่องมือหรือถูกโจมตีผ่านระบบ DNS",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_22_2",
+        "id": "risk_22_sub_2",
         "name": "ตรวจสอบ Log ของ DNS Query อย่างสม่ำเสมอเพื่อค้นหาพฤติกรรมการเรียกข้อมูลที่ผิดปกติ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_23",
-    "no": "",
+    "no": 23,
     "cluster": "การโจมตีแบบ Denial of Service (DoS) และ Distributed Denial of Service (DDoS)",
     "threat": "3. ถูกการใช้ Botnet เพื่อกระจายการโจมตีจากหลายแหล่งไปยังเป้าหมาย",
     "vulnerability": "3. ไม่มีการใช้ Load Balancer เช่น  ระบบไม่สามารถกระจายโหลดภาระของการประมวลผลคำขอไปยังเซิร์ฟเวอร์อื่นๆได้",
@@ -1439,45 +1791,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "เพิ่มความสามารถในการรองรับปริมาณงานที่เข้ามาพร้อมกันจำนวนมาก",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_23_1",
-        "name": "ติดตั้ง Load Balancer เพื่อกระจายปริมาณงานไปยัง Server สำรองในระบบเครือข่าย",
+        "id": "risk_23_sub_1",
+        "name": "เพิ่มความสามารถในการรองรับปริมาณงานที่เข้ามาพร้อมกันจำนวนมาก",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_23_2",
+        "id": "risk_23_sub_2",
         "name": "พิจารณาใช้บริการ CDN หรือ Cloud-based DDoS Protection สำหรับระบบที่เปิดเผยสู่สาธารณะ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_24",
-    "no": "",
+    "no": 24,
     "cluster": "การโจมตีแบบ Denial of Service (DoS) และ Distributed Denial of Service (DDoS)",
     "threat": "4. ถูกการโจมตีในระดับแอปพลิเคชัน เช่น การทำให้เว็บเซิร์ฟเวอร์ไม่สามารถรองรับคำขอที่ถูกต้องได้",
     "vulnerability": "4. ความปลอดภัยของ DNS และโปรโตคอลอยู่ในระดับต่ำ เช่น DNS Server ไม่มีการกำหนดค่าเพื่อป้องกันการโจมตี อาทิ DNS Spoofing หรือ Amplification",
@@ -1501,45 +1869,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ตรวจสอบและอัปเดตช่องทางการรับส่งข้อมูลให้เป็นไปตามมาตรฐานความปลอดภัยสูง",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_24_1",
-        "name": "อัปเดตซอฟต์แวร์เว็บเซิร์ฟเวอร์ (เช่น Apache/IIS) ให้เป็นเวอร์ชันล่าสุดเพื่ออุดช่องโหว่",
+        "id": "risk_24_sub_1",
+        "name": "ตรวจสอบและอัปเดตช่องทางการรับส่งข้อมูลให้เป็นไปตามมาตรฐานความปลอดภัยสูง",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_24_2",
+        "id": "risk_24_sub_2",
         "name": "ปิดใช้บริการ DNSSEC เพื่อป้องกันการปลอมแปลงข้อมูลชื่อโดเมนของหน่วยงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_25",
-    "no": "",
+    "no": 25,
     "cluster": "การโจมตีแบบ Denial of Service (DoS) และ Distributed Denial of Service (DDoS)",
     "threat": "5. ถูกการโจมตีโปรโตคอล เช่น SYN Flood, Ping of Death",
     "vulnerability": "5. มีการจัดการทรัพยากรระบบไม่เหมาะสม เช่น ระบบเซิร์ฟเวอร์ไม่มีแบนด์วิดท์หรือทรัพยากรเพียงพอที่จะรองรับการโจมตี",
@@ -1563,45 +1947,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ตั้งค่าอุปกรณ์เครือข่ายให้ทนทานต่อการโจมตีทางเทคนิคระดับพื้นฐาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_25_1",
-        "name": "ปรับแต่งคอนฟิก Firewall เพื่อป้องกัน SYN Flood และการโจมตีผ่านโปรโตคอลพื้นฐาน",
+        "id": "risk_25_sub_1",
+        "name": "ตั้งค่าอุปกรณ์เครือข่ายให้ทนทานต่อการโจมตีทางเทคนิคระดับพื้นฐาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_25_2",
+        "id": "risk_25_sub_2",
         "name": "ประสานงานกับผู้ให้บริการอินเทอร์เน็ต (ISP) เพื่อขยายแบนด์วิดท์ชั่วคราวเมื่อเกิดเหตุการณ์โจมตี",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_26",
-    "no": "6.0",
+    "no": 26,
     "cluster": "การโจมตีแบบ Man-in-the-Middle (MitM)",
     "threat": "1. มีการดักฟังการสื่อสาร (Eavesdropping) เช่น แฮ็กเกอร์ดักจับข้อมูลระหว่างผู้ใช้และเซิร์ฟเวอร์ อาทิ รหัสผ่านหรือข้อมูลสำคัญ",
     "vulnerability": "1. การสื่อสารที่ไม่มีการเข้ารหัส เช่น  การส่งข้อมูลผ่าน HTTP แทน HTTPS",
@@ -1625,30 +2025,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": true,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_26_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_27",
-    "no": "",
+    "no": 27,
     "cluster": "การโจมตีแบบ Man-in-the-Middle (MitM)",
     "threat": "2. ถูกการปลอมแปลงเว็บไซต์ (Spoofing) เช่น สร้างเว็บไซต์หรือเครือข่าย Wi-Fi ปลอมเพื่อหลอกให้ผู้ใช้ป้อนข้อมูล",
     "vulnerability": "2. เครือข่าย Wi-Fi สาธารณะ เช่น ไม่มีการตั้งค่าความปลอดภัย อาทิ WPA2/WPA3",
@@ -1672,30 +2079,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": true,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_27_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_28",
-    "no": "",
+    "no": 28,
     "cluster": "การโจมตีแบบ Man-in-the-Middle (MitM)",
     "threat": "3. ถูกการโจมตีผ่าน Wi-Fi ที่ไม่ปลอดภัย เช่น การโจมตีในเครือข่าย Wi-Fi สาธารณะที่ไม่มีการเข้ารหัส",
     "vulnerability": "3. การไม่ตรวจสอบใบรับรอง SSL/TLS เช่น ผู้ใช้ไม่สามารถแยกแยะใบรับรองปลอมจากใบรับรองจริงได้",
@@ -1719,30 +2133,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": true,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_28_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_29",
-    "no": "",
+    "no": 29,
     "cluster": "การโจมตีแบบ Man-in-the-Middle (MitM)",
     "threat": "4. มีการ Hijack เซสชัน (Session Hijacking) เช่น การเข้าควบคุมเซสชันของผู้ใช้งานที่เข้าสู่ระบบแล้ว",
     "vulnerability": "4. การขาดการยืนยันตัวตนแบบหลายปัจจัย (MFA) เช่น ไม่มีการป้องกันเมื่อเซสชันของผู้ใช้ถูกแฮ็ก",
@@ -1766,30 +2187,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_29_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_30",
-    "no": "",
+    "no": 30,
     "cluster": "การโจมตีแบบ Man-in-the-Middle (MitM)",
     "threat": "5. มีการปลอมใบรับรอง (Certificate Spoofing) เช่น การใช้ใบรับรอง SSL/TLS ปลอมเพื่อลวงผู้ใช้",
     "vulnerability": "5. การตั้งค่าอุปกรณ์ที่ไม่ปลอดภัย เช่น  อุปกรณ์ IoT หรือเครือข่ายในองค์กรไม่มีการตั้งค่าความปลอดภัยที่เหมาะสม",
@@ -1813,30 +2241,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_30_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_31",
-    "no": "7.0",
+    "no": 31,
     "cluster": "การโจมตีด้วยแรนซัมแวร์ (Ransomware Attacks)",
     "threat": "1. มีการดาวน์โหลดไฟล์หรือซอฟต์แวร์ที่แฝงแรนซัมแวร์ผ่านอีเมล์ฟิชชิง",
     "vulnerability": "1. การขาดการฝึกอบรมพนักงาน เช่น  พนักงานเปิดไฟล์แนบที่เป็นอันตรายจากอีเมล์ฟิชชิง",
@@ -1860,45 +2295,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "มุ่งเน้นการปรับเปลี่ยนพฤติกรรมเจ้าหน้าที่เพื่อลดโอกาสการนำเข้าแรนซัมแวร์ผ่านช่องทางสื่อสารหลัก",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_31_1",
-        "name": "จัดอบรมและทดสอบ Phishing Simulation โดยใช้ตัวอย่างไฟล์แนบที่มักแฝงแรนซัมแวร์",
+        "id": "risk_31_sub_1",
+        "name": "มุ่งเน้นการปรับเปลี่ยนพฤติกรรมเจ้าหน้าที่เพื่อลดโอกาสการนำเข้าแรนซัมแวร์ผ่านช่องทางสื่อสารหลัก",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_31_2",
+        "id": "risk_31_sub_2",
         "name": "ประชาสัมพันธ์แจ้งเตือนภัยแรนซัมแวร์รูปแบบใหม่ผ่านกลุ่ม LINE เครือข่ายสุขภาพจังหวัด",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 80,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 40,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 40
   },
   {
     "id": "risk_32",
-    "no": "",
+    "no": 32,
     "cluster": "การโจมตีด้วยแรนซัมแวร์ (Ransomware Attacks)",
     "threat": "2. ถูกการโจมตีโดยใช้ช่องโหว่ในระบบหรือซอฟต์แวร์ที่ไม่ได้อัปเดต",
     "vulnerability": "2. ซอฟต์แวร์และระบบปฏิบัติการที่ไม่ได้อัปเดต เช่น ระบบหรือซอฟต์แวร์ มีช่องโหว่ที่เปิดให้แรนซัมแวร์เข้าถึงได้",
@@ -1922,45 +2373,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปิดประตูการบุกรุกเชิงเทคนิคด้วยการทำให้ระบบปฏิบัติการและแอปพลิเคชันเป็นปัจจุบันเสมอ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_32_1",
-        "name": "จัดทำวงรอบการอัปเดตแพตช์ความปลอดภัย (Security Patch) สำหรับเครื่องแม่ข่ายและคอมพิวเตอร์สำนักงาน",
+        "id": "risk_32_sub_1",
+        "name": "ปิดประตูการบุกรุกเชิงเทคนิคด้วยการทำให้ระบบปฏิบัติการและแอปพลิเคชันเป็นปัจจุบันเสมอ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 50,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_32_2",
+        "id": "risk_32_sub_2",
         "name": "ตรวจสอบและประเมินช่องโหว่ (VA Scan) ของระบบ ก่อนใช้งานจริง",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 75,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 75
   },
   {
     "id": "risk_33",
-    "no": "",
+    "no": 33,
     "cluster": "การโจมตีด้วยแรนซัมแวร์ (Ransomware Attacks)",
     "threat": "3. มีการใช้ Remote Desktop Protocol (RDP) ที่ไม่ได้ตั้งค่าความปลอดภัย",
     "vulnerability": "3. การขาดการสำรองข้อมูล (Backup) เช่น ไม่มีระบบสำรองข้อมูลที่สามารถกู้คืนได้เมื่อถูกโจมตี",
@@ -1984,45 +2451,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "เน้นการเตรียมพร้อมเพื่อกู้คืนระบบให้กลับมาทำงานได้โดยเร็วที่สุดหากถูกโจมตีสำเร็จ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_33_1",
-        "name": "บังคับใช้กลยุทธ์สำรองข้อมูลแบบ 3-2-1 (3 ชุด, 2 สื่อ, 1 ชุดอยู่ Offline) สำหรับข้อมูล",
+        "id": "risk_33_sub_1",
+        "name": "เน้นการเตรียมพร้อมเพื่อกู้คืนระบบให้กลับมาทำงานได้โดยเร็วที่สุดหากถูกโจมตีสำเร็จ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_33_2",
+        "id": "risk_33_sub_2",
         "name": "จัดเตรียมเครื่องสำรองข้อมูล (NAS) ที่มีการแยกสิทธิ์การเข้าถึงอย่างเด็ดขาดจากระบบเครือข่ายหลัก",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 50,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 75,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 75
   },
   {
     "id": "risk_34",
-    "no": "",
+    "no": 34,
     "cluster": "การโจมตีด้วยแรนซัมแวร์ (Ransomware Attacks)",
     "threat": "4. มีการแอบแฝงแรนซัมแวร์ในอุปกรณ์ USB Storage หรืออุปกรณ์พกพาอื่นๆ",
     "vulnerability": "4. การตั้งค่าความปลอดภัยของ RDP ที่ไม่เหมาะสม เช่น เปิดใช้งาน RDP โดยไม่มีการควบคุมการเข้าถึงที่เข้มงวด",
@@ -2046,45 +2529,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "จำกัดช่องทางการนำเข้าและขยายผลของแรนซัมแวร์ผ่านอุปกรณ์พกพาและการเชื่อมต่อภายนอก",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_34_1",
-        "name": "ปิดการใช้งาน RDP หรือเปลี่ยนไปใช้ VPN ร่วมกับ MFA สำหรับการสนับสนุนงานไอทีระยะไกล",
+        "id": "risk_34_sub_1",
+        "name": "จำกัดช่องทางการนำเข้าและขยายผลของแรนซัมแวร์ผ่านอุปกรณ์พกพาและการเชื่อมต่อภายนอก",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_34_2",
+        "id": "risk_34_sub_2",
         "name": "บังคับใช้ระบบ Endpoint Security ที่มีฟีเจอร์ Ransomware Protection ในการสแกนอุปกรณ์พกพาอัตโนมัติ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 100,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 100
   },
   {
     "id": "risk_35",
-    "no": "",
+    "no": 35,
     "cluster": "การโจมตีด้วยแรนซัมแวร์ (Ransomware Attacks)",
     "threat": "5. มีการกระจายแรนซัมแวร์ผ่านเครือข่ายที่เชื่อมโยงกับองค์กร",
     "vulnerability": "5. การขาดระบบป้องกันมัลแวร์ที่มีประสิทธิภาพ เช่น ไม่มีซอฟต์แวร์ป้องกันแรนซัมแวร์ที่สามารถตรวจจับและบล็อกการโจมตี",
@@ -2108,45 +2607,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ใช้ระบบป้องกันระดับสูงเพื่อดักจับและหยุดการกระจายตัวของแรนซัมแวร์ในเครือข่ายสำนักงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_35_1",
-        "name": "ติดตั้งระบบป้องกันมัลแวร์ระดับ Endpoint Detection and Response (EDR) ในเครื่องที่มีความสำคัญสูง",
+        "id": "risk_35_sub_1",
+        "name": "ใช้ระบบป้องกันระดับสูงเพื่อดักจับและหยุดการกระจายตัวของแรนซัมแวร์ในเครือข่ายสำนักงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_35_2",
+        "id": "risk_35_sub_2",
         "name": "ทำการแยกส่วนเครือข่าย (Network Segmentation) เพื่อป้องกันการแพร่กระจายข้ามกลุ่มงานหรืออำเภอ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 100,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 100
   },
   {
     "id": "risk_36",
-    "no": "8.0",
+    "no": 36,
     "cluster": "การโจมตีด้วยวิศวกรรมสังคม (Social Engineering)",
     "threat": "1. Phishing -  มีการส่งอีเมล์หรือข้อความที่ดูน่าเชื่อถือเพื่อหลอกให้ผู้ใช้งาน ให้ข้อมูลสำคัญ เช่น รหัสผ่าน หรือข้อมูลส่วนตัว",
     "vulnerability": "1. การขาดความตระหนักของพนักงาน เช่น พนักงานไม่เข้าใจความเสี่ยงจาก Social Engineering",
@@ -2170,45 +2685,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "มุ่งเน้นการให้ความรู้เพื่อให้เจ้าหน้าที่เท่าทันกลโกงและไม่ตกเป็นเหยื่อของการหลอกขอข้อมูลสำคัญ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_36_1",
-        "name": "จัดอบรม Cyber Security Awareness ประจำปีให้แก่เจ้าหน้าที่ สสจ. และเครือข่าย",
+        "id": "risk_36_sub_1",
+        "name": "มุ่งเน้นการให้ความรู้เพื่อให้เจ้าหน้าที่เท่าทันกลโกงและไม่ตกเป็นเหยื่อของการหลอกขอข้อมูลสำคัญ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_36_2",
+        "id": "risk_36_sub_2",
         "name": "ประชาสัมพันธ์สื่อการสอน (Infographic) เรื่องการสังเกตข้อความหลอกลวงผ่านกลุ่ม LIN",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_37",
-    "no": "",
+    "no": 37,
     "cluster": "การโจมตีด้วยวิศวกรรมสังคม (Social Engineering)",
     "threat": "2. Spear Phishing -  ถูกการโจมตีที่ใช้การกำหนดเป้าหมายเฉพาะบุคคลหรือหน่วยงานเฉพาะ โดยใช้ข้อมูลส่วนตัวของผู้ใช้งาน เพื่อเพิ่มความน่าเชื่อถือ",
     "vulnerability": "2. ไม่มีการตรวจสอบตัวตนของผู้ขอข้อมูล เช่น ขาดกระบวนการยืนยันตัวตนก่อนให้ข้อมูลสำคัญ",
@@ -2232,30 +2763,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_37_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_38",
-    "no": "",
+    "no": 38,
     "cluster": "การโจมตีด้วยวิศวกรรมสังคม (Social Engineering)",
     "threat": "3. Pretexting - มีการสร้างสถานการณ์หลอกลวง เช่น แอบอ้างเป็นฝ่าย IT เพื่อขอข้อมูลสำคัญ",
     "vulnerability": "3. ไม่มีการควบคุมการเข้าถึงพื้นที่ทางกายภาพ เช่น การเข้า-ออกพื้นที่สำคัญไม่ได้รับการควบคุมอย่างเข้มงวด",
@@ -2279,45 +2817,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันบุคคลภายนอกแอบอ้างเข้ามาในพื้นที่ทำงานเพื่อจุดประสงค์ที่ไม่หวังดี",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_38_1",
-        "name": "ติดตั้งระบบควบคุมการเข้า-ออก (Access Control) ในห้อง Server และกลุ่มงานสุขภาพดิจิทัล",
+        "id": "risk_38_sub_1",
+        "name": "ป้องกันบุคคลภายนอกแอบอ้างเข้ามาในพื้นที่ทำงานเพื่อจุดประสงค์ที่ไม่หวังดี",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_38_2",
+        "id": "risk_38_sub_2",
         "name": "ออกระเบียบการแลกบัตรและติดป้ายแสดงตนสำหรับผู้มาติดต่อหรือช่างจากภายนอก",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 100,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 100
   },
   {
     "id": "risk_39",
-    "no": "",
+    "no": 39,
     "cluster": "การโจมตีด้วยวิศวกรรมสังคม (Social Engineering)",
     "threat": "4. Baiting - มีการหลอกล่อ วางเหยื่อ เพื่อให้ผู้ใช้งานนำไปใช้ เช่น อุปกรณ์ USB Storage ที่แฝงมัลแวร์เพื่อให้เป้าหมายหยิบไปใช้งาน",
     "vulnerability": "4. ขาดการป้องกันระบบสารสนเทศ เช่น ระบบไม่มีการกรองอีเมล์หรือเว็บไซต์ที่น่าสงสัย",
@@ -2341,45 +2895,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันมัลแวร์ที่มากับสื่อบันทึกข้อมูลที่พบโดยบังเอิญหรือไม่ได้ตรวจสอบ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_39_1",
-        "name": "ติดตั้งโปรแกรม Antivirus ที่มีระบบสแกนอัตโนมัติเมื่อเสียบ USB เข้ากับเครื่องคอมพิวเตอร์สำนักงาน",
+        "id": "risk_39_sub_1",
+        "name": "ป้องกันมัลแวร์ที่มากับสื่อบันทึกข้อมูลที่พบโดยบังเอิญหรือไม่ได้ตรวจสอบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_39_2",
+        "id": "risk_39_sub_2",
         "name": "รณรงค์ห้ามเจ้าหน้าที่ใช้แฟลชไดรฟ์ที่พบเจอหรือได้รับแจกฟรีกับระบบงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_40",
-    "no": "",
+    "no": 40,
     "cluster": "การโจมตีด้วยวิศวกรรมสังคม (Social Engineering)",
     "threat": "5. Tailgating - มีการเข้าถึงพื้นที่ที่มีการจำกัดการเข้าถึงพื้นที่ที่สำคัญ โดยติดตามผู้มีสิทธิ์เข้าไปในพื้นที่",
     "vulnerability": "5. การใช้โซเชียลมีเดียที่ไม่มีการควบคุม เช่น ข้อมูลสำคัญขององค์กรหรือพนักงานถูกเผยแพร่ในโซเชียลมีเดีย",
@@ -2403,45 +2973,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ควบคุมพฤติกรรมการแชร์ข้อมูลและการเข้าถึงพื้นที่หวงห้ามเพื่อป้องกันการรั่วไหลของข้อมูล",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_40_1",
-        "name": "จัดทำนโยบายการใช้โซเชียลมีเดีย (Social Media Policy) สำหรับเจ้าหน้าที่เพื่อไม่ให้เผลอเผยแพร่ภาพข้อมูลสำคัญ",
+        "id": "risk_40_sub_1",
+        "name": "ควบคุมพฤติกรรมการแชร์ข้อมูลและการเข้าถึงพื้นที่หวงห้ามเพื่อป้องกันการรั่วไหลของข้อมูล",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_40_2",
+        "id": "risk_40_sub_2",
         "name": "ติดตั้งกล้องวงจรปิด (CCTV) บริเวณทางเข้าพื้นที่จำกัดเพื่อตรวจสอบการลักลอบเข้าถึง",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 100,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 50,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 50
   },
   {
     "id": "risk_41",
-    "no": "9.0",
+    "no": 41,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของคลาวด์ (Cloud Security Risks)",
     "threat": "1. การตั้งค่าคลาวด์ที่ไม่ปลอดภัย (Misconfiguration) เช่น การเปิดเผยข้อมูลที่สำคัญบางอย่างบนอินเทอร์เน็ตเนื่องจากการตั้งค่าที่ผิดพลาด จึงต้องยอมเปิดเผย",
     "vulnerability": "1. ขาดการตรวจสอบการตั้งค่าที่รัดกุม เช่น ไม่มีการตรวจสอบหรือปรับปรุงการตั้งค่าความปลอดภัยในระบบคลาวด์",
@@ -2465,30 +3051,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_41_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_42",
-    "no": "",
+    "no": 42,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของคลาวด์ (Cloud Security Risks)",
     "threat": "2. ถูกการโจมตี API เช่น แฮ็กเกอร์โจมตี API ที่ไม่ได้รับการป้องกัน อาทิ API Key หรือ Token ที่ไม่ได้รับการเข้ารหัส",
     "vulnerability": "2. การควบคุมการเข้าถึงที่ไม่เหมาะสม เช่น สิทธิ์การเข้าถึงคลาวด์ถูกกำหนดอย่างไม่รัดกุม เช่น ทุกคนสามารถเข้าถึงได้",
@@ -2512,30 +3105,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_42_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_43",
-    "no": "",
+    "no": 43,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของคลาวด์ (Cloud Security Risks)",
     "threat": "3. มีการขโมยข้อมูลในระหว่างการส่งข้อมูล เช่น การดักฟังข้อมูลที่ไม่ได้เข้ารหัสระหว่างการส่งข้อมูล",
     "vulnerability": "3. การขาดการเข้ารหัสข้อมูล เช่น ข้อมูลที่จัดเก็บหรือส่งผ่านคลาวด์ไม่ได้รับการเข้ารหัส",
@@ -2559,30 +3159,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_43_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_44",
-    "no": "",
+    "no": 44,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของคลาวด์ (Cloud Security Risks)",
     "threat": "4. มีการแฮ็กบัญชีผู้ใช้คลาวด์ เช่น ผู้โจมตีเข้าควบคุมบัญชีผ่านช่องโหว่ของรหัสผ่านหรือการฟิชชิง",
     "vulnerability": "4. การไม่ปฏิบัติตามกฎระเบียบหรือมาตรฐานความปลอดภัยของระบบคลาวด์ เช่น ระบบคลาวด์ไม่ได้รับการปรับให้สอดคล้องกับมาตรฐาน เช่น ISO 27001, 27018, 27701",
@@ -2606,30 +3213,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_44_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_45",
-    "no": "",
+    "no": 45,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของคลาวด์ (Cloud Security Risks)",
     "threat": "5. ถูกมัลแวร์ในคลาวด์ เช่น การอัปโหลดไฟล์ที่แฝงมัลแวร์ขึ้นสู่ระบบคลาวด์และกระจายไปยังผู้ใช้รายอื่นๆ",
     "vulnerability": "5. การพึ่งพาผู้ให้บริการคลาวด์โดยไม่มีการตรวจสอบมาตรฐาน เช่น ขาดการตรวจสอบนโยบายความปลอดภัยของผู้ให้บริการคลาวด์",
@@ -2653,30 +3267,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_45_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_46",
-    "no": "10.0",
+    "no": 46,
     "cluster": "ความเสี่ยงจากผู้จำหน่ายภายนอก (Third-Party Vendor Risks)",
     "threat": "1. มีการเข้าถึงข้อมูลโดยไม่ได้รับอนุญาตจากผู้จำหน่าย (3rd Party/Suppliers) ที่ไม่ได้มีการควบคุมความปลอดภัยอาจทำให้ข้อมูลขององค์กรรั่วไหล",
     "vulnerability": "1. การขาดกระบวนการตรวจสอบผู้จำหน่าย (3rd Party/Suppliers) เช่น ไม่มีการตรวจสอบความปลอดภัยของผู้จำหน่าย (3rd Party/Suppliers) ก่อนเซ็นต์สัญญา",
@@ -2700,30 +3321,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_46_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_47",
-    "no": "",
+    "no": 47,
     "cluster": "ความเสี่ยงจากผู้จำหน่ายภายนอก (Third-Party Vendor Risks)",
     "threat": "2. มีการโจมตีผ่านซัพพลายเชน (Supply Chain Attacks) เช่น ผู้โจมตีใช้ช่องโหว่ของซัพพลายเออร์เพื่อเข้าถึงระบบองค์กร",
     "vulnerability": "2. ไม่มีข้อตกลงด้านความปลอดภัย (Security SLA) เช่น ขาดข้อตกลงที่กำหนดบทบาทและความรับผิดชอบด้านความปลอดภัย",
@@ -2747,30 +3375,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_47_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_48",
-    "no": "",
+    "no": 48,
     "cluster": "ความเสี่ยงจากผู้จำหน่ายภายนอก (Third-Party Vendor Risks)",
     "threat": "3. พบว่าผู้จำหน่ายขาดการปฏิบัติตามกฎระเบียบ เช่น ผู้จำหน่ายไม่ปฏิบัติตามมาตรฐานหรือข้อกำหนดด้านความปลอดภัย เช่น ISO 27001, 27018, 27701",
     "vulnerability": "3. การเข้าถึงระบบที่ไม่เหมาะสม:  ผู้จำหน่ายได้รับสิทธิ์เข้าถึงระบบมากเกินความจำเป็น",
@@ -2794,45 +3429,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "จำกัดสิทธิ์ผู้รับจ้างและบังคับใช้ข้อตกลงคุ้มครองข้อมูลส่วนบุคคลตามมาตรฐาน PDPA",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_48_1",
-        "name": "บังคับใช้การยืนยันตัวตนแบบหลายปัจจัย (MFA) สำหรับผู้จำหน่ายที่ต้องรีโมทเข้ามาดูแลระบบสารสนเทศ",
+        "id": "risk_48_sub_1",
+        "name": "จำกัดสิทธิ์ผู้รับจ้างและบังคับใช้ข้อตกลงคุ้มครองข้อมูลส่วนบุคคลตามมาตรฐาน PDPA",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_48_2",
+        "id": "risk_48_sub_2",
         "name": "จัดทำข้อตกลงการประมวลผลข้อมูล (Data Processing Agreement - DPA) ร่วมกับผู้จำหน่ายตามกฎหมาย PDPA",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_49",
-    "no": "",
+    "no": 49,
     "cluster": "ความเสี่ยงจากผู้จำหน่ายภายนอก (Third-Party Vendor Risks)",
     "threat": "4. การพึ่งพาผู้จำหน่ายที่ไม่มีความมั่นคงในการบริการ เช่น ความล้มเหลวของผู้จำหน่าย อาทิ การหยุดให้บริการ อาจส่งผลกระทบต่อธุรกิจ",
     "vulnerability": "4. ขาดการเฝ้าระวังความปลอดภัยของผู้จำหน่าย เช่น ไม่มีการติดตามการปฏิบัติงานของผู้จำหน่ายในด้านความปลอดภัย",
@@ -2856,45 +3507,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันการหยุดชะงักของระบบสำคัญจากการบริหารจัดการของผู้จำหน่าย",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_49_1",
-        "name": "จัดทำแผนความต่อเนื่องทางธุรกิจ (BCP) ในกรณีผู้ให้บริการหลักไม่สามารถให้บริการได้",
+        "id": "risk_49_sub_1",
+        "name": "ป้องกันการหยุดชะงักของระบบสำคัญจากการบริหารจัดการของผู้จำหน่าย",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_49_2",
+        "id": "risk_49_sub_2",
         "name": "ตรวจประเมินประสิทธิภาพและมาตรฐานความปลอดภัยของผู้จำหน่าย (Vendor Audit) เป็นรายปี",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_50",
-    "no": "",
+    "no": 50,
     "cluster": "ความเสี่ยงจากผู้จำหน่ายภายนอก (Third-Party Vendor Risks)",
     "threat": "5. การแชร์ข้อมูลระหว่างกันกับผู้จำหน่ายที่ไม่ได้มีการป้องกัน เช่น การส่งข้อมูลสำคัญผ่านช่องทางที่ไม่มีการเข้ารหัส",
     "vulnerability": "5. การแชร์ข้อมูลกับผู้จำหน่ายหลายๆ ราย ทำให้ยิ่งแชร์ข้อมูลกับผู้จำหน่ายมากๆ ความเสี่ยงที่ข้อมูลจะรั่วไหลก็ยิ่งสูง",
@@ -2918,45 +3585,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ลดปริมาณการแชร์ข้อมูลที่ไม่จำเป็นและเพิ่มความปลอดภัยในการรับส่งข้อมูลระหว่างหน่วยงาน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_50_1",
-        "name": "บังคับใช้การรับส่งข้อมูลผ่านช่องทางที่มีการเข้ารหัส (Encrypted Channel) เช่น SFTP หรือ VPN เท่านั้น",
+        "id": "risk_50_sub_1",
+        "name": "ลดปริมาณการแชร์ข้อมูลที่ไม่จำเป็นและเพิ่มความปลอดภัยในการรับส่งข้อมูลระหว่างหน่วยงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_50_2",
+        "id": "risk_50_sub_2",
         "name": "จัดทำบัญชีรายการข้อมูล (Data Inventory) ที่แชร์ให้ผู้จำหน่ายแต่ละรายเพื่อควบคุมและตรวจสอบการใช้งาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_51",
-    "no": "11.0",
+    "no": 51,
     "cluster": "ความเสี่ยงของอุปกรณ์มือถือ (Mobile Device Risks) ขององค์กร",
     "threat": "1. มีการสูญหายหรือถูกขโมย เช่น อุปกรณ์ที่เก็บข้อมูลสำคัญถูกขโมยหรือสูญหายโดยไม่มีการป้องกัน",
     "vulnerability": "1. ไม่มีการเข้ารหัสข้อมูล เช่น ข้อมูลในอุปกรณ์ไม่ได้รับการเข้ารหัส ทำให้ง่ายต่อการเข้าถึงเมื่ออุปกรณ์สูญหาย",
@@ -2980,30 +3663,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_51_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_52",
-    "no": "",
+    "no": 52,
     "cluster": "ความเสี่ยงของอุปกรณ์มือถือ (Mobile Device Risks) ขององค์กร",
     "threat": "2. มัลแวร์ในมือถือขององค์กร เช่น การติดตั้งแอปพลิเคชันที่มีมัลแวร์ซึ่งสามารถเข้าถึงข้อมูลในอุปกรณ์",
     "vulnerability": "2. การตั้งค่าความปลอดภัยที่ไม่เหมาะสม เช่น อุปกรณ์ไม่มีการตั้งรหัสผ่านหรือการล็อกหน้าจอ",
@@ -3027,30 +3717,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_52_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_53",
-    "no": "",
+    "no": 53,
     "cluster": "ความเสี่ยงของอุปกรณ์มือถือ (Mobile Device Risks) ขององค์กร",
     "threat": "3. มีการโจมตีผ่าน Wi-Fi สาธารณะ เช่น การดักจับข้อมูลจากอุปกรณ์ที่เชื่อมต่อเครือข่าย Wi-Fi ที่ไม่มีการป้องกัน",
     "vulnerability": "3. การดาวน์โหลดแอปพลิเคชันจากแหล่งที่ไม่น่าเชื่อถือ เช่น การติดตั้งแอปพลิเคชั่น จากร้านค้าที่ไม่ได้รับการรับรอง",
@@ -3074,45 +3771,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันการดักฟังข้อมูลและการฝังตัวของแรนซัมแวร์ผ่านแอปพลิเคชันแปลกปลอม",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_53_1",
-        "name": "จัดอบรมให้ความรู้เรื่องความเสี่ยงจากการใช้ Wi-Fi สาธารณะและการสังเกตแอปพลิเคชันปลอม",
+        "id": "risk_53_sub_1",
+        "name": "ป้องกันการดักฟังข้อมูลและการฝังตัวของแรนซัมแวร์ผ่านแอปพลิเคชันแปลกปลอม",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_53_2",
+        "id": "risk_53_sub_2",
         "name": "แนะนำให้เจ้าหน้าที่ใช้งาน VPN ของหน่วยงานเมื่อต้องเข้าถึงระบบฐานข้อมูลสำคัญผ่านเครือข่ายภายนอ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_54",
-    "no": "",
+    "no": 54,
     "cluster": "ความเสี่ยงของอุปกรณ์มือถือ (Mobile Device Risks) ขององค์กร",
     "threat": "4. Phishing ผ่านอุปกรณ์มือถือ เช่น การส่งข้อความหรืออีเมล์    ฟิชชิงเพื่อหลอกให้ผู้ใช้เปิดเผยข้อมูล",
     "vulnerability": "4. การขาดการควบคุมการใช้งาน BYODในองค์กร เช่น ไม่มีนโยบาย BYOD (Bring Your Own Device) ที่ชัดเจน",
@@ -3136,30 +3849,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_54_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_55",
-    "no": "",
+    "no": 55,
     "cluster": "ความเสี่ยงของอุปกรณ์มือถือ (Mobile Device Risks) ขององค์กร",
     "threat": "5. มีการเข้าถึงโดยไม่ได้รับอนุญาต เช่น การใช้ข้อมูลหรือแอปพลิเคชันในอุปกรณ์โดยผู้ไม่ได้รับอนุญาต",
     "vulnerability": "5. ไม่มีการอัปเดตระบบ เช่น อุปกรณ์ไม่ได้รับการอัปเดตซอฟต์แวร์และแพตช์ความปลอดภัย",
@@ -3183,45 +3903,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปิดช่องโหว่ด้านความปลอดภัยที่อาจถูกผู้โจมตีใช้ผ่านแอปพลิเคชันหรือ OS ที่ล้าสมัย",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_55_1",
-        "name": "กำหนดให้เจ้าหน้าที่ตั้งค่าอัปเดตระบบปฏิบัติการ (OS) และแอปพลิเคชันทำงานให้เป็นปัจจุบันเสมอ",
+        "id": "risk_55_sub_1",
+        "name": "ปิดช่องโหว่ด้านความปลอดภัยที่อาจถูกผู้โจมตีใช้ผ่านแอปพลิเคชันหรือ OS ที่ล้าสมัย",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_55_2",
+        "id": "risk_55_sub_2",
         "name": "บังคับใช้การยืนยันตัวตนแบบหลายปัจจัย (MFA) เมื่อต้องเข้าใช้งานแอปพลิเคชันสำคัญของหน่วยงานบนมือถือ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_56",
-    "no": "12.0",
+    "no": 56,
     "cluster": "ซอฟต์แวร์และระบบที่มีช่องโหว่ (Vulnerable Software and Systems)",
     "threat": "1. พบว่ามีการใช้ช่องโหว่ของซอฟต์แวร์ที่ไม่ได้อัปเดตเพื่อเข้าควบคุมระบบ (Exploitation of Unpatched Software)",
     "vulnerability": "1. ซอฟต์แวร์และระบบที่ไม่ได้อัปเดต เช่น การใช้เวอร์ชันที่ล้าสมัยของซอฟต์แวร์และระบบปฏิบัติการ",
@@ -3245,30 +3981,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_56_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_57",
-    "no": "",
+    "no": 57,
     "cluster": "ซอฟต์แวร์และระบบที่มีช่องโหว่ (Vulnerable Software and Systems)",
     "threat": "2. มีการโจมตีผ่านช่องโหว่ของระบบปฏิบัติการ เช่น การโจมตีแบบ Zero-Day",
     "vulnerability": "2. การตั้งค่าที่ไม่ปลอดภัย (Misconfiguration) เช่น การตั้งค่าซอฟต์แวร์หรือเซิร์ฟเวอร์ที่เปิดเผยข้อมูลสำคัญ ทำให้เปิดช่องโหว่",
@@ -3292,45 +4035,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "เสริมสร้างเกราะป้องกันระดับโครงสร้างพื้นฐานเพื่อลดโอกาสที่ช่องโหว่ใหม่ ๆ จะถูกนำมาใช้โจมตี",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_57_1",
-        "name": "จัดทำมาตรฐานการตั้งค่าความปลอดภัย (Security Baseline) สำหรับเครื่อง Server",
+        "id": "risk_57_sub_1",
+        "name": "เสริมสร้างเกราะป้องกันระดับโครงสร้างพื้นฐานเพื่อลดโอกาสที่ช่องโหว่ใหม่ ๆ จะถูกนำมาใช้โจมตี",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_57_2",
+        "id": "risk_57_sub_2",
         "name": "ติดตั้งระบบตรวจจับการบุกรุก (IDS/IPS) เพื่อคัดกรองพฤติกรรมที่เข้าข่ายการใช้ช่องโหว่ Zero-Day",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_58",
-    "no": "",
+    "no": 58,
     "cluster": "ซอฟต์แวร์และระบบที่มีช่องโหว่ (Vulnerable Software and Systems)",
     "threat": "3. มีการโจมตีผ่านแอปพลิเคชันเว็บ เช่น SQL Injection, Cross-Site Scripting (XSS)",
     "vulnerability": "3. การใช้ซอฟต์แวร์ละเมิดลิขสิทธิ์ เช่น ซอฟต์แวร์ที่ไม่มีการรับประกันความปลอดภัยหรือไม่มีแพตช์อัปเดตหรือผ่านการถอดระหัสที่ไม่สมบรูณ์",
@@ -3354,30 +4113,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_58_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_59",
-    "no": "",
+    "no": 59,
     "cluster": "ซอฟต์แวร์และระบบที่มีช่องโหว่ (Vulnerable Software and Systems)",
     "threat": "4. มีการแฝงมัลแวร์ในส่วนของปลั๊กอินหรือส่วนเสริมของซอฟต์แวร์",
     "vulnerability": "4. ไม่มีระบบจัดการช่องโหว่ เช่น ขาดเครื่องมือและกระบวนการในการค้นหาและแก้ไขช่องโหว่ในระบบ",
@@ -3401,45 +4167,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "สร้างกระบวนการค้นหาและแก้ไขจุดอ่อนของระบบอย่างเป็นระบบก่อนที่จะเกิดปัญหา",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_59_1",
-        "name": "ใช้เครื่องมือสแกนหาช่องโหว่ (Vulnerability Scanner) ตรวจสอบระบบเครือข่ายของ สสจ. เป็นรายไตรมาส",
+        "id": "risk_59_sub_1",
+        "name": "สร้างกระบวนการค้นหาและแก้ไขจุดอ่อนของระบบอย่างเป็นระบบก่อนที่จะเกิดปัญหา",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_59_2",
+        "id": "risk_59_sub_2",
         "name": "กำหนดรายชื่อส่วนเสริม (Extensions/Plugins) ที่อนุญาตให้ติดตั้งและใช้งานได้ในองค์กร (Whitelisting)",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_60",
-    "no": "",
+    "no": 60,
     "cluster": "ซอฟต์แวร์และระบบที่มีช่องโหว่ (Vulnerable Software and Systems)",
     "threat": "5. มีการใช้บริการหรือโปรโตคอลที่ล้าสมัย เช่น FTP หรือ Telnet",
     "vulnerability": "5. ขาดการตรวจสอบซัพพลายเชนของซอฟต์แวร์ (Software Supply Chain) เช่น ไม่มีการตรวจสอบความน่าเชื่อถือของซอฟต์แวร์จากผู้จัดจำหน่าย",
@@ -3463,45 +4245,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ยกเลิกการใช้งานเทคโนโลยีที่ไม่มีการเข้ารหัสและตรวจสอบแหล่งที่มาของซอฟต์แวร์ให้ชัดเจน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_60_1",
-        "name": "ปิดการใช้งานโปรโตคอลที่ไม่ปลอดภัยอย่าง FTP/Telnet และเปลี่ยนไปใช้ SFTP หรือ SSH ที่มีการเข้ารหัส",
+        "id": "risk_60_sub_1",
+        "name": "ยกเลิกการใช้งานเทคโนโลยีที่ไม่มีการเข้ารหัสและตรวจสอบแหล่งที่มาของซอฟต์แวร์ให้ชัดเจน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_60_2",
+        "id": "risk_60_sub_2",
         "name": "จัดทำแนวทางการตรวจสอบความน่าเชื่อถือของผู้ผลิตซอฟต์แวร์ก่อนนำมาใช้งานในระบบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_61",
-    "no": "13.0",
+    "no": 61,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของเครือข่าย (Network Security Risks)",
     "threat": "1. ถูกการโจมตีแบบ DDoS (Distributed Denial of Service) เช่น การส่งคำขอจำนวนมากเพื่อทำให้เครือข่ายหยุดทำงาน",
     "vulnerability": "1. การตั้งค่าความปลอดภัยที่ไม่เหมาะสม เช่น การตั้งค่าเราเตอร์หรือไฟร์วอลล์ที่ไม่ปลอดภัย",
@@ -3525,45 +4323,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Transfer Risk",
     "treatment_plan": "เสริมความแข็งแกร่งให้แก่อุปกรณ์กระจายสัญญาณเพื่อรองรับภาระงานหนักและป้องกันการโจมตี",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_61_1",
-        "name": "ดำเนินการตรวจสอบและปรับปรุงคอนฟิก (Configuration Audit) ของเราเตอร์และไฟร์วอลล์ให้เป็นไปตามมาตรฐานความปลอดภัย",
+        "id": "risk_61_sub_1",
+        "name": "เสริมความแข็งแกร่งให้แก่อุปกรณ์กระจายสัญญาณเพื่อรองรับภาระงานหนักและป้องกันการโจมตี",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": true
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_61_2",
+        "id": "risk_61_sub_2",
         "name": "ตั้งค่าการจำกัดปริมาณคำขอ (Rate Limiting) บนอุปกรณ์ไฟร์วอลล์เพื่อป้องกันการทำงานหนักเกินไปจากคำขอแปลกปลอม",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_62",
-    "no": "",
+    "no": 62,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของเครือข่าย (Network Security Risks)",
     "threat": "2. ถูกการโจมตีแบบ Man-in-the-Middle (MitM) เช่น การดักฟังข้อมูลระหว่างการสื่อสารผ่านเครือข่าย",
     "vulnerability": "2. ไม่มีการแยกเครือข่าย (Network Segmentation) เช่น ขาดการแยกเครือข่ายสำคัญออกจากเครือข่ายทั่วไป (VLAN)",
@@ -3587,30 +4401,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_62_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_63",
-    "no": "",
+    "no": 63,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของเครือข่าย (Network Security Risks)",
     "threat": "3. ถูกการโจมตีแบบ Phishing ผ่านเครือข่าย เช่น การส่งลิงก์ฟิชชิงหรือไฟล์ที่เป็นอันตรายผ่านอีเมล์หรือเครือข่าย",
     "vulnerability": "3. ขาดระบบตรวจจับและป้องกันภัยคุกคาม เช่น ไม่มีการติดตั้ง IDS/IPS (Intrusion Detection/Prevention Systems)",
@@ -3634,45 +4455,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Transfer Risk",
     "treatment_plan": "ใช้เทคโนโลยีตรวจสอบทราฟฟิกเพื่อค้นหาและระงับไฟล์หรือลิงก์อันตรายก่อนถึงตัวผู้ใช้",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_63_1",
-        "name": "ติดตั้งและเปิดใช้งานระบบ IDS/IPS เพื่อตรวจสอบและบล็อกพฤติกรรมการบุกรุกที่ผิดปกติในเครือข่ายสำนักงาน",
+        "id": "risk_63_sub_1",
+        "name": "ใช้เทคโนโลยีตรวจสอบทราฟฟิกเพื่อค้นหาและระงับไฟล์หรือลิงก์อันตรายก่อนถึงตัวผู้ใช้",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_63_2",
+        "id": "risk_63_sub_2",
         "name": "ตั้งค่าระบบกรองเนื้อหาอีเมล (Email Filtering) ที่ระดับเครือข่ายเพื่อตรวจสอบลิงก์และไฟล์แนบที่เป็นอันตราย",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_64",
-    "no": "",
+    "no": 64,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของเครือข่าย (Network Security Risks)",
     "threat": "4. มีการใช้ช่องโหว่ของโปรโตคอลเครือข่าย เช่น การโจมตีผ่านโปรโตคอล อาทิ DNS Spoofing หรือ ARP Poisoning",
     "vulnerability": "4. การใช้โปรโตคอลที่ล้าสมัย เช่น FTP หรือ Telnet ที่ไม่มีการเข้ารหัส",
@@ -3696,45 +4533,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Transfer Risk",
     "treatment_plan": "ยกเลิกการใช้เทคโนโลยีส่งข้อมูลแบบข้อความดิบ (Clear Text) และป้องกันการปลอมแปลงชื่อโดเมน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_64_1",
-        "name": "ยกเลิกการใช้งาน FTP และ Telnet โดยเปลี่ยนไปใช้ SFTP และ SSH ที่มีการเข้ารหัสข้อมูลอย่างแน่นหนา",
+        "id": "risk_64_sub_1",
+        "name": "ยกเลิกการใช้เทคโนโลยีส่งข้อมูลแบบข้อความดิบ (Clear Text) และป้องกันการปลอมแปลงชื่อโดเมน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_64_2",
+        "id": "risk_64_sub_2",
         "name": "เปิดใช้งานฟีเจอร์ DNSSEC บน DNS Server ของสำนักงานเพื่อป้องกันการโจมตีแบบ DNS Spoofing",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_65",
-    "no": "",
+    "no": 65,
     "cluster": "ความเสี่ยงด้านความปลอดภัยของเครือข่าย (Network Security Risks)",
     "threat": "5. มีการเข้าถึงเครือข่ายโดยไม่ได้รับอนุญาต เช่น บุคคลภายนอกหรืออุปกรณ์ที่ไม่ได้รับอนุญาตเชื่อมต่อกับเครือข่ายขององค์กร",
     "vulnerability": "5. ไม่มีการควบคุมการเข้าถึง (Access Control) เช่น ไม่มีการตรวจสอบอุปกรณ์หรือผู้ใช้ที่เชื่อมต่อกับเครือข่ายขององค์กร",
@@ -3758,45 +4611,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Transfer Risk",
     "treatment_plan": "ตรวจสอบตัวตนของอุปกรณ์และผู้ใช้งานทุกรายที่ต้องการเชื่อมต่อกับเครือข่ายภายใน",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_65_1",
-        "name": "บังคับใช้การยืนยันตัวตนด้วย MAC Address Filtering หรือมาตรฐาน 802.1X สำหรับอุปกรณ์ที่จะเชื่อมต่อเครือข่ายภายใน",
+        "id": "risk_65_sub_1",
+        "name": "ตรวจสอบตัวตนของอุปกรณ์และผู้ใช้งานทุกรายที่ต้องการเชื่อมต่อกับเครือข่ายภายใน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_65_2",
+        "id": "risk_65_sub_2",
         "name": "จัดทำบันทึกและตรวจสอบประวัติการเชื่อมต่อเครือข่าย (Network Log Review) อย่างสม่ำเสมอเพื่อค้นหาอุปกรณ์แปลกปลอม",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_66",
-    "no": "14.0",
+    "no": 66,
     "cluster": "ความเสี่ยงด้านความปลอดภัยทางกายภาพ (Physical Security Risks)",
     "threat": "1. มีการเข้าถึงพื้นที่โดยไม่ได้รับอนุญาต เช่น บุคคลภายนอกหรือผู้ไม่ได้รับอนุญาตสามารถเข้าถึงพื้นที่สำคัญได้ อาทิ ศูนย์ข้อมูลหรือเซิร์ฟเวอร์รูมหรือดาต้าเซ็นต์เตอร์",
     "vulnerability": "1. การขาดระบบควบคุมการเข้าถึง (Access Control) เช่น ไม่มีการกำหนดสิทธิ์หรือการยืนยันตัวตนก่อนเข้าถึงพื้นที่สำคัญ",
@@ -3820,30 +4689,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_66_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_67",
-    "no": "",
+    "no": 67,
     "cluster": "ความเสี่ยงด้านความปลอดภัยทางกายภาพ (Physical Security Risks)",
     "threat": "2. มีการขโมยหรือสูญหายของอุปกรณ์ เช่น อุปกรณ์สำคัญต่างๆ อาทิ เซิร์ฟเวอร์ ฮาร์ดไดรฟ์ แล็ปท็อป ถูกขโมยหรือสูญหาย",
     "vulnerability": "2. ไม่มีการเฝ้าระวังด้วยกล้องวงจรปิด (CCTV) เช่น ขาดระบบเฝ้าระวังหรือการตรวจสอบเหตุการณ์ที่เกิดขึ้นในพื้นที่สำคัญ",
@@ -3867,30 +4743,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_67_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_68",
-    "no": "",
+    "no": 68,
     "cluster": "ความเสี่ยงด้านความปลอดภัยทางกายภาพ (Physical Security Risks)",
     "threat": "3. มีการก่อวินาศกรรม (Sabotage) เช่น การทำลายทรัพย์สินหรือระบบโดยบุคคลภายในหรือบุคคลภายนอก",
     "vulnerability": "3. ไม่มีระบบป้องกันการก่อวินาศกรรม เช่น ขาดการออกแบบหรือมาตรการป้องกันการก่อวินาศกรรม",
@@ -3914,30 +4797,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_68_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_69",
-    "no": "",
+    "no": 69,
     "cluster": "ความเสี่ยงด้านความปลอดภัยทางกายภาพ (Physical Security Risks)",
     "threat": "4. เกิดภัยธรรมชาติ (Natural Disasters) เช่น น้ำท่วม ไฟไหม้ หรือแผ่นดินไหวที่ส่งผลกระทบต่ออุปกรณ์และข้อมูลสำคัญ",
     "vulnerability": "3. ไม่มีระบบป้องกันภัยธรรมชาติ เช่น ขาดการออกแบบหรือมาตรการป้องกันภัยธรรมชาติ อาทิ การป้องกันน้ำท่วม",
@@ -3961,45 +4851,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ลดผลกระทบจากอัคคีภัยหรืออุทกภัยที่อาจทำความเสียหายต่อข้อมูลยุทธศาสตร์จังหวัด",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_69_1",
-        "name": "ติดตั้งระบบตรวจจับควันและถังดับเพลิงชนิดไม่ทำลายอุปกรณ์อิเล็กทรอนิกส์ (เช่น CO2 หรือ FM-200)",
+        "id": "risk_69_sub_1",
+        "name": "ลดผลกระทบจากอัคคีภัยหรืออุทกภัยที่อาจทำความเสียหายต่อข้อมูลยุทธศาสตร์จังหวัด",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_69_2",
+        "id": "risk_69_sub_2",
         "name": "ติดตั้งอุปกรณ์บนชั้นวางที่สูงจากระดับพื้น (Raised Floor) เพื่อป้องกันความเสียหายจากน้ำท่วมขัง",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_70",
-    "no": "",
+    "no": 70,
     "cluster": "ความเสี่ยงด้านความปลอดภัยทางกายภาพ (Physical Security Risks)",
     "threat": "5. มีการขโมยข้อมูลผ่านการเข้าถึงทางกายภาพ เช่น การเชื่อมต่อกับพอร์ต USB หรือเครือข่ายโดยตรงในองค์กร เพื่อขโมยข้อมูล",
     "vulnerability": "5. การเก็บรักษาอุปกรณ์สำคัญในที่ไม่ปลอดภัย เช่น อุปกรณ์สำคัญถูกเก็บไว้ในพื้นที่ที่เข้าถึงได้ง่าย",
@@ -4023,45 +4929,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปิดช่องทางทางกายภาพที่อาจใช้ในการขโมยข้อมูลสำคัญหรือฝังมัลแวร์เข้าสู่ระบบ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_70_1",
-        "name": "ติดตั้งอุปกรณ์ล็อคพอร์ต USB (Physical Port Blocker) สำหรับเครื่องคอมพิวเตอร์ที่เข้าถึงข้อมูล PDPA",
+        "id": "risk_70_sub_1",
+        "name": "ปิดช่องทางทางกายภาพที่อาจใช้ในการขโมยข้อมูลสำคัญหรือฝังมัลแวร์เข้าสู่ระบบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_70_2",
+        "id": "risk_70_sub_2",
         "name": "จัดห้องทำงานกลุ่มงานสุขภาพดิจิทัลให้เป็นสัดส่วน และไม่ทิ้งแล็ปท็อปไว้โดยไม่มีการล็อคกุญแจหรือสายเคเบิลล็อก",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_71",
-    "no": "15.0",
+    "no": 71,
     "cluster": "ความเสี่ยงจากการไม่ปฏิบัติตามกฎระเบียบและข้อบังคับ (Regulatory and Compliance Risks) (Non-Compliance Activity)",
     "threat": "1. บทลงโทษทางกฎหมาย เช่น การถูกปรับหรือฟ้องร้องจากการไม่ปฏิบัติตามกฎหมาย เช่น พรบ คอมพิวเตอร์, พรบ ข้อมูลส่วนบุคคล หรือ พรบ ไซเบอร์",
     "vulnerability": "1. การขาดความรู้เกี่ยวกับกฎหมายและข้อบังคับที่เกี่ยวข้อง เช่น พนักงานและผู้บริหารไม่ทราบถึงข้อกำหนดและกฎหมายที่ต้องปฏิบัติตาม",
@@ -4085,45 +5007,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ให้ความรู้เชิงลึกแก่ผู้บริหารและเจ้าหน้าที่เพื่อให้ปฏิบัติงานได้ถูกต้องตามระเบียบ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_71_1",
-        "name": "จัดทำคู่มือปฏิบัติงานด้านกฎหมายดิจิทัล (Compliance Handbook) ฉบับย่อสำหรับเจ้าหน้าที่",
+        "id": "risk_71_sub_1",
+        "name": "ให้ความรู้เชิงลึกแก่ผู้บริหารและเจ้าหน้าที่เพื่อให้ปฏิบัติงานได้ถูกต้องตามระเบียบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_71_2",
+        "id": "risk_71_sub_2",
         "name": "จัดประชุมชี้แจงข้อกฎหมายสำคัญที่เกี่ยวข้องกับงานสาธารณสุขจังหวัดให้แก่ผู้บริหารทุกระดับ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": true,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_72",
-    "no": "",
+    "no": 72,
     "cluster": "ความเสี่ยงจากการไม่ปฏิบัติตามกฎระเบียบและข้อบังคับ (Regulatory and Compliance Risks) (Non-Compliance Activity)",
     "threat": "2. การเสียชื่อเสียง เช่น ความน่าเชื่อถือขององค์กรลดลงเนื่องจากการละเมิดกฎระเบียบข้อบังคับด้านความมั่นคงปลอดภัยของข้อมูล",
     "vulnerability": "2. ไม่มีระบบติดตามและตรวจสอบการปฏิบัติตามข้อกำหนด เช่น ขาดเครื่องมือหรือกระบวนการในการประเมินสถานะความสอดคล้อง",
@@ -4147,30 +5085,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_72_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_73",
-    "no": "",
+    "no": 73,
     "cluster": "ความเสี่ยงจากการไม่ปฏิบัติตามกฎระเบียบและข้อบังคับ (Regulatory and Compliance Risks) (Non-Compliance Activity)",
     "threat": "3. มีการหยุดชะงักของธุรกิจ เช่น การปิดระบบหรือบริการชั่วคราวเนื่องจากการตรวจสอบจากหน่วยงานกำกับดูแล",
     "vulnerability": "3. ขาดนโยบายและกระบวนการที่ชัดเจน เช่น ไม่มีแนวทางปฏิบัติที่ช่วยให้พนักงานรวมถึงหน่วยงานกำกับดูแลปฏิบัติตามข้อบังคับได้ง่าย",
@@ -4194,30 +5139,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_73_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_74",
-    "no": "",
+    "no": 74,
     "cluster": "ความเสี่ยงจากการไม่ปฏิบัติตามกฎระเบียบและข้อบังคับ (Regulatory and Compliance Risks) (Non-Compliance Activity)",
     "threat": "4.มีความเสียหายทางการเงิน เช่น  การสูญเสียลูกค้าหรือโอกาสทางธุรกิจเนื่องจากการละเมิดข้อบังคับ",
     "vulnerability": "4. การจัดการเอกสารและข้อมูลที่ไม่เหมาะสม เช่น การจัดเก็บเอกสารหรือการตีความหมายของข้อมูลไม่ตรงตามข้อกำหนดของกฎหมาย",
@@ -4241,30 +5193,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_74_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_75",
-    "no": "",
+    "no": 75,
     "cluster": "ความเสี่ยงจากการไม่ปฏิบัติตามกฎระเบียบและข้อบังคับ (Regulatory and Compliance Risks) (Non-Compliance Activity)",
     "threat": "5. มีความเสี่ยงต่อความปลอดภัยของข้อมูล เช่น การจัดการข้อมูลไม่ตรงตามกฎหมาย อาจนำไปสู่การละเมิดข้อมูล",
     "vulnerability": "5. การไม่ทำการประเมินความเสี่ยงด้านข้อกำหนด เช่น ไม่ได้ตรวจสอบว่ากระบวนการใดอาจละเมิดข้อบังคับ",
@@ -4288,45 +5247,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "วิเคราะห์ความเสี่ยงของกระบวนการทำงานที่เกี่ยวข้องกับข้อมูลส่วนบุคคลอย่างเป็นระบบ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_75_1",
-        "name": "ดำเนินการประเมินผลกระทบด้านการคุ้มครองข้อมูล (DPIA) สำหรับโครงการใหม่",
+        "id": "risk_75_sub_1",
+        "name": "วิเคราะห์ความเสี่ยงของกระบวนการทำงานที่เกี่ยวข้องกับข้อมูลส่วนบุคคลอย่างเป็นระบบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_75_2",
+        "id": "risk_75_sub_2",
         "name": "ทบทวนบันทึกรายการกิจกรรมประเมินผล (RoPA) เป็นประจำทุก 6 เดือน เพื่อให้ข้อมูลเป็นปัจจุบันที่สุด",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_76",
-    "no": "16.0",
+    "no": 76,
     "cluster": "การสูญหายหรือการรั่วไหลของข้อมูล (Data Loss or Data Leakage)",
     "threat": "1. มีการส่งข้อมูลโดยไม่ได้ตั้งใจ เช่น การส่งข้อมูลสำคัญไปยังผู้รับผิดคนหรือแพลตฟอร์มที่ไม่ปลอดภัย",
     "vulnerability": "1. การขาดการควบคุมการเข้าถึงข้อมูล เช่น ไม่มีการกำหนดสิทธิ์การเข้าถึงข้อมูลที่เหมาะสม",
@@ -4350,45 +5325,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ป้องกันความผิดพลาดจากการทำงาน (Human Error) โดยการจำกัดสิทธิ์และสร้างระบบทวนสอบ",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_76_1",
-        "name": "กำหนดสิทธิ์การเข้าถึงข้อมูลในระบบ Dashboard และฐานข้อมูลกลางตามบทบาทหน้าที่ (RBAC)",
+        "id": "risk_76_sub_1",
+        "name": "ป้องกันความผิดพลาดจากการทำงาน (Human Error) โดยการจำกัดสิทธิ์และสร้างระบบทวนสอบ",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_76_2",
+        "id": "risk_76_sub_2",
         "name": "กำหนดขั้นตอนการตรวจสอบและยืนยันรายชื่อผู้รับก่อนการส่งข้อมูลสำคัญออกสู่ภายนอกหน่วยงาน",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": true,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_77",
-    "no": "",
+    "no": 77,
     "cluster": "การสูญหายหรือการรั่วไหลของข้อมูล (Data Loss or Data Leakage)",
     "threat": "2. มีการขโมยข้อมูลโดยเจตนา เช่น พนักงานที่ไม่พอใจหรือบุคคลภายนอกขโมยข้อมูลเพื่อผลประโยชน์ส่วนตัว",
     "vulnerability": "2. การไม่มีการเข้ารหัสข้อมูล เช่น ข้อมูลที่จัดเก็บหรือรับส่งกัน ไม่มีการเข้ารหัส",
@@ -4412,45 +5403,61 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Mitigate Risk",
     "treatment_plan": "ปกป้องความลับด้วยเทคโนโลยีการเข้ารหัส",
-    "expected_finish_date": "ภายใน 30 ก.ย. 69",
     "sub_actions": [
       {
-        "id": "sub_77_1",
-        "name": "บังคับใช้การเข้ารหัสไฟล์ข้อมูล (Encryption) ที่มีความอ่อนไหวสูงก่อนการจัดเก็บในเครื่องแม่ข่าย",
+        "id": "risk_77_sub_1",
+        "name": "ปกป้องความลับด้วยเทคโนโลยีการเข้ารหัส",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       },
       {
-        "id": "sub_77_2",
+        "id": "risk_77_sub_2",
         "name": "บังคับใช้โปรโตคอลการรับส่งข้อมูลที่มีการเข้ารหัสลับ (HTTPS/SSL) ในทุกระบบงานดิจิทัล",
         "expected_date_part2": "ภายใน 30 ก.ย. 69",
         "progress_percent": 0,
-        "expected_date_part3": "15 ก.ย. 69"
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": true,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": true,
+          "s": true,
+          "r": true,
+          "i": true,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 5,
+        "residual_risk_score": 5,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
       }
     ],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "progress_percent": 0
   },
   {
     "id": "risk_78",
-    "no": "",
+    "no": 78,
     "cluster": "การสูญหายหรือการรั่วไหลของข้อมูล (Data Loss or Data Leakage)",
     "threat": "3. มีการละเมิดข้อมูลผ่านเครือข่ายที่ไม่ปลอดภัย เช่น การรั่วไหลของข้อมูลที่ส่งผ่าน Wi-Fi หรือเครือข่ายที่ไม่มีการเข้ารหัส",
     "vulnerability": "3. ขาดนโยบายและกระบวนการจัดการข้อมูล เช่น ไม่มีการกำหนดนโยบายในการจัดการข้อมูลสำคัญและข้อมูลส่วนบุคคล",
@@ -4474,30 +5481,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": true,
-      "i": false,
-      "a": true
-    },
-    "residual_fsrilo": {
-      "f": true,
-      "s": true,
-      "r": true,
-      "i": true,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 5,
-    "residual_risk_score": 5,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_78_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_79",
-    "no": "",
+    "no": 79,
     "cluster": "การสูญหายหรือการรั่วไหลของข้อมูล (Data Loss or Data Leakage)",
     "threat": "4. ถูกการโจมตีแบบ Phishing เช่น ผู้โจมตีใช้ฟิชชิงเพื่อเข้าถึงข้อมูลสำคัญผ่านอีเมล์หรือข้อความ",
     "vulnerability": "4. การขาดระบบป้องกันข้อมูลรั่วไหล (Data Loss Prevention - DLP) เช่น ไม่มีการใช้ระบบเพื่อตรวจจับและป้องกันการถ่ายโอนข้อมูลที่ไม่ได้รับอนุญาต",
@@ -4521,30 +5535,37 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_79_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   },
   {
     "id": "risk_80",
-    "no": "",
+    "no": 80,
     "cluster": "การสูญหายหรือการรั่วไหลของข้อมูล (Data Loss or Data Leakage)",
     "threat": "5. มีการติดมัลแวร์หรือแรนซัมแวร์ เช่น มีการใช้มัลแวร์เพื่อดึงข้อมูลหรือขัดขวางการเข้าถึงข้อมูล",
     "vulnerability": "5. อุปกรณ์และบัญชีทรัพย์สินที่ไม่ได้รับการควบคุม เช่น อุปกรณ์พกพาหรือบัญชีผู้ใช้งานที่ไม่ได้ใช้งานยังสามารถเข้าถึงข้อมูลได้",
@@ -4568,26 +5589,33 @@ export const DEFAULT_RISK_ITEMS = [
     "risk_owner": "CSMR",
     "treatment_option": "Continue Monitoring",
     "treatment_plan": "",
-    "expected_finish_date": "",
-    "sub_actions": [],
-    "progress_percent": 0,
-    "residual_cia": {
-      "c": false,
-      "i": false,
-      "a": false
-    },
-    "residual_fsrilo": {
-      "f": false,
-      "s": false,
-      "r": false,
-      "i": false,
-      "l": false,
-      "o": false
-    },
-    "residual_likelihood": 1,
-    "residual_impact": 1,
-    "residual_risk_score": 1,
-    "further_actions": "เฝ้าติดตามเป็นระยะ"
+    "sub_actions": [
+      {
+        "id": "risk_80_sub_1",
+        "name": "จัดทำและดำเนินการตามแผนความมั่นคงปลอดภัย",
+        "expected_date_part2": "ภายใน 30 ก.ย. 69",
+        "progress_percent": 0,
+        "expected_date_part3": "15 ก.ย. 69",
+        "residual_cia": {
+          "c": false,
+          "i": false,
+          "a": false
+        },
+        "residual_fsrilo": {
+          "f": false,
+          "s": false,
+          "r": false,
+          "i": false,
+          "l": false,
+          "o": false
+        },
+        "residual_likelihood": 1,
+        "residual_impact": 2,
+        "residual_risk_score": 2,
+        "further_actions": "เฝ้าติดตามเป็นระยะ"
+      }
+    ],
+    "progress_percent": 0
   }
 ];
 
