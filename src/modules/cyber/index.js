@@ -11,8 +11,15 @@ import {
 import {
   renderRiskAssessmentHtml,
   bindRiskAssessmentEvents,
-  exportRiskAssessmentToCsv
+  exportRiskAssessmentToCsv,
+  calculateRiskMetrics
 } from './riskAssessment.js'
+import {
+  renderRiskReportHtml,
+  bindRiskReportEvents,
+  exportRiskReportToWord,
+  DEFAULT_RISK_REPORT_DATA
+} from './riskReport.js'
 import {
   DEFAULT_RISK_METADATA,
   DEFAULT_UPDATE_LOGS,
@@ -26,6 +33,7 @@ const LOCAL_STORAGE_LOGS_KEY = 'sko_cii_update_logs'
 const LOCAL_STORAGE_AUDIT_PROGRAMME_KEY = 'sko_cyber_audit_programmes'
 const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
 const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v3'
+const LOCAL_STORAGE_RISK_REPORTS_KEY = 'sko_cyber_risk_reports'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -137,6 +145,8 @@ let cyberState = {
   riskClusterFilter: 'all',
   riskMatrixFilter: null,
   riskSearchQuery: '',
+  riskReports: [],
+  activeRiskReportId: 'report_default_2569',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -329,9 +339,45 @@ function initData() {
     }
     saveRiskAssessment()
   }
+
+  // 8. Risk Reports (2.4 Risk Report)
+  try {
+    const savedRiskReports = localStorage.getItem(LOCAL_STORAGE_RISK_REPORTS_KEY)
+    if (savedRiskReports) {
+      cyberState.riskReports = JSON.parse(savedRiskReports)
+    }
+  } catch (e) {
+    cyberState.riskReports = []
+  }
+  if (!Array.isArray(cyberState.riskReports) || cyberState.riskReports.length === 0) {
+    cyberState.riskReports = [JSON.parse(JSON.stringify(DEFAULT_RISK_REPORT_DATA))]
+  }
+  if (!cyberState.activeRiskReportId || !cyberState.riskReports.some(r => r.id === cyberState.activeRiskReportId)) {
+    cyberState.activeRiskReportId = cyberState.riskReports[0].id
+  }
 }
 
 initData()
+
+function saveRiskReports() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_RISK_REPORTS_KEY, JSON.stringify(cyberState.riskReports))
+  } catch (e) {
+    console.error('Error saving risk reports:', e)
+  }
+}
+
+function getActiveRiskReport() {
+  if (!Array.isArray(cyberState.riskReports) || cyberState.riskReports.length === 0) {
+    cyberState.riskReports = [JSON.parse(JSON.stringify(DEFAULT_RISK_REPORT_DATA))]
+  }
+  let rep = cyberState.riskReports.find(r => r.id === cyberState.activeRiskReportId)
+  if (!rep) {
+    rep = cyberState.riskReports[0]
+    cyberState.activeRiskReportId = rep.id
+  }
+  return rep
+}
 
 function saveRiskAssessment() {
   try {
@@ -1872,6 +1918,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('2.3 Risk Assessment') || 
     cyberState.selectedDoc.title.includes('2.3 Risk Assessment')
   )
+  const isRiskReport = (
+    currentKey.includes('2.4 Risk Report') || 
+    cyberState.selectedDoc.title.includes('2.4 Risk Report')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -1919,6 +1969,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบจัดทำ พิมพ์ และส่งออกไฟล์ Word รายงานการตรวจสอบด้านความมั่นคงปลอดภัยไซเบอร์ (Audit Report)'
               : isRiskAssessment
               ? 'ระบบประเมินและบริหารจัดการความเสี่ยงด้านไซเบอร์ (Risk Assessment and Treatment) 6 แท็บย่อยแบบ Interactive'
+              : isRiskReport
+              ? 'ระบบจัดทำ พิมพ์ และส่งออกไฟล์ Word รายงานการประเมินความเสี่ยงไซเบอร์ (Cybersecurity Risk Assessment Report)'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -1936,6 +1988,8 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.riskSearchQuery,
               cyberState.riskAssessmentViewMode || 'card'
             )
+          : isRiskReport
+          ? renderRiskReportHtml(getActiveRiskReport(), cyberState.riskReports)
           : renderGenericDocLinksHtml(savedData)}
 
       </div>
@@ -2111,8 +2165,215 @@ function renderPolicyAndFrameworkTab(el) {
     bindRiskAssessmentEvents(el, cyberState.riskAssessment, (action) => {
       handleRiskAssessmentAction(action, el)
     })
+  } else if (isRiskReport) {
+    bindRiskReportEvents(el, getActiveRiskReport(), cyberState.riskAssessment, (action) => {
+      handleRiskReportAction(action, el)
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
+  }
+}
+
+function handleRiskReportAction(action, el) {
+  const report = getActiveRiskReport()
+
+  if (action.type === 'select_report') {
+    cyberState.activeRiskReportId = action.reportId
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'create_report') {
+    const nextId = 'report_' + Date.now()
+    const newReport = JSON.parse(JSON.stringify(DEFAULT_RISK_REPORT_DATA))
+    newReport.id = nextId
+    const nowThai = toThaiDate(new Date().toISOString().split('T')[0])
+    newReport.versionTitle = `รายงานฉบับใหม่ (${nowThai})`
+    newReport.createdAt = new Date().toISOString().split('T')[0]
+    newReport.header.evalDate = nowThai
+    newReport.summary.evalDate = nowThai
+    cyberState.riskReports.unshift(newReport)
+    cyberState.activeRiskReportId = nextId
+    saveRiskReports()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('สร้างรายงานการประเมินความเสี่ยงฉบับใหม่เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'delete_report') {
+    if (cyberState.riskReports.length <= 1) {
+      alert('ไม่สามารถลบได้ เนื่องจากต้องมีรายงานอย่างน้อย 1 ฉบับ')
+      return
+    }
+    cyberState.riskReports = cyberState.riskReports.filter(r => r.id !== action.reportId)
+    cyberState.activeRiskReportId = cyberState.riskReports[0].id
+    saveRiskReports()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายงานฉบับนี้เรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'update_field') {
+    const parts = action.path.split('.')
+    let cur = report
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!cur[parts[i]]) cur[parts[i]] = {}
+      cur = cur[parts[i]]
+    }
+    cur[parts[parts.length - 1]] = action.value
+    saveRiskReports()
+
+    if (action.path === 'header.evalDate' || action.path === 'header.reportTitle') {
+      const opt = el.querySelector(`#risk-report-select option[value="${report.id}"]`)
+      if (opt) {
+        opt.textContent = report.versionTitle || report.header?.evalDate || report.id
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_objective') {
+    if (report.body?.objectives) {
+      report.body.objectives[action.index] = action.value
+      saveRiskReports()
+    }
+    return
+  }
+
+  if (action.type === 'add_objective') {
+    if (!report.body) report.body = {}
+    if (!report.body.objectives) report.body.objectives = []
+    report.body.objectives.push('เพื่อระบุและควบคุมความเสี่ยงเพิ่มเติมในระบบ')
+    saveRiskReports()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มวัตถุประสงค์เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'delete_objective') {
+    if (report.body?.objectives && report.body.objectives.length > 1) {
+      report.body.objectives.splice(action.index, 1)
+      saveRiskReports()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('ลบวัตถุประสงค์เรียบร้อยแล้ว', 'info')
+    }
+    return
+  }
+
+  if (action.type === 'add_table_row') {
+    if (!report.body) report.body = {}
+    if (!report.body.tableRows) report.body.tableRows = []
+    const nextNo = report.body.tableRows.length + 1
+    report.body.tableRows.push({
+      id: 'r_' + Date.now(),
+      no: nextNo,
+      riskTitle: 'ระบุชื่อความเสี่ยงหรือภัยคุกคาม',
+      riskLevel: 'สูง',
+      potentialImpact: 'กระทบต่อความลับ ความถูกต้อง หรือความพร้อมใช้งานของข้อมูล',
+      existingControls: 'ยังไม่มีมาตรการควบคุมที่เพียงพอ',
+      recommendations: 'ดำเนินการตามมาตรการควบคุมความมั่นคงปลอดภัยไซเบอร์',
+      targetDate: '15 กันยายน 2569'
+    })
+    saveRiskReports()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มแถวความเสี่ยงใหม่เรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'update_table_row') {
+    if (report.body?.tableRows?.[action.index]) {
+      report.body.tableRows[action.index][action.field] = action.value
+      saveRiskReports()
+    }
+    return
+  }
+
+  if (action.type === 'delete_table_row') {
+    if (report.body?.tableRows) {
+      report.body.tableRows.splice(action.index, 1)
+      report.body.tableRows.forEach((r, idx) => { r.no = idx + 1 })
+      saveRiskReports()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('ลบแถวความเสี่ยงเรียบร้อยแล้ว', 'info')
+    }
+    return
+  }
+
+  if (action.type === 'sync_from_23_stats') {
+    const metrics = calculateRiskMetrics(cyberState.riskAssessment)
+    if (metrics) {
+      if (!report.summary) report.summary = {}
+      report.summary.totalRisks = metrics.total
+      report.summary.lowRisks = metrics.countLow
+      report.summary.moderateRisks = metrics.countModerate
+      report.summary.highRisks = (metrics.countHigh || 0) + (metrics.countVeryHigh || 0)
+      
+      if (report.summary.highRisks > 0) {
+        report.summary.overallRiskLevel = 'สูง'
+      } else if (report.summary.moderateRisks > 0) {
+        report.summary.overallRiskLevel = 'ปานกลาง'
+      } else {
+        report.summary.overallRiskLevel = 'ต่ำ'
+      }
+      saveRiskReports()
+      renderPolicyAndFrameworkTab(el)
+      showNotification(`คำนวณสรุปสถิติจาก 2.3 เรียบร้อยแล้ว (ทั้งหมด ${metrics.total} ข้อ, เสี่ยงสูง ${report.summary.highRisks} ข้อ)`, 'success')
+    }
+    return
+  }
+
+  if (action.type === 'sync_from_23_high_risks') {
+    const items = cyberState.riskAssessment?.items || []
+    const highItems = items.filter(it => {
+      const score = (Number(it.likelihood) || 1) * (Number(it.impact) || 1)
+      return score >= 10
+    })
+
+    if (highItems.length === 0) {
+      showNotification('ไม่พบรายการที่มีระดับความเสี่ยงสูง (คะแนน >= 10) ในข้อ 2.3', 'warning')
+      return
+    }
+
+    const newRows = highItems.map((it, idx) => {
+      const score = (Number(it.likelihood) || 1) * (Number(it.impact) || 1)
+      const lvl = score >= 15 ? 'สูง' : 'สูง'
+
+      let impacts = []
+      if (it.threat) impacts.push(it.threat)
+      if (it.vulnerability) impacts.push(`ช่องโหว่: ${it.vulnerability}`)
+      const impText = impacts.join('\n') || 'อาจทำให้ระบบหยุดชะงักและข้อมูลรั่วไหล'
+
+      let recs = []
+      if (it.treatment_plan) recs.push(`- ${it.treatment_plan}`)
+      if (it.sub_actions && it.sub_actions.length > 0) {
+        it.sub_actions.forEach(sub => {
+          if (sub.name && sub.name !== it.treatment_plan) {
+            recs.push(`- ${sub.name}`)
+          }
+        })
+      }
+      const recText = recs.join('\n') || '- ติดตามและบังคับใช้มาตรการควบคุมความมั่นคงปลอดภัย'
+
+      const target = it.sub_actions?.[0]?.expected_date_part3 || it.sub_actions?.[0]?.expected_date_part2 || '15 กันยายน 2569'
+
+      return {
+        id: `r_sync_${it.id || idx}_${Date.now()}`,
+        no: idx + 1,
+        riskTitle: it.cluster ? `${it.cluster}` : (it.threat || 'ความเสี่ยงไซเบอร์'),
+        riskLevel: lvl,
+        potentialImpact: impText,
+        existingControls: it.current_control || 'ยังไม่มีมาตรการควบคุมที่เพียงพอ',
+        recommendations: recText,
+        targetDate: target
+      }
+    })
+
+    if (!report.body) report.body = {}
+    report.body.tableRows = newRows
+    saveRiskReports()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`ซิงค์รายการความเสี่ยงสูงจาก 2.3 สำเร็จ (${newRows.length} รายการ)`, 'success')
+    return
   }
 }
 
