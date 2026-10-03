@@ -28,6 +28,13 @@ import {
   DEFAULT_KRI_DOCUMENT_DATA
 } from './kriDocument.js'
 import {
+  renderAssetInventoryHtml,
+  bindAssetInventoryEvents,
+  exportAssetInventoryToWord,
+  exportAssetInventoryToCsv,
+  DEFAULT_ASSET_INVENTORY_DATA
+} from './assetInventory.js'
+import {
   DEFAULT_RISK_METADATA,
   DEFAULT_UPDATE_LOGS,
   DEFAULT_RISK_ITEMS
@@ -42,6 +49,7 @@ const LOCAL_STORAGE_AUDIT_REPORTS_KEY = 'sko_cyber_audit_reports'
 const LOCAL_STORAGE_RISK_ASSESSMENT_KEY = 'sko_cyber_risk_assessment_v3'
 const LOCAL_STORAGE_RISK_REPORTS_KEY = 'sko_cyber_risk_reports'
 const LOCAL_STORAGE_KRI_DATA_KEY = 'sko_cyber_kri_data'
+const LOCAL_STORAGE_ASSET_INVENTORY_KEY = 'sko_cyber_asset_inventory'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -158,6 +166,10 @@ let cyberState = {
   kriData: {},
   selectedKriYear: '2569',
   kriViewMode: 'fiscal',
+  assetInventory: null,
+  assetInventorySubTab: 'hardware',
+  assetInventorySearchQuery: '',
+  assetInventoryCritFilter: 'all',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -390,6 +402,19 @@ function initData() {
     cyberState.selectedKriYear = Object.keys(cyberState.kriData).sort((a, b) => Number(b) - Number(a))[0] || '2569'
   }
 
+  // 10. Asset Inventory (1.2 Asset Inventory List)
+  try {
+    const savedAssetInv = localStorage.getItem(LOCAL_STORAGE_ASSET_INVENTORY_KEY)
+    if (savedAssetInv) {
+      cyberState.assetInventory = JSON.parse(savedAssetInv)
+    }
+  } catch (e) {
+    cyberState.assetInventory = null
+  }
+  if (!cyberState.assetInventory || !Array.isArray(cyberState.assetInventory.items) || cyberState.assetInventory.items.length === 0) {
+    cyberState.assetInventory = JSON.parse(JSON.stringify(DEFAULT_ASSET_INVENTORY_DATA))
+  }
+
   // If selectedDoc was set to "3.2 รายงานการแจ้งเหตุการณ์", fallback to 3.2.1
   if (cyberState.selectedDoc?.key === '3.2 รายงานการแจ้งเหตุการณ์' || cyberState.selectedDoc?.title === '3.2 รายงานการแจ้งเหตุการณ์') {
     const fallback = allFlatDocs.find(d => d.key === '3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์') || allFlatDocs[0]
@@ -398,6 +423,14 @@ function initData() {
 }
 
 initData()
+
+function saveAssetInventory() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_ASSET_INVENTORY_KEY, JSON.stringify(cyberState.assetInventory))
+  } catch (e) {
+    console.error('Error saving Asset Inventory:', e)
+  }
+}
 
 function saveKriData() {
   try {
@@ -1985,6 +2018,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('2.5 KRI Document') || 
     cyberState.selectedDoc.title.includes('2.5 KRI Document')
   )
+  const isAssetInventory = (
+    currentKey.includes('1.2 Asset Inventory List') ||
+    cyberState.selectedDoc.title.includes('1.2 Asset Inventory List')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2036,6 +2073,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบจัดทำ พิมพ์ และส่งออกไฟล์ Word รายงานการประเมินความเสี่ยงไซเบอร์ (Cybersecurity Risk Assessment Report)'
               : isKriDocument
               ? 'ระบบประเมินและรายงานผลดัชนีชี้วัดความเสี่ยงที่สำคัญ (Key Risk Indicators - KRI) Matrix 12 เดือน'
+              : isAssetInventory
+              ? 'ระบบทะเบียนทรัพย์สินสารสนเทศของบริการที่สำคัญ (IT Asset Register) แบ่งหมวด Hardware vs Software & Applications'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2061,6 +2100,13 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.kriViewMode || 'fiscal', 
               cyberState.selectedKriYear || '2569', 
               Object.keys(cyberState.kriData).sort((a,b) => Number(b) - Number(a))
+            )
+          : isAssetInventory
+          ? renderAssetInventoryHtml(
+              cyberState.assetInventory,
+              cyberState.assetInventorySubTab || 'hardware',
+              cyberState.assetInventorySearchQuery || '',
+              cyberState.assetInventoryCritFilter || 'all'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2245,6 +2291,10 @@ function renderPolicyAndFrameworkTab(el) {
     bindKriDocumentEvents(el, getActiveKriData(), (action) => {
       handleKriDocumentAction(action, el)
     })
+  } else if (isAssetInventory) {
+    bindAssetInventoryEvents(el, cyberState.assetInventory, (action) => {
+      handleAssetInventoryAction(action, el)
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
   }
@@ -2360,6 +2410,120 @@ function handleKriDocumentAction(action, el) {
 
   if (action.type === 'export_csv') {
     exportKriToCsv(currentKri, cyberState.kriViewMode || 'fiscal')
+    return
+  }
+}
+
+function handleAssetInventoryAction(action, el) {
+  if (!cyberState.assetInventory) {
+    cyberState.assetInventory = JSON.parse(JSON.stringify(DEFAULT_ASSET_INVENTORY_DATA))
+  }
+
+  if (action.type === 'SWITCH_SUBTAB') {
+    cyberState.assetInventorySubTab = action.subtab
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'SEARCH') {
+    cyberState.assetInventorySearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    const searchInp = el.querySelector('#asset-search-input')
+    if (searchInp) {
+      searchInp.focus()
+      searchInp.selectionStart = searchInp.selectionEnd = searchInp.value.length
+    }
+    return
+  }
+
+  if (action.type === 'FILTER_CRIT') {
+    cyberState.assetInventoryCritFilter = action.critFilter
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'UPDATE_HEADER_DATE') {
+    if (!cyberState.assetInventory.metadata) cyberState.assetInventory.metadata = {}
+    cyberState.assetInventory.metadata.updatedDate = action.date
+    saveAssetInventory()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`อัปเดตวันที่ปรับปรุงทะเบียนเป็น ${action.date} เรียบร้อยแล้ว`, 'success')
+    return
+  }
+
+  if (action.type === 'UPDATE_ITEM_DATE') {
+    const item = cyberState.assetInventory.items?.find(it => it.id === action.id)
+    if (item) {
+      item.lastUpdated = action.date
+      saveAssetInventory()
+      renderPolicyAndFrameworkTab(el)
+      showNotification(`อัปเดตวันที่ของ "${item.name}" เป็น ${action.date} แล้ว`, 'success')
+    }
+    return
+  }
+
+  if (action.type === 'UPDATE_METADATA') {
+    cyberState.assetInventory.metadata = { ...action.metadata }
+    saveAssetInventory()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('บันทึกข้อมูลส่วนหัวทะเบียนทรัพย์สินเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'ADD_ITEM') {
+    if (!cyberState.assetInventory.items) cyberState.assetInventory.items = []
+    const newNo = cyberState.assetInventory.items.length + 1
+    const newItem = { ...action.item, no: newNo }
+    cyberState.assetInventory.items.push(newItem)
+    saveAssetInventory()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`เพิ่มทรัพย์สิน "${newItem.name}" เรียบร้อยแล้ว`, 'success')
+    return
+  }
+
+  if (action.type === 'UPDATE_ITEM') {
+    const idx = cyberState.assetInventory.items?.findIndex(it => it.id === action.item.id)
+    if (idx !== -1 && idx !== undefined) {
+      const existingNo = cyberState.assetInventory.items[idx].no
+      cyberState.assetInventory.items[idx] = { ...action.item, no: existingNo }
+      saveAssetInventory()
+      renderPolicyAndFrameworkTab(el)
+      showNotification(`แก้ไขข้อมูล "${action.item.name}" เรียบร้อยแล้ว`, 'success')
+    }
+    return
+  }
+
+  if (action.type === 'DELETE_ITEM') {
+    cyberState.assetInventory.items = (cyberState.assetInventory.items || []).filter(it => it.id !== action.id)
+    // Re-assign 'no' sequence
+    cyberState.assetInventory.items.forEach((it, i) => {
+      it.no = i + 1
+    })
+    saveAssetInventory()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการทรัพย์สินเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'RESET_DEFAULT') {
+    cyberState.assetInventory = JSON.parse(JSON.stringify(DEFAULT_ASSET_INVENTORY_DATA))
+    cyberState.assetInventorySearchQuery = ''
+    cyberState.assetInventoryCritFilter = 'all'
+    saveAssetInventory()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('รีเซ็ตข้อมูลทะเบียนทรัพย์สินเป็นค่าเริ่มต้นเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'EXPORT_WORD') {
+    exportAssetInventoryToWord(cyberState.assetInventory, cyberState.assetInventorySubTab)
+    showNotification('ส่งออกไฟล์ Word (.doc) สำเร็จ', 'success')
+    return
+  }
+
+  if (action.type === 'EXPORT_CSV') {
+    exportAssetInventoryToCsv(cyberState.assetInventory, cyberState.assetInventorySubTab)
+    showNotification('ส่งออกไฟล์ Excel (.csv) สำเร็จ', 'success')
     return
   }
 }
