@@ -84,6 +84,19 @@ import {
   DEFAULT_BIA_REPORT_DATA,
   mergeBiaEvidentToReportRows
 } from './biaReportData.js'
+import {
+  renderRiskRegisterHtml,
+  bindRiskRegisterEvents,
+  exportRiskRegisterWord,
+  exportRiskRegisterCsv,
+  syncRiskRegisterToSupabase,
+  fetchRiskRegisterFromSupabase
+} from './riskRegister.js'
+import {
+  DEFAULT_RISK_REGISTER_HEADER,
+  DEFAULT_RISK_REGISTER_LOGS,
+  DEFAULT_RISK_REGISTER_ITEMS
+} from './riskRegisterData.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
@@ -99,6 +112,7 @@ const LOCAL_STORAGE_ASSET_REGISTER_KEY = 'sko_cyber_asset_register'
 const LOCAL_STORAGE_ASSET_RISK_KEY = 'sko_cyber_asset_risk_assessment'
 const LOCAL_STORAGE_BIA_EVIDENT_KEY = 'sko_cyber_bia_evident'
 const LOCAL_STORAGE_BIA_REPORTS_KEY = 'sko_cyber_bia_reports'
+const LOCAL_STORAGE_RISK_REGISTER_KEY = 'sko_cyber_risk_register'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -237,6 +251,11 @@ let cyberState = {
   biaReports: [],
   activeBiaReportId: 'bia_report_2569',
   biaReportSubTab: 'report',
+  riskRegister: null,
+  riskRegisterSubTab: 'register',
+  riskRegisterClusterFilter: 'all',
+  riskRegisterSearchQuery: '',
+  riskRegisterViewMode: 'table',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -245,7 +264,8 @@ let cyberState = {
     '3.2 รายงานการแจ้งเหตุการณ์': true,
     'Govern': true,
     'Identify': true,
-    '1.Asset Management': true
+    '1.Asset Management': true,
+    '2.Risk Assessment and Risk Management Strategy': true
   }
 }
 
@@ -555,17 +575,35 @@ function initData() {
     cyberState.activeBiaReportId = cyberState.biaReports[0].id
   }
 
+  // 15. Risk Register (2.2 Risk Register - ทะเบียนความเสี่ยง)
+  try {
+    const savedRiskReg = localStorage.getItem(LOCAL_STORAGE_RISK_REGISTER_KEY)
+    if (savedRiskReg) {
+      cyberState.riskRegister = JSON.parse(savedRiskReg)
+    }
+  } catch (e) {
+    cyberState.riskRegister = null
+  }
+  if (!cyberState.riskRegister || !Array.isArray(cyberState.riskRegister.items) || cyberState.riskRegister.items.length === 0) {
+    cyberState.riskRegister = {
+      header: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_ITEMS))
+    }
+  }
+
   // Background fetch from Supabase for all modules
   Promise.all([
     fetchAssetRiskFromSupabase(),
     fetchBiaFromSupabase(),
     fetchBiaReportsFromSupabase(),
+    fetchRiskRegisterFromSupabase(),
     fetchModuleFromSupabase('asset_inventory'),
     fetchModuleFromSupabase('asset_register'),
     fetchModuleFromSupabase('risk_assessment'),
     fetchModuleFromSupabase('risk_reports'),
     fetchModuleFromSupabase('kri_data')
-  ]).then(([assetRisk, bia, biaRep, inv, reg, risk, rep, kri]) => {
+  ]).then(([assetRisk, bia, biaRep, riskReg, inv, reg, risk, rep, kri]) => {
     if (assetRisk?.items?.length > 0) {
       cyberState.assetRiskAssessment = assetRisk
       localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(assetRisk))
@@ -580,6 +618,10 @@ function initData() {
       if (!cyberState.biaReports.some(r => r.id === cyberState.activeBiaReportId)) {
         cyberState.activeBiaReportId = cyberState.biaReports[0].id
       }
+    }
+    if (riskReg?.items?.length > 0) {
+      cyberState.riskRegister = riskReg
+      localStorage.setItem(LOCAL_STORAGE_RISK_REGISTER_KEY, JSON.stringify(riskReg))
     }
     if (inv?.items?.length > 0) {
       cyberState.assetInventory = inv
@@ -690,6 +732,17 @@ function saveBiaReports() {
     }
   } catch (e) {
     console.error('Error saving BIA Reports:', e)
+  }
+}
+
+function saveRiskRegister() {
+  try {
+    if (cyberState.riskRegister) {
+      localStorage.setItem(LOCAL_STORAGE_RISK_REGISTER_KEY, JSON.stringify(cyberState.riskRegister))
+      syncRiskRegisterToSupabase(cyberState.riskRegister)
+    }
+  } catch (e) {
+    console.error('Error saving Risk Register:', e)
   }
 }
 
@@ -2303,6 +2356,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('1.7 BIA Report') ||
     cyberState.selectedDoc.title.includes('1.7 BIA Report')
   )
+  const isRiskRegister = (
+    currentKey.includes('2.2 Risk Register') ||
+    cyberState.selectedDoc.title.includes('2.2 Risk Register')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2364,6 +2421,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบวิเคราะห์ผลกระทบทางธุรกิจ (Business Impact Analysis - BIA) 9 บริการสำคัญ พร้อมคำนวณ MTPD/RTO/RPO และผลกระทบ 4 มิติ'
               : isBiaReport
               ? 'ระบบจัดทำและพิมพ์รายงานการวิเคราะห์ผลกระทบทางธุรกิจ (BIA Report) 6 ส่วน พร้อมตารางเปรียบเทียบและระบบแนบเอกสาร PDF'
+              : isRiskRegister
+              ? 'ระบบทะเบียนความเสี่ยงไซเบอร์ (Risk Register) 3 ส่วน: ประเมิน, วางแผนจัดการ และติดตามผล พร้อมเกณฑ์ 5x5 และตารางเปรียบเทียบ'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2427,6 +2486,14 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.biaReportSubTab || 'report',
               savedData.pdfLinks || [],
               cyberState.biaEvident?.items || []
+            )
+          : isRiskRegister
+          ? renderRiskRegisterHtml(
+              cyberState.riskRegister,
+              cyberState.riskRegisterSubTab || 'register',
+              cyberState.riskRegisterClusterFilter || 'all',
+              cyberState.riskRegisterSearchQuery || '',
+              cyberState.riskRegisterViewMode || 'table'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2638,6 +2705,10 @@ function renderPolicyAndFrameworkTab(el) {
         handleBiaReportAction(action, el, currentKey)
       }
     )
+  } else if (isRiskRegister) {
+    bindRiskRegisterEvents(el, cyberState.riskRegister, (action) => {
+      handleRiskRegisterAction(action, el)
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
   }
@@ -3264,6 +3335,128 @@ function handleBiaReportAction(action, el, currentKey) {
     return
   }
 }
+
+function handleRiskRegisterAction(action, el) {
+  if (!cyberState.riskRegister) {
+    cyberState.riskRegister = {
+      header: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_ITEMS))
+    }
+  }
+
+  if (action.type === 'change_subtab') {
+    cyberState.riskRegisterSubTab = action.subtab
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_view_mode') {
+    cyberState.riskRegisterViewMode = action.mode
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'filter_cluster') {
+    cyberState.riskRegisterClusterFilter = action.cluster
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search_query') {
+    cyberState.riskRegisterSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    const inp = el.querySelector('#input-search-rr')
+    if (inp) {
+      inp.focus()
+      inp.selectionStart = inp.selectionEnd = inp.value.length
+    }
+    return
+  }
+
+  if (action.type === 'update_header') {
+    cyberState.riskRegister.header = { ...action.header }
+    saveRiskRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('บันทึกข้อมูลส่วนหัวทะเบียนความเสี่ยงเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'add_item') {
+    if (!cyberState.riskRegister.items) cyberState.riskRegister.items = []
+    cyberState.riskRegister.items.push(action.item)
+    saveRiskRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มรายการความเสี่ยง ' + (action.item.system || '') + ' สำเร็จ', 'success')
+    return
+  }
+
+  if (action.type === 'update_item') {
+    const idx = cyberState.riskRegister.items?.findIndex(it => it.id === action.item.id)
+    if (idx !== -1 && idx !== undefined) {
+      cyberState.riskRegister.items[idx] = { ...action.item }
+      saveRiskRegister()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('อัปเดตรายการความเสี่ยงเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_item') {
+    cyberState.riskRegister.items = (cyberState.riskRegister.items || []).filter(it => it.id !== action.id)
+    saveRiskRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการความเสี่ยงเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'add_log') {
+    if (!cyberState.riskRegister.logs) cyberState.riskRegister.logs = []
+    cyberState.riskRegister.logs.unshift({
+      id: 'log_' + Date.now(),
+      date: action.date,
+      detail: action.detail
+    })
+    saveRiskRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มบันทึกประวัติเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'edit_log') {
+    const log = cyberState.riskRegister.logs?.find(l => l.id === action.id)
+    if (log) {
+      log.detail = action.detail
+      saveRiskRegister()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('แก้ไขบันทึกประวัติเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_log') {
+    cyberState.riskRegister.logs = (cyberState.riskRegister.logs || []).filter(l => l.id !== action.id)
+    saveRiskRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบบันทึกประวัติเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'reset_default') {
+    cyberState.riskRegister = {
+      header: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_LOGS)),
+      items: JSON.parse(JSON.stringify(DEFAULT_RISK_REGISTER_ITEMS))
+    }
+    cyberState.riskRegisterClusterFilter = 'all'
+    cyberState.riskRegisterSearchQuery = ''
+    saveRiskRegister()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('รีเซ็ตข้อมูลทะเบียนความเสี่ยงเป็นค่าเริ่มต้นเรียบร้อยแล้ว', 'success')
+    return
+  }
+}
+
 
 function handleAssetRegisterAction(action, el) {
   if (!cyberState.assetRegister) {

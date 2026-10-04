@@ -278,6 +278,53 @@ CREATE TABLE IF NOT EXISTS public.cyber_bia_reports (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 12. [2.2] ทะเบียนความเสี่ยง (Risk Register)
+CREATE TABLE IF NOT EXISTS public.cyber_risk_register_items (
+    id TEXT PRIMARY KEY,
+    date_identified TEXT,
+    category TEXT NOT NULL,
+    system TEXT NOT NULL,
+    threat TEXT,
+    vulnerability TEXT,
+    existing_controls TEXT,
+    impact_cia JSONB DEFAULT '{"c": false, "i": false, "a": false}'::jsonb,
+    severity_fsrilo JSONB DEFAULT '{"f": false, "s": false, "r": false, "i": false, "l": false, "o": false}'::jsonb,
+    likelihood NUMERIC DEFAULT 1,
+    impact NUMERIC DEFAULT 1,
+    risk_level NUMERIC DEFAULT 1,
+    risk_owner TEXT,
+    treatment_option TEXT,
+    treatment_plan TEXT,
+    progress_percent NUMERIC DEFAULT 0,
+    expected_finish_date TEXT,
+    residual_likelihood NUMERIC DEFAULT 1,
+    residual_impact NUMERIC DEFAULT 1,
+    residual_risk_level NUMERIC DEFAULT 1,
+    status TEXT DEFAULT 'Open',
+    follow_up_progress TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.cyber_risk_register_header (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    evaluator TEXT,
+    recorder TEXT,
+    period_month TEXT,
+    meeting_date TEXT,
+    location TEXT,
+    address TEXT,
+    critical_service TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.cyber_risk_register_logs (
+    id TEXT PRIMARY KEY,
+    date TEXT,
+    detail TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ====================================================================================================
 -- กำหนดสิทธิ์และความปลอดภัย (Row Level Security & Permissions)
 -- เพื่อให้ผู้ใช้งานทั้ง authenticated และ anon สามารถอ่าน/เขียน/อัปเดตข้อมูลได้จากทุกเครื่อง
@@ -297,6 +344,9 @@ DECLARE
         'cyber_bia_header',
         'cyber_bia_logs',
         'cyber_bia_reports',
+        'cyber_risk_register_items',
+        'cyber_risk_register_header',
+        'cyber_risk_register_logs',
         'cyber_risk_matrix_items',
         'cyber_risk_matrix_header',
         'cyber_risk_matrix_logs',
