@@ -171,6 +171,29 @@ export function renderUserPermissionHtml(
   `
 }
 
+// Helper: จัดระเบียบข้อความหัวตารางฟังก์ชันให้อ่านง่าย ไม่ซ้อนทับกัน
+export function formatMatrixFnLabel(label) {
+  if (!label) return ''
+  let str = String(label).trim()
+  if (str.includes(' (')) {
+    const parts = str.split(' (')
+    return `${parts[0]}<br><span style="font-size:10px; font-weight:normal; opacity:0.9;">(${parts[1]}</span>`
+  }
+  if (str.includes(' & ')) {
+    const parts = str.split(' & ')
+    return `${parts[0]}<br><span style="font-size:10px; font-weight:normal; opacity:0.9;">& ${parts[1]}</span>`
+  }
+  if (str.includes(' และ')) {
+    const parts = str.split(' และ')
+    return `${parts[0]}<br><span style="font-size:10px; font-weight:normal; opacity:0.9;">และ${parts[1]}</span>`
+  }
+  if (str.includes('/')) {
+    const parts = str.split('/')
+    return `${parts[0]}<br><span style="font-size:10px; font-weight:normal; opacity:0.9;">/ ${parts[1]}</span>`
+  }
+  return str
+}
+
 // 1. แท็บย่อย: Permission Matrix (ตารางสิทธิ์ RBAC 2D)
 function renderMatrixTabHtml(roles, systems, matrix) {
   // รวบรวมฟังก์ชันทั้งหมดของทุกระบบ
@@ -196,7 +219,7 @@ function renderMatrixTabHtml(roles, systems, matrix) {
             ตารางกำหนดสิทธิ์การเข้าถึงระบบสารสนเทศ (Role-Based Access Control Matrix)
           </h3>
           <p style="margin:3px 0 0 0; font-size:12px; color:#64748b;">
-            กำหนดสิทธิ์ตามหลักการ Need-to-Know และ Least Privilege (คลิกที่ช่องในตารางเพื่อสลับสิทธิ์ได้ทันที)
+            กำหนดสิทธิ์ตามหลักการ Need-to-Know และ Least Privilege (คลิกที่ช่องในตารางเพื่อสลับสิทธิ์ได้ทันที • เลื่อนแนวนอนเพื่อดูระบบอื่น ๆ)
           </p>
         </div>
 
@@ -209,25 +232,29 @@ function renderMatrixTabHtml(roles, systems, matrix) {
         </div>
       </div>
 
-      <!-- Matrix Table Scrollable -->
-      <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+      <!-- Matrix Table Scrollable with Sticky Role Columns -->
+      <div style="overflow-x:auto; width:100%; border-top:1px solid #cbd5e1;">
+        <table style="min-width:2450px; width:100%; border-collapse:separate; border-spacing:0; font-size:12px; text-align:left; table-layout:fixed; background:#fff;">
           <thead>
             <!-- Header Row 1: System Names -->
             <tr style="background:#1e3a8a; color:#fff;">
-              <th rowspan="2" style="padding:10px 12px; border:1px solid #3b82f6; width:130px; vertical-align:middle; text-align:center;">รหัสบทบาท (Role)</th>
-              <th rowspan="2" style="padding:10px 14px; border:1px solid #3b82f6; width:220px; vertical-align:middle;">ชื่อบทบาท / ตำแหน่งหน้าที่</th>
-              ${systems.map(sys => `
-                <th colspan="${sys.functions.length}" style="padding:8px 10px; border:1px solid #3b82f6; text-align:center; font-weight:700; background:#1e40af;">
+              <th rowspan="2" style="position:sticky; left:0; top:0; z-index:25; background:#1e3a8a; padding:12px 10px; border-bottom:1px solid #3b82f6; border-right:1px solid #3b82f6; width:110px; min-width:110px; max-width:110px; vertical-align:middle; text-align:center; box-sizing:border-box;">
+                รหัสบทบาท (Role)
+              </th>
+              <th rowspan="2" style="position:sticky; left:110px; top:0; z-index:25; background:#1e3a8a; padding:12px 14px; border-bottom:1px solid #3b82f6; border-right:2px solid #2563eb; width:250px; min-width:250px; max-width:250px; vertical-align:middle; box-shadow:3px 0 6px rgba(0,0,0,0.15); box-sizing:border-box;">
+                ชื่อบทบาท / ตำแหน่งหน้าที่
+              </th>
+              ${systems.map((sys, sIdx) => `
+                <th colspan="${sys.functions.length}" style="padding:10px 8px; border-bottom:1px solid #3b82f6; border-right:2px solid #1d4ed8; text-align:center; font-weight:700; font-size:12.5px; background:${sIdx % 2 === 0 ? '#1e40af' : '#1d4ed8'}; color:#fff; box-sizing:border-box;">
                   ${sys.name}
                 </th>
               `).join('')}
             </tr>
             <!-- Header Row 2: Functions -->
-            <tr style="background:#2563eb; color:#fff; font-size:11px;">
+            <tr style="background:#2563eb; color:#fff;">
               ${systems.map(sys => sys.functions.map(fn => `
-                <th style="padding:8px 6px; border:1px solid #3b82f6; text-align:center; min-width:85px; max-width:110px; vertical-align:middle; line-height:1.2;" title="${fn.label}">
-                  ${fn.label}
+                <th style="padding:8px 6px; border-bottom:2px solid #cbd5e1; border-right:1px solid #3b82f6; text-align:center; width:115px; min-width:115px; max-width:115px; vertical-align:middle; line-height:1.35; font-size:11px; word-break:break-word; overflow-wrap:break-word; white-space:normal; box-sizing:border-box; background:#2563eb;" title="${fn.label}">
+                  ${formatMatrixFnLabel(fn.label)}
                 </th>
               `).join('')).join('')}
             </tr>
@@ -236,26 +263,27 @@ function renderMatrixTabHtml(roles, systems, matrix) {
             ${roles.map((role, rIdx) => {
               const roleMatrix = matrix[role.id] || {}
               const isEven = rIdx % 2 === 0
+              const rowBg = isEven ? '#ffffff' : '#f8fafc'
               return `
-                <tr style="background:${isEven ? '#fff' : '#f8fafc'}; border-bottom:1px solid #e2e8f0;">
-                  <td style="padding:10px 12px; border-right:1px solid #e2e8f0; border-left:1px solid #e2e8f0; font-weight:700; color:#1e40af; text-align:center; white-space:nowrap;">
+                <tr style="background:${rowBg};">
+                  <td style="position:sticky; left:0; z-index:10; background:${rowBg}; padding:10px 10px; border-bottom:1px solid #e2e8f0; border-right:1px solid #e2e8f0; font-weight:700; color:#1e40af; text-align:center; width:110px; min-width:110px; max-width:110px; box-sizing:border-box;">
                     ${role.code}
                   </td>
-                  <td style="padding:10px 14px; border-right:1px solid #e2e8f0;">
-                    <div style="font-weight:700; color:#0f172a;">${role.title}</div>
-                    <div style="font-size:11px; color:#64748b; margin-top:2px;">${role.description}</div>
+                  <td style="position:sticky; left:110px; z-index:10; background:${rowBg}; padding:10px 14px; border-bottom:1px solid #e2e8f0; border-right:2px solid #cbd5e1; width:250px; min-width:250px; max-width:250px; box-shadow:3px 0 6px rgba(0,0,0,0.06); box-sizing:border-box;">
+                    <div style="font-weight:700; color:#0f172a; line-height:1.3;">${role.title}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:3px; line-height:1.3;">${role.description}</div>
                   </td>
                   ${allFunctions.map(fn => {
                     const val = roleMatrix[fn.functionId] || '-'
                     const badge = getMatrixPermissionBadge(val)
                     return `
-                      <td style="padding:6px 4px; border-right:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
+                      <td style="padding:8px 4px; border-bottom:1px solid #e2e8f0; border-right:1px solid #e2e8f0; text-align:center; vertical-align:middle; width:115px; min-width:115px; max-width:115px; box-sizing:border-box;">
                         <button class="upm-matrix-toggle-btn" 
                           data-role-id="${role.id}" 
                           data-fn-id="${fn.functionId}" 
                           data-val="${val}"
                           title="คลิกเพื่อสลับสิทธิ์: ${badge.title}"
-                          style="border:1px solid ${badge.border}; background:${badge.bg}; color:${badge.color}; font-weight:800; font-size:12px; padding:4px 8px; border-radius:4px; cursor:pointer; width:34px; height:28px; line-height:1;">
+                          style="border:1px solid ${badge.border}; background:${badge.bg}; color:${badge.color}; font-weight:800; font-size:12px; padding:4px 8px; border-radius:5px; cursor:pointer; width:36px; height:30px; line-height:1; display:inline-flex; align-items:center; justify-content:center; transition:all 0.15s ease;">
                           ${val}
                         </button>
                       </td>
@@ -311,7 +339,7 @@ function renderReviewTabHtml(filteredAccounts, allAccounts, statusFilter, search
       <!-- Accounts Table -->
       <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
         <div style="overflow-x:auto;">
-          <table style="width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;">
+          <table style="min-width:1100px; width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;">
             <thead>
               <tr style="background:#f1f5f9; color:#334155; font-weight:700; border-bottom:2px solid #cbd5e1;">
                 <th style="padding:10px 12px; width:45px; text-align:center;">#</th>
@@ -534,7 +562,7 @@ function renderPrintTemplate(header, roles, systems, matrix, accounts) {
           <tr style="background:#f8fafc; font-size:8pt;">
             <th style="border:1px solid #000; padding:2px;"></th>
             <th style="border:1px solid #000; padding:2px;"></th>
-            ${systems.map(s => s.functions.map(fn => `<th style="border:1px solid #000; padding:2px; text-align:center;">${fn.label}</th>`).join('')).join('')}
+            ${systems.map(s => s.functions.map(fn => `<th style="border:1px solid #000; padding:2px; text-align:center; font-size:7pt; line-height:1.2;">${formatMatrixFnLabel(fn.label)}</th>`).join('')).join('')}
           </tr>
         </thead>
         <tbody>

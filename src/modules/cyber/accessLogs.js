@@ -222,7 +222,7 @@ function renderLogsTabHtml(filteredLogs, allLogs, statusFilter, systemFilter, se
       <!-- Logs Table -->
       <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
         <div style="overflow-x:auto;">
-          <table style="width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;">
+          <table style="min-width:1250px; width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;">
             <thead>
               <tr style="background:#f1f5f9; color:#334155; font-weight:700; border-bottom:2px solid #cbd5e1;">
                 <th style="padding:10px 12px; width:135px;">วันเวลา (Timestamp)</th>
