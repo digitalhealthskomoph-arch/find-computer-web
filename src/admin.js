@@ -10,8 +10,23 @@ import QRCode from 'qrcode'
 // ==========================================
 // State
 // ==========================================
+const LOCAL_STORAGE_MODULE_KEY = 'sko_admin_current_module'
+const LOCAL_STORAGE_PROC_TAB_KEY = 'sko_admin_procurement_tab'
+
+function getInitialModule() {
+  const hash = (window.location.hash || '').replace('#', '').trim().toLowerCase()
+  if (hash === 'cyber' || hash === 'pdpa' || hash === 'procurement') {
+    return hash
+  }
+  const saved = localStorage.getItem(LOCAL_STORAGE_MODULE_KEY)
+  if (saved === 'cyber' || saved === 'pdpa' || saved === 'procurement') {
+    return saved
+  }
+  return 'procurement'
+}
+
 let state = {
-  currentModule: 'procurement', // 'procurement' | 'cyber' | 'pdpa'
+  currentModule: getInitialModule(), // 'procurement' | 'cyber' | 'pdpa'
   user: null,
   meetings: [],
   currentMeeting: null,
@@ -20,7 +35,7 @@ let state = {
   items: [],
   committees: [],
   agenda3Items: [],
-  activeTab: 'meetings',
+  activeTab: localStorage.getItem(LOCAL_STORAGE_PROC_TAB_KEY) || 'meetings',
   dtRowId: 0,
 }
 
@@ -30,12 +45,24 @@ const app = document.getElementById('app')
 // Bootstrap
 // ==========================================
 async function init() {
+  window.addEventListener('hashchange', () => {
+    const mod = getInitialModule()
+    if (mod !== state.currentModule) {
+      window.switchModule(mod)
+    }
+  })
+
   const { data: { session } } = await supabase.auth.getSession()
   state.user = session?.user || null
 
   supabase.auth.onAuthStateChange((_e, sess) => {
-    state.user = sess?.user || null
-    renderApp()
+    const prevUserId = state.user?.id
+    const nextUser = sess?.user || null
+    state.user = nextUser
+    // Only re-render if auth state actually changed (e.g. login or logout)
+    if (prevUserId !== nextUser?.id) {
+      renderApp()
+    }
   })
 
   renderApp()
@@ -44,6 +71,14 @@ async function init() {
 function renderApp() {
   if (!state.user) { renderLogin(); return }
   renderAdmin()
+  const el = document.getElementById('main-content')
+  if (state.currentModule === 'cyber') {
+    renderCyberModule(el)
+  } else if (state.currentModule === 'pdpa') {
+    renderPdpaModule(el)
+  } else if (state.currentModule === 'procurement') {
+    renderTab()
+  }
   loadData()
 }
 
@@ -188,9 +223,19 @@ function renderAdmin() {
 }
 
 window.logout = async () => { await supabase.auth.signOut() }
-window.switchTab = (tab) => { state.activeTab = tab; renderTab() }
+window.switchTab = (tab) => {
+  state.activeTab = tab
+  try { localStorage.setItem(LOCAL_STORAGE_PROC_TAB_KEY, tab) } catch (e) {}
+  renderTab()
+}
 window.switchModule = (mod) => {
   state.currentModule = mod
+  try {
+    localStorage.setItem(LOCAL_STORAGE_MODULE_KEY, mod)
+    if (window.location.hash !== `#${mod}`) {
+      history.replaceState(null, '', `#${mod}`)
+    }
+  } catch (e) {}
   renderAdmin()
   const el = document.getElementById('main-content')
   if (mod === 'procurement') {
@@ -220,13 +265,8 @@ async function loadData() {
     state.districts[d.name] = (d.agencies || []).map(a => a.name)
   })
   
-  const el = document.getElementById('main-content')
   if (state.currentModule === 'procurement') {
     renderTab()
-  } else if (state.currentModule === 'cyber') {
-    renderCyberModule(el)
-  } else if (state.currentModule === 'pdpa') {
-    renderPdpaModule(el)
   }
 }
 

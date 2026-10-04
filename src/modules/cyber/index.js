@@ -127,6 +127,18 @@ const LOCAL_STORAGE_BIA_EVIDENT_KEY = 'sko_cyber_bia_evident'
 const LOCAL_STORAGE_BIA_REPORTS_KEY = 'sko_cyber_bia_reports'
 const LOCAL_STORAGE_RISK_REGISTER_KEY = 'sko_cyber_risk_register'
 const LOCAL_STORAGE_THIRD_PARTY_RISK_KEY = 'sko_cyber_third_party_risk'
+const LOCAL_STORAGE_CYBER_MAIN_TAB_KEY = 'sko_cyber_active_main_tab'
+const LOCAL_STORAGE_CYBER_SELECTED_DOC_KEY = 'sko_cyber_selected_doc_key'
+const LOCAL_STORAGE_CYBER_CII_SUBTAB_KEY = 'sko_cyber_cii_subtab'
+const LOCAL_STORAGE_EXPANDED_NODES_KEY = 'sko_cyber_expanded_nodes'
+const LOCAL_STORAGE_TPR_VENDOR_KEY = 'sko_cyber_tpr_vendor_id'
+const LOCAL_STORAGE_TPR_SUBTAB_KEY = 'sko_cyber_tpr_subtab'
+const LOCAL_STORAGE_RISK_REGISTER_SUBTAB_KEY = 'sko_cyber_risk_register_subtab'
+const LOCAL_STORAGE_BIA_SUBTAB_KEY = 'sko_cyber_bia_subtab'
+const LOCAL_STORAGE_BIA_REPORT_SUBTAB_KEY = 'sko_cyber_bia_report_subtab'
+const LOCAL_STORAGE_ASSET_RISK_SUBTAB_KEY = 'sko_cyber_asset_risk_subtab'
+const LOCAL_STORAGE_RISK_ASSESS_SUBTAB_KEY = 'sko_cyber_risk_assess_subtab'
+const LOCAL_STORAGE_ASSET_INV_SUBTAB_KEY = 'sko_cyber_asset_inv_subtab'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -691,6 +703,61 @@ function initData() {
     }
   }).catch(() => {})
 
+  // 17. Restore navigation, tabs, and selected document across page reloads
+  try {
+    const savedActiveTab = localStorage.getItem(LOCAL_STORAGE_CYBER_MAIN_TAB_KEY)
+    if (savedActiveTab && ['assessment', 'docs', 'incidents'].includes(savedActiveTab)) {
+      cyberState.activeTab = savedActiveTab
+    }
+
+    const savedCiiSubTab = localStorage.getItem(LOCAL_STORAGE_CYBER_CII_SUBTAB_KEY)
+    if (savedCiiSubTab && ['log', 'instructions', 'assessment'].includes(savedCiiSubTab)) {
+      cyberState.assessmentSubTab = savedCiiSubTab
+    }
+
+    const savedExpanded = localStorage.getItem(LOCAL_STORAGE_EXPANDED_NODES_KEY)
+    if (savedExpanded) {
+      cyberState.expandedNodes = { ...cyberState.expandedNodes, ...JSON.parse(savedExpanded) }
+    }
+
+    const savedDocKey = localStorage.getItem(LOCAL_STORAGE_CYBER_SELECTED_DOC_KEY)
+    if (savedDocKey) {
+      const found = allFlatDocs.find(d => d.key === savedDocKey || d.title === savedDocKey)
+      if (found) {
+        cyberState.selectedDoc = found
+        if (found.category) cyberState.expandedNodes[found.category] = true
+        if (found.domain) cyberState.expandedNodes[found.domain] = true
+        if (found.major) cyberState.expandedNodes[found.major] = true
+      }
+    }
+
+    const savedTprVendor = localStorage.getItem(LOCAL_STORAGE_TPR_VENDOR_KEY)
+    if (savedTprVendor && cyberState.thirdPartyRisk?.some(p => p.id === savedTprVendor)) {
+      cyberState.activeThirdPartyVendorId = savedTprVendor
+    }
+
+    const savedTprSubTab = localStorage.getItem(LOCAL_STORAGE_TPR_SUBTAB_KEY)
+    if (savedTprSubTab) cyberState.thirdPartySubTab = savedTprSubTab
+
+    const savedRiskRegSubTab = localStorage.getItem(LOCAL_STORAGE_RISK_REGISTER_SUBTAB_KEY)
+    if (savedRiskRegSubTab) cyberState.riskRegisterSubTab = savedRiskRegSubTab
+
+    const savedBiaSubTab = localStorage.getItem(LOCAL_STORAGE_BIA_SUBTAB_KEY)
+    if (savedBiaSubTab) cyberState.biaSubTab = savedBiaSubTab
+
+    const savedBiaRepSubTab = localStorage.getItem(LOCAL_STORAGE_BIA_REPORT_SUBTAB_KEY)
+    if (savedBiaRepSubTab) cyberState.biaReportSubTab = savedBiaRepSubTab
+
+    const savedAssetRiskSubTab = localStorage.getItem(LOCAL_STORAGE_ASSET_RISK_SUBTAB_KEY)
+    if (savedAssetRiskSubTab) cyberState.assetRiskSubTab = savedAssetRiskSubTab
+
+    const savedRiskAssessSubTab = localStorage.getItem(LOCAL_STORAGE_RISK_ASSESS_SUBTAB_KEY)
+    if (savedRiskAssessSubTab) cyberState.riskAssessmentSubTab = savedRiskAssessSubTab
+
+    const savedAssetInvSubTab = localStorage.getItem(LOCAL_STORAGE_ASSET_INV_SUBTAB_KEY)
+    if (savedAssetInvSubTab) cyberState.assetInventorySubTab = savedAssetInvSubTab
+  } catch (e) {}
+
   // If selectedDoc was set to "3.2 รายงานการแจ้งเหตุการณ์", fallback to 3.2.1
   if (cyberState.selectedDoc?.key === '3.2 รายงานการแจ้งเหตุการณ์' || cyberState.selectedDoc?.title === '3.2 รายงานการแจ้งเหตุการณ์') {
     const fallback = allFlatDocs.find(d => d.key === '3.2.1 แบบฟอร์มรายงานการแจ้งเหตุภัยคุกคามทางไซเบอร์') || allFlatDocs[0]
@@ -1003,6 +1070,7 @@ function bindNavEvents(container) {
   container.querySelectorAll('.cyber-main-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       cyberState.activeTab = btn.dataset.tab
+      localStorage.setItem(LOCAL_STORAGE_CYBER_MAIN_TAB_KEY, cyberState.activeTab)
       renderCyberModule(container)
     })
   })
@@ -1074,6 +1142,7 @@ function renderCiiAssessmentMainTab(el, container) {
   el.querySelectorAll('.cii-subtab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       cyberState.assessmentSubTab = btn.dataset.subtab
+      localStorage.setItem(LOCAL_STORAGE_CYBER_CII_SUBTAB_KEY, cyberState.assessmentSubTab)
       renderCiiAssessmentMainTab(el, container)
     })
   })
@@ -2370,6 +2439,9 @@ function bindGenericDocEvents(el, currentKey) {
 }
 
 function renderPolicyAndFrameworkTab(el) {
+  const prevTreeScroll = el.querySelector('#doc-tree-scroll-container')?.scrollTop || 0
+  const prevRightScroll = el.querySelector('#doc-right-content-container')?.scrollTop || 0
+
   const q = cyberState.docSearchKeyword.toLowerCase().trim()
   const filteredDocs = q ? allFlatDocs.filter(d => 
     d.title.toLowerCase().includes(q) ||
@@ -2448,7 +2520,7 @@ function renderPolicyAndFrameworkTab(el) {
       </div>
 
       <!-- Right Main Content: Document Details & Viewer -->
-      <div style="flex:1; overflow-y:auto; padding:28px;">
+      <div id="doc-right-content-container" style="flex:1; overflow-y:auto; padding:28px;">
         
         <!-- Breadcrumb & Header -->
         <div style="border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:24px;">
@@ -2573,6 +2645,11 @@ function renderPolicyAndFrameworkTab(el) {
       </div>
     </div>
   `
+
+  const newTreeScroll = el.querySelector('#doc-tree-scroll-container')
+  if (newTreeScroll && prevTreeScroll) newTreeScroll.scrollTop = prevTreeScroll
+  const newRightScroll = el.querySelector('#doc-right-content-container')
+  if (newRightScroll && prevRightScroll) newRightScroll.scrollTop = prevRightScroll
 
   // Bind Search input
   document.getElementById('doc-tree-search-input')?.addEventListener('input', (e) => {
@@ -2917,6 +2994,7 @@ function handleAssetInventoryAction(action, el) {
 
   if (action.type === 'SWITCH_SUBTAB') {
     cyberState.assetInventorySubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_ASSET_INV_SUBTAB_KEY, action.subtab)
     cyberState.assetInventoryGroupFilter = 'all'
     renderPolicyAndFrameworkTab(el)
     return
@@ -3037,6 +3115,7 @@ function handleAssetRiskAction(action, el) {
 
   if (action.type === 'change_subtab') {
     cyberState.assetRiskSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_SUBTAB_KEY, action.subtab)
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -3179,6 +3258,7 @@ function handleBiaAction(action, el) {
 
   if (action.type === 'change_subtab') {
     cyberState.biaSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_BIA_SUBTAB_KEY, action.subtab)
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -3281,6 +3361,7 @@ function handleBiaReportAction(action, el, currentKey) {
 
   if (action.type === 'change_subtab') {
     cyberState.biaReportSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_BIA_REPORT_SUBTAB_KEY, action.subtab)
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -3429,6 +3510,7 @@ function handleRiskRegisterAction(action, el) {
 
   if (action.type === 'change_subtab') {
     cyberState.riskRegisterSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_RISK_REGISTER_SUBTAB_KEY, action.subtab)
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -3547,12 +3629,14 @@ function handleThirdPartyRiskAction(action, el) {
 
   if (action.type === 'change_subtab') {
     cyberState.thirdPartySubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_TPR_SUBTAB_KEY, action.subtab)
     renderPolicyAndFrameworkTab(el)
     return
   }
 
   if (action.type === 'change_vendor') {
     cyberState.activeThirdPartyVendorId = action.vendorId
+    localStorage.setItem(LOCAL_STORAGE_TPR_VENDOR_KEY, action.vendorId)
     cyberState.thirdPartyClusterFilter = 'all'
     cyberState.thirdPartyMatrixFilter = null
     cyberState.thirdPartySearchQuery = ''
@@ -4011,6 +4095,7 @@ function handleRiskAssessmentAction(action, el) {
   // 1. Navigation / View filters
   if (action.type === 'switch_subtab') {
     cyberState.riskAssessmentSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_RISK_ASSESS_SUBTAB_KEY, action.subtab)
     renderPolicyAndFrameworkTab(el)
     return
   }
@@ -4432,6 +4517,7 @@ function bindTreeEvents(el) {
       e.stopPropagation()
       const key = header.dataset.nodeKey
       cyberState.expandedNodes[key] = !cyberState.expandedNodes[key]
+      localStorage.setItem(LOCAL_STORAGE_EXPANDED_NODES_KEY, JSON.stringify(cyberState.expandedNodes))
       renderPolicyAndFrameworkTab(el)
     })
   })
@@ -4443,6 +4529,7 @@ function bindTreeEvents(el) {
       const targetDoc = allFlatDocs.find(d => d.key === key)
       if (targetDoc) {
         cyberState.selectedDoc = targetDoc
+        localStorage.setItem(LOCAL_STORAGE_CYBER_SELECTED_DOC_KEY, targetDoc.key)
         renderPolicyAndFrameworkTab(el)
       }
     })
