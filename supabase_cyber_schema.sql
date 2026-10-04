@@ -337,6 +337,42 @@ CREATE TABLE IF NOT EXISTS public.cyber_third_party_risk_profiles (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 14. [1.2 Protect] การจัดเก็บบันทึกประวัติการเข้าถึงและการตรวจทาน Log (Access Logs & Review)
+-- หมายเหตุ: ซิงค์ผ่าน cyber_module_states (module_key: 'access_logs') หรือใช้ตารางแยก:
+CREATE TABLE IF NOT EXISTS public.cyber_access_logs (
+    id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    target_system TEXT NOT NULL,
+    source_ip TEXT NOT NULL,
+    action_type TEXT NOT NULL,
+    privilege_used TEXT,
+    status TEXT NOT NULL, -- 'Success', 'Failed'
+    severity TEXT NOT NULL, -- 'Normal', 'Warning', 'Critical'
+    event_detail TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 15. [1.3 Protect] การทบทวนสิทธิ์และการกำหนดเมทริกซ์การเข้าถึง (User Permission Matrix & Review)
+-- หมายเหตุ: ซิงค์ผ่าน cyber_module_states (module_key: 'user_permission_matrix') หรือใช้ตารางแยก:
+CREATE TABLE IF NOT EXISTS public.cyber_user_permission_review (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    user_ad TEXT NOT NULL,
+    position TEXT,
+    department TEXT,
+    target_system TEXT NOT NULL,
+    system_role TEXT NOT NULL,
+    auth_method TEXT,
+    last_reviewed TEXT,
+    review_status TEXT NOT NULL, -- 'คงสิทธิ์ถูกต้อง', 'รอเพิกถอนสิทธิ์', 'รอปรับลดสิทธิ์'
+    review_remark TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ====================================================================================================
 -- กำหนดสิทธิ์และความปลอดภัย (Row Level Security & Permissions)
 -- เพื่อให้ผู้ใช้งานทั้ง authenticated และ anon สามารถอ่าน/เขียน/อัปเดตข้อมูลได้จากทุกเครื่อง
@@ -369,6 +405,8 @@ DECLARE
         'cyber_incidents',
         'cyber_audit_programmes',
         'cyber_audit_reports',
+        'cyber_access_logs',
+        'cyber_user_permission_review',
         'cyber_module_states'
     ];
 BEGIN

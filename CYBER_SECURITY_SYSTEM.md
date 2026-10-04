@@ -113,6 +113,10 @@ src/modules/cyber/
 ├── kriDocument.js               # [2.5] ระบบเอกสารดัชนีชี้วัดความเสี่ยงสำคัญ (KRI 12 เดือน)
 ├── thirdPartyRisk.js            # [4.5] ระบบประเมินความเสี่ยงคู่ค้า/ห่วงโซ่อุปทาน & Zero Trust
 ├── thirdPartyRiskData.js        # [4.5] ข้อมูลตั้งต้นการประเมินคู่ค้า (เช่น บริษัท มีเพิล คอร์ปอเรชั่นฯ)
+├── accessLogs.js                # [1.2 Protect] ระบบจัดเก็บบันทึกประวัติการเข้าถึง (Access Logs) & Log Review
+├── accessLogsData.js            # [1.2 Protect] ข้อมูลตั้งต้น 10 บันทึก Audit Log และรอบตรวจทานตาม สกมช.
+├── userPermissionMatrix.js      # [1.3 Protect] ระบบทบทวนสิทธิ์และเมทริกซ์การเข้าถึง (User Permission Matrix)
+├── userPermissionData.js        # [1.3 Protect] ข้อมูลตั้งต้น 6 ระบบ สสจ., 8 บทบาท, ตารางสิทธิ์ 2D และบัญชีทบทวน
 └── auditReport.js               # [1.4] ระบบรายงานผลการตรวจสอบภายในด้านความมั่นคงปลอดภัย
 ```
 
@@ -242,6 +246,28 @@ src/modules/cyber/
 - **ฟังก์ชันหลัก**:
   - **1.3 Audit Programme**: แผนตรวจประจำปีงบประมาณของ 10 โรงพยาบาล/หน่วยงานในสังกัด สสจ.สระแก้ว ครอบคลุม 7 ขอบเขต (Guideline, Govern, Identify, Protect, Detect, Respond, Recover) และ 4 ไตรมาส (Q1-Q4) พร้อมระบบพิมพ์ A4 แนวนอน
   - **1.4 Audit Report**: รายงานผลการตรวจสอบภายในรายโรงพยาบาล สรุปผลการประเมิน Major NC, Minor NC, Observation พร้อมส่งออก Word (.doc)
+
+#### 1.2 Logs of all access (การจัดเก็บบันทึกประวัติการเข้าถึงและการตรวจทาน Log)
+- **หมวดหมู่**: Protect > 1.กระบวนการการควบคุมการเข้าถึง (Access Control)
+- **แหล่งไฟล์**: `src/modules/cyber/accessLogs.js` และ `accessLogsData.js`
+- **กฎหมายและมาตรฐานอ้างอิง**: พรบ.การรักษาความมั่นคงปลอดภัยไซเบอร์ พ.ศ. 2562 (มาตรา 43) และประกาศ สกมช. [ข้อ 22.1.2]
+- **ฟังก์ชันหลัก**:
+  - **1. บันทึกประวัติการเข้าถึง (Access Audit Logs)**: ตาราง Audit Trail ครอบคลุม วันเวลา (Timestamp), ผู้ใช้งาน (User Name / AD ID), ระบบเป้าหมาย (Active Directory, Core Firewall, HDC Database, e-Saraban, 3-in-1 Portal), IP ต้นทาง (Source IP), ประเภทกิจกรรม (Interactive Login, Config Change, Backup, Brute Force), สิทธิ์ที่ใช้ (Privilege), สถานะ (Success/Failed) และระดับความรุนแรง (Normal, Warning, Critical)
+  - **2. แบบตรวจทาน Log รายสัปดาห์/เดือน (Log Review Checklist & Report)**: รองรับการสร้างรอบการตรวจทาน (Review Rounds) พร้อม 5 ข้อตรวจมาตรฐาน สกมช. (Logins สิทธิ์สูง, Brute Force, การแก้ไขบัญชี Admin, ความสมบูรณ์ของการบันทึก Log, การ Query HDC ผิดปกติ) สามารถบันทึกข้อค้นพบและมาตรการแก้ไข พร้อมชื่อผู้ตรวจทานและผู้อนุมัติผล
+  - **3. ประวัติการปรับปรุง (Update Log)**: บันทึกวันเวลาและผู้ดำเนินการ
+  - **การพิมพ์และส่งออก**: ส่งออก Word (.doc), ส่งออก CSV (.csv), และพิมพ์ A4 แนวนอน
+  - **การซิงค์ข้อมูล**: ซิงค์ขึ้น Supabase ตาราง `cyber_module_states` (key: `access_logs`) แบบ Offline-First
+
+#### 1.3 User Permission Matrix/Review (เมทริกซ์สิทธิ์และการทบทวนสิทธิ์ผู้ใช้งาน)
+- **หมวดหมู่**: Protect > 1.กระบวนการการควบคุมการเข้าถึง (Access Control)
+- **แหล่งไฟล์**: `src/modules/cyber/userPermissionMatrix.js` และ `userPermissionData.js`
+- **กฎหมายและมาตรฐานอ้างอิง**: ประกาศ สกมช. [ข้อ 22.1.3] สิทธิ์ตามหลัก Least Privilege และการทบทวนสิทธิ์ประจำรอบ
+- **ฟังก์ชันหลัก**:
+  - **1. ตารางสิทธิ์ระบบสำคัญ (Permission Matrix 2 มิติ)**: เมทริกซ์แบบ Interactive แสดงความสัมพันธ์ระหว่าง 8 บทบาทหน้าที่ระดับผู้ดูแลระบบ สสจ. (CIO/นายแพทย์, Domain Admin, Network/Firewall Admin, HDC DB Admin, e-Saraban Admin, Developer, Auditor, User) กับ 6 ระบบสำคัญของ สสจ. (18 ฟังก์ชันย่อย) คลิกเพื่อสลับสิทธิ์ได้ทันที: `X` (เต็มสิทธิ์), `O` (ปฏิบัติการ), `V` (ดูข้อมูลเท่านั้น), `-` (ไม่อนุญาต)
+  - **2. ผลการทบทวนสิทธิ์ผู้ใช้งาน (User Access Review)**: ทะเบียนบัญชีผู้ถือสิทธิ์ระดับ Admin 10 บัญชี แสดงชื่อ, AD User, ตำแหน่ง, กลุ่มงาน, ระบบที่เข้าถึง, บทบาท, วิธีการยืนยันตัวตน (2FA/MFA), วันที่ทบทวนล่าสุด และสถานะการทบทวน (`คงสิทธิ์ถูกต้อง`, `รอเพิกถอนสิทธิ์`, `รอปรับลดสิทธิ์`) สามารถค้นหา กรอง เพิ่ม แก้ไข และลบบัญชีได้
+  - **3. ประวัติการทบทวน (Update Log)**: ประวัติการปรับปรุงและทบทวนเมทริกซ์สิทธิ์
+  - **การพิมพ์และส่งออก**: ส่งออก Word (.doc), ส่งออก CSV (.csv), และพิมพ์ A4 แนวนอน
+  - **การซิงค์ข้อมูล**: ซิงค์ขึ้น Supabase ตาราง `cyber_module_states` (key: `user_permission_matrix`) แบบ Offline-First
 
 ---
 

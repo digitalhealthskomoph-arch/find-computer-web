@@ -110,6 +110,36 @@ import {
   DEFAULT_THIRD_PARTY_HEADER,
   DEFAULT_THIRD_PARTY_ITEMS
 } from './thirdPartyRiskData.js'
+import {
+  renderUserPermissionHtml,
+  bindUserPermissionEvents,
+  exportUserPermissionWord,
+  exportUserPermissionCsv,
+  syncUserPermissionToSupabase,
+  fetchUserPermissionFromSupabase
+} from './userPermissionMatrix.js'
+import {
+  DEFAULT_USER_PERMISSION_HEADER,
+  DEFAULT_USER_PERMISSION_LOGS,
+  SSK_SYSTEMS,
+  SSK_ROLES,
+  DEFAULT_PERMISSION_MATRIX,
+  DEFAULT_USER_REVIEW_ACCOUNTS
+} from './userPermissionData.js'
+import {
+  renderAccessLogsHtml,
+  bindAccessLogsEvents,
+  exportAccessLogsWord,
+  exportAccessLogsCsv,
+  syncAccessLogsToSupabase,
+  fetchAccessLogsFromSupabase
+} from './accessLogs.js'
+import {
+  DEFAULT_ACCESS_LOGS_HEADER,
+  DEFAULT_ACCESS_LOGS_UPDATE_LOGS,
+  DEFAULT_ACCESS_LOG_ITEMS,
+  DEFAULT_LOG_REVIEW_ROUNDS
+} from './accessLogsData.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
@@ -127,6 +157,8 @@ const LOCAL_STORAGE_BIA_EVIDENT_KEY = 'sko_cyber_bia_evident'
 const LOCAL_STORAGE_BIA_REPORTS_KEY = 'sko_cyber_bia_reports'
 const LOCAL_STORAGE_RISK_REGISTER_KEY = 'sko_cyber_risk_register'
 const LOCAL_STORAGE_THIRD_PARTY_RISK_KEY = 'sko_cyber_third_party_risk'
+const LOCAL_STORAGE_ACCESS_LOGS_KEY = 'sko_cyber_access_logs'
+const LOCAL_STORAGE_USER_PERMISSION_KEY = 'sko_cyber_user_permission'
 const LOCAL_STORAGE_CYBER_MAIN_TAB_KEY = 'sko_cyber_active_main_tab'
 const LOCAL_STORAGE_CYBER_SELECTED_DOC_KEY = 'sko_cyber_selected_doc_key'
 const LOCAL_STORAGE_CYBER_CII_SUBTAB_KEY = 'sko_cyber_cii_subtab'
@@ -139,6 +171,8 @@ const LOCAL_STORAGE_BIA_REPORT_SUBTAB_KEY = 'sko_cyber_bia_report_subtab'
 const LOCAL_STORAGE_ASSET_RISK_SUBTAB_KEY = 'sko_cyber_asset_risk_subtab'
 const LOCAL_STORAGE_RISK_ASSESS_SUBTAB_KEY = 'sko_cyber_risk_assess_subtab'
 const LOCAL_STORAGE_ASSET_INV_SUBTAB_KEY = 'sko_cyber_asset_inv_subtab'
+const LOCAL_STORAGE_ACCESS_LOGS_SUBTAB_KEY = 'sko_cyber_access_logs_subtab'
+const LOCAL_STORAGE_USER_PERMISSION_SUBTAB_KEY = 'sko_cyber_user_permission_subtab'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -289,6 +323,16 @@ let cyberState = {
   thirdPartySearchQuery: '',
   thirdPartyViewMode: 'table',
   thirdPartyMatrixFilter: null,
+  accessLogs: null,
+  accessLogsSubTab: 'logs',
+  accessLogsStatusFilter: 'all',
+  accessLogsSystemFilter: 'all',
+  accessLogsSearchQuery: '',
+  selectedLogReviewRoundId: 'review_w4',
+  userPermission: null,
+  userPermissionSubTab: 'matrix',
+  userPermissionStatusFilter: 'all',
+  userPermissionSearchQuery: '',
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -299,7 +343,9 @@ let cyberState = {
     'Identify': true,
     '1.Asset Management': true,
     '2.Risk Assessment and Risk Management Strategy': true,
-    '4.Third Party Management': true
+    '4.Third Party Management': true,
+    'Protect': true,
+    '1.กระบวนการการควบคุมการเข้าถึง (Access Control)': true
   }
 }
 
@@ -642,6 +688,44 @@ function initData() {
     cyberState.activeThirdPartyVendorId = cyberState.thirdPartyRisk[0]?.id || 'vendor_meeple'
   }
 
+  // 17. Access Logs (1.2 Logs of all access)
+  try {
+    const savedAccessLogs = localStorage.getItem(LOCAL_STORAGE_ACCESS_LOGS_KEY)
+    if (savedAccessLogs) {
+      cyberState.accessLogs = JSON.parse(savedAccessLogs)
+    }
+  } catch (e) {
+    cyberState.accessLogs = null
+  }
+  if (!cyberState.accessLogs || !Array.isArray(cyberState.accessLogs.log_items) || cyberState.accessLogs.log_items.length === 0) {
+    cyberState.accessLogs = {
+      header: JSON.parse(JSON.stringify(DEFAULT_ACCESS_LOGS_HEADER)),
+      update_logs: JSON.parse(JSON.stringify(DEFAULT_ACCESS_LOGS_UPDATE_LOGS)),
+      log_items: JSON.parse(JSON.stringify(DEFAULT_ACCESS_LOG_ITEMS)),
+      review_rounds: JSON.parse(JSON.stringify(DEFAULT_LOG_REVIEW_ROUNDS))
+    }
+  }
+
+  // 18. User Permission Matrix (1.3 User Permission Matrix/Review)
+  try {
+    const savedUserPerm = localStorage.getItem(LOCAL_STORAGE_USER_PERMISSION_KEY)
+    if (savedUserPerm) {
+      cyberState.userPermission = JSON.parse(savedUserPerm)
+    }
+  } catch (e) {
+    cyberState.userPermission = null
+  }
+  if (!cyberState.userPermission || !Array.isArray(cyberState.userPermission.user_accounts) || cyberState.userPermission.user_accounts.length === 0) {
+    cyberState.userPermission = {
+      header: JSON.parse(JSON.stringify(DEFAULT_USER_PERMISSION_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_USER_PERMISSION_LOGS)),
+      systems: JSON.parse(JSON.stringify(SSK_SYSTEMS)),
+      roles: JSON.parse(JSON.stringify(SSK_ROLES)),
+      matrix: JSON.parse(JSON.stringify(DEFAULT_PERMISSION_MATRIX)),
+      user_accounts: JSON.parse(JSON.stringify(DEFAULT_USER_REVIEW_ACCOUNTS))
+    }
+  }
+
   // Background fetch from Supabase for all modules
   Promise.all([
     fetchAssetRiskFromSupabase(),
@@ -649,12 +733,14 @@ function initData() {
     fetchBiaReportsFromSupabase(),
     fetchRiskRegisterFromSupabase(),
     fetchThirdPartyRiskFromSupabase(),
+    fetchAccessLogsFromSupabase(),
+    fetchUserPermissionFromSupabase(),
     fetchModuleFromSupabase('asset_inventory'),
     fetchModuleFromSupabase('asset_register'),
     fetchModuleFromSupabase('risk_assessment'),
     fetchModuleFromSupabase('risk_reports'),
     fetchModuleFromSupabase('kri_data')
-  ]).then(([assetRisk, bia, biaRep, riskReg, thirdParty, inv, reg, risk, rep, kri]) => {
+  ]).then(([assetRisk, bia, biaRep, riskReg, thirdParty, accessLogs, userPerm, inv, reg, risk, rep, kri]) => {
     if (assetRisk?.items?.length > 0) {
       cyberState.assetRiskAssessment = assetRisk
       localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(assetRisk))
@@ -680,6 +766,14 @@ function initData() {
       if (!cyberState.thirdPartyRisk.some(p => p.id === cyberState.activeThirdPartyVendorId)) {
         cyberState.activeThirdPartyVendorId = cyberState.thirdPartyRisk[0].id
       }
+    }
+    if (accessLogs?.log_items?.length > 0) {
+      cyberState.accessLogs = accessLogs
+      localStorage.setItem(LOCAL_STORAGE_ACCESS_LOGS_KEY, JSON.stringify(accessLogs))
+    }
+    if (userPerm?.user_accounts?.length > 0) {
+      cyberState.userPermission = userPerm
+      localStorage.setItem(LOCAL_STORAGE_USER_PERMISSION_KEY, JSON.stringify(userPerm))
     }
     if (inv?.items?.length > 0) {
       cyberState.assetInventory = inv
@@ -756,6 +850,12 @@ function initData() {
 
     const savedAssetInvSubTab = localStorage.getItem(LOCAL_STORAGE_ASSET_INV_SUBTAB_KEY)
     if (savedAssetInvSubTab) cyberState.assetInventorySubTab = savedAssetInvSubTab
+
+    const savedAccessLogsSubTab = localStorage.getItem(LOCAL_STORAGE_ACCESS_LOGS_SUBTAB_KEY)
+    if (savedAccessLogsSubTab) cyberState.accessLogsSubTab = savedAccessLogsSubTab
+
+    const savedUserPermSubTab = localStorage.getItem(LOCAL_STORAGE_USER_PERMISSION_SUBTAB_KEY)
+    if (savedUserPermSubTab) cyberState.userPermissionSubTab = savedUserPermSubTab
   } catch (e) {}
 
   // If selectedDoc was set to "3.2 รายงานการแจ้งเหตุการณ์", fallback to 3.2.1
@@ -867,6 +967,28 @@ function saveThirdPartyRisk() {
     }
   } catch (e) {
     console.error('Error saving Third Party Risk:', e)
+  }
+}
+
+function saveAccessLogs() {
+  try {
+    if (cyberState.accessLogs) {
+      localStorage.setItem(LOCAL_STORAGE_ACCESS_LOGS_KEY, JSON.stringify(cyberState.accessLogs))
+      syncAccessLogsToSupabase(cyberState.accessLogs)
+    }
+  } catch (e) {
+    console.error('Error saving Access Logs:', e)
+  }
+}
+
+function saveUserPermission() {
+  try {
+    if (cyberState.userPermission) {
+      localStorage.setItem(LOCAL_STORAGE_USER_PERMISSION_KEY, JSON.stringify(cyberState.userPermission))
+      syncUserPermissionToSupabase(cyberState.userPermission)
+    }
+  } catch (e) {
+    console.error('Error saving User Permission Matrix:', e)
   }
 }
 
@@ -2493,6 +2615,18 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('4.5') ||
     cyberState.selectedDoc.title.includes('4.5')
   )
+  const isAccessLogs = (
+    currentKey.includes('1.2 Logs of all access') ||
+    cyberState.selectedDoc.title.includes('1.2 Logs of all access') ||
+    currentKey.includes('Logs of all access') ||
+    cyberState.selectedDoc.title.includes('Logs of all access')
+  )
+  const isUserPermission = (
+    currentKey.includes('1.3 User Permission Matrix') ||
+    cyberState.selectedDoc.title.includes('1.3 User Permission Matrix') ||
+    currentKey.includes('User Permission Matrix') ||
+    cyberState.selectedDoc.title.includes('User Permission Matrix')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2558,6 +2692,10 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบทะเบียนความเสี่ยงไซเบอร์ (Risk Register) 3 ส่วน: ประเมิน, วางแผนจัดการ และติดตามผล พร้อมเกณฑ์ 5x5 และตารางเปรียบเทียบ'
               : isThirdPartyRisk
               ? 'ระบบประเมินความเสี่ยงบริการและห่วงโซ่อุปทานผลิตภัณฑ์ (Third-Party & Supply Chain Risk - Zero Trust) 10 คลัสเตอร์ 80 รายการ'
+              : isAccessLogs
+              ? 'ระบบจัดเก็บบันทึกประวัติการเข้าถึง (Access Audit Logs) และการตรวจทาน Log รายสัปดาห์/เดือน ตามประกาศ สกมช. [ข้อ 22.1.2]'
+              : isUserPermission
+              ? 'ระบบทบทวนสิทธิ์การเข้าถึง (User Permission Matrix & Access Review) สิทธิ์แบบ 2 มิติ และการทบทวนบัญชี Admin'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2639,6 +2777,23 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.thirdPartySearchQuery || '',
               cyberState.thirdPartyViewMode || 'table',
               cyberState.thirdPartyMatrixFilter || null
+            )
+          : isAccessLogs
+          ? renderAccessLogsHtml(
+              cyberState.accessLogs,
+              cyberState.accessLogsSubTab || 'logs',
+              cyberState.accessLogsStatusFilter || 'all',
+              cyberState.accessLogsSystemFilter || 'all',
+              cyberState.accessLogsSearchQuery || '',
+              cyberState.selectedLogReviewRoundId || 'review_w4'
+            )
+          : isUserPermission
+          ? renderUserPermissionHtml(
+              cyberState.userPermission,
+              cyberState.userPermissionSubTab || 'matrix',
+              cyberState.userPermissionStatusFilter || 'all',
+              cyberState.userPermissionSearchQuery || '',
+              'all'
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2868,6 +3023,14 @@ function renderPolicyAndFrameworkTab(el) {
         handleThirdPartyRiskAction(action, el)
       }
     )
+  } else if (isAccessLogs) {
+    bindAccessLogsEvents(el, (action) => {
+      handleAccessLogsAction(action, el)
+    })
+  } else if (isUserPermission) {
+    bindUserPermissionEvents(el, (action) => {
+      handleUserPermissionAction(action, el)
+    })
   } else {
     bindGenericDocEvents(el, currentKey)
   }
@@ -3782,6 +3945,725 @@ function handleThirdPartyRiskAction(action, el) {
   }
 }
 
+function handleAccessLogsAction(action, el) {
+  if (!cyberState.accessLogs) {
+    cyberState.accessLogs = {
+      header: JSON.parse(JSON.stringify(DEFAULT_ACCESS_LOGS_HEADER)),
+      update_logs: JSON.parse(JSON.stringify(DEFAULT_ACCESS_LOGS_UPDATE_LOGS)),
+      log_items: JSON.parse(JSON.stringify(DEFAULT_ACCESS_LOG_ITEMS)),
+      review_rounds: JSON.parse(JSON.stringify(DEFAULT_LOG_REVIEW_ROUNDS))
+    }
+  }
+
+  if (action.type === 'change_subtab') {
+    cyberState.accessLogsSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_ACCESS_LOGS_SUBTAB_KEY, action.subtab)
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search_logs') {
+    cyberState.accessLogsSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    const inp = el.querySelector('#al-search-input')
+    if (inp) {
+      inp.focus()
+      inp.selectionStart = inp.selectionEnd = inp.value.length
+    }
+    return
+  }
+
+  if (action.type === 'filter_system') {
+    cyberState.accessLogsSystemFilter = action.system
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'filter_status') {
+    cyberState.accessLogsStatusFilter = action.status
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_review_round') {
+    cyberState.selectedLogReviewRoundId = action.roundId
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'update_checklist_result') {
+    const round = cyberState.accessLogs.review_rounds?.find(r => r.id === action.roundId)
+    if (round) {
+      const it = round.items?.find(i => i.id === action.chkId)
+      if (it) {
+        it.result = action.result
+        saveAccessLogs()
+        renderPolicyAndFrameworkTab(el)
+        showNotification('บันทึกผลการตรวจทานเรียบร้อยแล้ว', 'success')
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_checklist_finding') {
+    const round = cyberState.accessLogs.review_rounds?.find(r => r.id === action.roundId)
+    if (round) {
+      const it = round.items?.find(i => i.id === action.chkId)
+      if (it) {
+        it.finding = action.finding
+        saveAccessLogs()
+        showNotification('บันทึกข้อค้นพบเรียบร้อยแล้ว', 'success')
+      }
+    }
+    return
+  }
+
+  if (action.type === 'update_action_taken') {
+    const round = cyberState.accessLogs.review_rounds?.find(r => r.id === action.roundId)
+    if (round) {
+      round.action_taken = action.actionTaken
+      saveAccessLogs()
+      showNotification('บันทึกมาตรการแก้ไขเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_log_item') {
+    cyberState.accessLogs.log_items = (cyberState.accessLogs.log_items || []).filter(l => l.id !== action.id)
+    saveAccessLogs()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบรายการบันทึกประวัติการเข้าถึงเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'open_add_log_modal') {
+    openAddLogModal(el)
+    return
+  }
+
+  if (action.type === 'open_add_review_round_modal') {
+    openAddReviewRoundModal(el)
+    return
+  }
+
+  if (action.type === 'open_add_update_log_modal') {
+    openAddAccessUpdateLogModal(el)
+    return
+  }
+
+  if (action.type === 'export_word') {
+    exportAccessLogsWord(cyberState.accessLogs)
+    return
+  }
+
+  if (action.type === 'export_csv') {
+    exportAccessLogsCsv(cyberState.accessLogs)
+    return
+  }
+
+  if (action.type === 'save_sync') {
+    saveAccessLogs()
+    showNotification('บันทึกและซิงค์ข้อมูล Access Logs เรียบร้อยแล้ว', 'success')
+    return
+  }
+}
+
+function handleUserPermissionAction(action, el) {
+  if (!cyberState.userPermission) {
+    cyberState.userPermission = {
+      header: JSON.parse(JSON.stringify(DEFAULT_USER_PERMISSION_HEADER)),
+      logs: JSON.parse(JSON.stringify(DEFAULT_USER_PERMISSION_LOGS)),
+      systems: JSON.parse(JSON.stringify(SSK_SYSTEMS)),
+      roles: JSON.parse(JSON.stringify(SSK_ROLES)),
+      matrix: JSON.parse(JSON.stringify(DEFAULT_PERMISSION_MATRIX)),
+      user_accounts: JSON.parse(JSON.stringify(DEFAULT_USER_REVIEW_ACCOUNTS))
+    }
+  }
+
+  if (action.type === 'change_subtab') {
+    cyberState.userPermissionSubTab = action.subtab
+    localStorage.setItem(LOCAL_STORAGE_USER_PERMISSION_SUBTAB_KEY, action.subtab)
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search_accounts') {
+    cyberState.userPermissionSearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    const inp = el.querySelector('#upm-search-input')
+    if (inp) {
+      inp.focus()
+      inp.selectionStart = inp.selectionEnd = inp.value.length
+    }
+    return
+  }
+
+  if (action.type === 'filter_status') {
+    cyberState.userPermissionStatusFilter = action.status
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'update_matrix_cell') {
+    if (!cyberState.userPermission.matrix) cyberState.userPermission.matrix = {}
+    if (!cyberState.userPermission.matrix[action.roleId]) cyberState.userPermission.matrix[action.roleId] = {}
+    cyberState.userPermission.matrix[action.roleId][action.fnId] = action.nextVal
+    saveUserPermission()
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'delete_account') {
+    cyberState.userPermission.user_accounts = (cyberState.userPermission.user_accounts || []).filter(a => a.id !== action.id)
+    saveUserPermission()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบบัญชีผู้ถือสิทธิ์ออกจากทะเบียนเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'open_add_account_modal') {
+    openAddOrEditAccountModal(el, null)
+    return
+  }
+
+  if (action.type === 'open_edit_account_modal') {
+    const acc = cyberState.userPermission.user_accounts?.find(a => a.id === action.id)
+    if (acc) {
+      openAddOrEditAccountModal(el, acc)
+    }
+    return
+  }
+
+  if (action.type === 'open_add_log_modal') {
+    openAddUserPermUpdateLogModal(el)
+    return
+  }
+
+  if (action.type === 'export_word') {
+    exportUserPermissionWord(cyberState.userPermission)
+    return
+  }
+
+  if (action.type === 'export_csv') {
+    exportUserPermissionCsv(cyberState.userPermission)
+    return
+  }
+
+  if (action.type === 'save_sync') {
+    saveUserPermission()
+    showNotification('บันทึกและซิงค์ข้อมูล User Permission Matrix เรียบร้อยแล้ว', 'success')
+    return
+  }
+}
+
+// Modal: เพิ่มรายการ Access Log
+function openAddLogModal(el) {
+  const modalContainer = document.getElementById('cyber-modal-container')
+  if (!modalContainer) return
+
+  const now = new Date()
+  const pad = (n) => String(n).padStart(2, '0')
+  const defaultTs = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+      <div class="modal" style="background:#fff; border-radius:12px; width:100%; max-width:640px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+        <div class="modal-header" style="background:#1e293b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+            ➕ บันทึกประวัติการเข้าถึงระบบสำคัญ (Add Access Log)
+          </h3>
+          <button id="close-al-modal" style="background:none; border:none; font-size:24px; color:#fff; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <form id="al-add-log-form" style="padding:22px; display:flex; flex-direction:column; gap:14px; font-size:13px; max-height:80vh; overflow-y:auto;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">วันเวลา (Timestamp) *</label>
+              <input type="text" id="al-log-ts" class="form-control" value="${defaultTs}" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; font-family:monospace; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">IP ที่เข้าถึง (Source IP) *</label>
+              <input type="text" id="al-log-ip" class="form-control" value="192.168.1.100" required placeholder="เช่น 192.168.1.50 หรือ 10.0.0.12" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; font-family:monospace; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ชื่อ-สกุล ผู้ใช้งาน *</label>
+              <input type="text" id="al-log-name" class="form-control" placeholder="เช่น นายปิยะณัฐ วิเชียร" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">บัญชีผู้ใช้ (User ID / AD) *</label>
+              <input type="text" id="al-log-uid" class="form-control" placeholder="เช่น piyanat.v" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; font-family:monospace; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ระบบเป้าหมาย (Target System) *</label>
+              <select id="al-log-target" class="form-control" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                <option value="Active Directory Domain Controller (SSK-DC01)">Active Directory Domain Controller (SSK-DC01)</option>
+                <option value="FortiGate 200F Core Firewall (SSK-FW01)">FortiGate 200F Core Firewall (SSK-FW01)</option>
+                <option value="SSK Health Data Center (HDC Database Server)">SSK Health Data Center (HDC Database Server)</option>
+                <option value="SSK e-Saraban Web Portal">SSK e-Saraban Web Portal</option>
+                <option value="3-in-1 Smart Governance Portal">3-in-1 Smart Governance Portal</option>
+                <option value="Central Backup Repository (Veeam/NAS)">Central Backup Repository (Veeam/NAS)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">สิทธิ์ที่เรียกใช้งาน (Privilege)</label>
+              <input type="text" id="al-log-priv" class="form-control" value="Domain Admin" placeholder="เช่น Domain Admin, DB Admin, User" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ประเภทกิจกรรม *</label>
+              <select id="al-log-act" class="form-control" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                <option value="Interactive Login">Interactive Login</option>
+                <option value="Privileged Config Change">Privileged Config Change</option>
+                <option value="Scheduled Backup Job">Scheduled Backup Job</option>
+                <option value="Password Reset">Password Reset</option>
+                <option value="Database Query / Export">Database Query / Export</option>
+                <option value="Failed Login">Failed Login</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">สถานะ (Status) *</label>
+              <select id="al-log-status" class="form-control" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                <option value="Success">Success (สำเร็จ)</option>
+                <option value="Failed">Failed (ล้มเหลว)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ระดับความรุนแรง *</label>
+              <select id="al-log-sev" class="form-control" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                <option value="Normal">Normal (ปกติ)</option>
+                <option value="Warning">Warning (เตือน/เฝ้าระวัง)</option>
+                <option value="Critical">Critical (วิกฤต)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">รายละเอียดกิจกรรม (Event Detail) *</label>
+            <textarea id="al-log-detail" class="form-control" rows="3" required placeholder="เช่น ยืนยันตัวตนสำเร็จผ่าน Kerberos authentication เข้าสู่ระบบเพื่อตรวจสอบสถานะเซอร์วิส" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;"></textarea>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; border-top:1px solid #e2e8f0; padding-top:14px;">
+            <button type="button" id="cancel-al-modal-btn" class="btn" style="background:#f1f5f9; color:#475569; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1;">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="background:#2563eb; color:#fff; font-weight:700; padding:8px 18px; border-radius:6px; border:none; cursor:pointer;">
+              💾 บันทึกรายการ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+
+  const close = () => { modalContainer.innerHTML = '' }
+  document.getElementById('close-al-modal')?.addEventListener('click', close)
+  document.getElementById('cancel-al-modal-btn')?.addEventListener('click', close)
+
+  document.getElementById('al-add-log-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const newLog = {
+      id: 'log_' + Date.now(),
+      timestamp: document.getElementById('al-log-ts')?.value || defaultTs,
+      user_id: document.getElementById('al-log-uid')?.value || 'user',
+      user_name: document.getElementById('al-log-name')?.value || 'User',
+      target_system: document.getElementById('al-log-target')?.value || 'System',
+      source_ip: document.getElementById('al-log-ip')?.value || '192.168.1.1',
+      action_type: document.getElementById('al-log-act')?.value || 'Interactive Login',
+      privilege_used: document.getElementById('al-log-priv')?.value || 'User',
+      status: document.getElementById('al-log-status')?.value || 'Success',
+      severity: document.getElementById('al-log-sev')?.value || 'Normal',
+      event_detail: document.getElementById('al-log-detail')?.value || ''
+    }
+
+    if (!cyberState.accessLogs.log_items) cyberState.accessLogs.log_items = []
+    cyberState.accessLogs.log_items.unshift(newLog)
+    saveAccessLogs()
+    close()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มรายการบันทึกประวัติการเข้าถึงเรียบร้อยแล้ว', 'success')
+  })
+}
+
+// Modal: เพิ่มรอบตรวจทาน Log รายสัปดาห์
+function openAddReviewRoundModal(el) {
+  const modalContainer = document.getElementById('cyber-modal-container')
+  if (!modalContainer) return
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+      <div class="modal" style="background:#fff; border-radius:12px; width:100%; max-width:540px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+        <div class="modal-header" style="background:#1e293b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+            🛡️ เพิ่มรอบการตรวจทาน Log ประจำสัปดาห์ / เดือน
+          </h3>
+          <button id="close-round-modal" style="background:none; border:none; font-size:24px; color:#fff; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <form id="al-add-round-form" style="padding:22px; display:flex; flex-direction:column; gap:14px; font-size:13px;">
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ชื่อรอบการตรวจทาน *</label>
+            <input type="text" id="al-round-title" class="form-control" required placeholder="เช่น รอบตรวจทานประจำสัปดาห์ที่ 1 - มีนาคม 2569" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ช่วงเวลาที่ตรวจ (Period) *</label>
+            <input type="text" id="al-round-period" class="form-control" required placeholder="เช่น 1 - 7 มีนาคม 2569" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ผู้ตรวจทานบันทึก *</label>
+              <input type="text" id="al-round-auditor" class="form-control" value="นายสมชาย รอบคอบ" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ตำแหน่งผู้ตรวจทาน</label>
+              <input type="text" id="al-round-auditor-pos" class="form-control" value="เจ้าหน้าที่ความมั่นคงปลอดภัยสารสนเทศ" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ผู้อนุมัติผลการตรวจ *</label>
+            <input type="text" id="al-round-approver" class="form-control" value="นายแพทย์สาธารณสุขจังหวัดสระแก้ว" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; border-top:1px solid #e2e8f0; padding-top:14px;">
+            <button type="button" id="cancel-round-modal-btn" class="btn" style="background:#f1f5f9; color:#475569; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1;">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="background:#2563eb; color:#fff; font-weight:700; padding:8px 18px; border-radius:6px; border:none; cursor:pointer;">
+              ➕ สร้างรอบตรวจ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+
+  const close = () => { modalContainer.innerHTML = '' }
+  document.getElementById('close-round-modal')?.addEventListener('click', close)
+  document.getElementById('cancel-round-modal-btn')?.addEventListener('click', close)
+
+  document.getElementById('al-add-round-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const newRoundId = 'review_' + Date.now()
+    const title = document.getElementById('al-round-title')?.value || 'รอบตรวจทานใหม่'
+    const period = document.getElementById('al-round-period')?.value || ''
+    const auditor_name = document.getElementById('al-round-auditor')?.value || 'เจ้าหน้าที่ตรวจสอบ'
+    const auditor_position = document.getElementById('al-round-auditor-pos')?.value || 'เจ้าหน้าที่ความมั่นคงปลอดภัย'
+    const approver_name = document.getElementById('al-round-approver')?.value || 'ผู้บริหาร'
+
+    const newRound = {
+      id: newRoundId,
+      title,
+      period,
+      auditor_name,
+      auditor_position,
+      approver_name,
+      items: [
+        {
+          id: 'chk_1',
+          title: 'ตรวจการล็อกอินบัญชีสิทธิ์สูง (Privileged / Domain Admin Logins)',
+          scope: 'AD Domain Controller & Firewall',
+          result: 'ผ่านการประเมิน (Pass)',
+          finding: 'พบการเข้าสู่ระบบเฉพาะเวลาราชการและมี 2FA ถูกต้อง'
+        },
+        {
+          id: 'chk_2',
+          title: 'ตรวจการพยายามเดารหัสผ่านหรือ Brute Force ผิดปกติ',
+          scope: 'Web Portal & Firewall',
+          result: 'ผ่านการประเมิน (Pass)',
+          finding: 'ระบบบล็อก IP ผิดปกติอัตโนมัติ ไม่พบการเจาะสำเร็จ'
+        },
+        {
+          id: 'chk_3',
+          title: 'ตรวจการสร้าง แก้ไข หรือลบบัญชีผู้ใช้สิทธิ์ระดับ Admin',
+          scope: 'Active Directory & Database',
+          result: 'ผ่านการประเมิน (Pass)',
+          finding: 'มีการขอยกเลิกสิทธิ์ตามแบบฟอร์มถูกต้อง'
+        },
+        {
+          id: 'chk_4',
+          title: 'ตรวจความสมบูรณ์ของการบันทึก Log และการสำรองข้อมูล Log',
+          scope: 'Central Syslog Server & NAS',
+          result: 'ผ่านการประเมิน (Pass)',
+          finding: 'Log ทำงานต่อเนื่อง 24 ชม. พื้นที่จัดเก็บเพียงพอ'
+        },
+        {
+          id: 'chk_5',
+          title: 'ตรวจการเข้าถึงฐานข้อมูล HDC และสถิติคำสั่ง Query ผิดปกติ',
+          scope: 'HDC Database Server',
+          result: 'ผ่านการประเมิน (Pass)',
+          finding: 'การเชื่อมต่อมาจากแอปพลิเคชันภายในที่ได้รับอนุญาต'
+        }
+      ],
+      action_taken: 'ระบบบันทึกและตรวจทาน Log เป็นไปตามเกณฑ์ สกมช. มาตรา 43 (ข้อ 22.1.2)'
+    }
+
+    if (!cyberState.accessLogs.review_rounds) cyberState.accessLogs.review_rounds = []
+    cyberState.accessLogs.review_rounds.unshift(newRound)
+    cyberState.selectedLogReviewRoundId = newRoundId
+    saveAccessLogs()
+    close()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`เพิ่มรอบตรวจทาน "${title}" เรียบร้อยแล้ว`, 'success')
+  })
+}
+
+// Modal: เพิ่ม Update Log ใน 1.2 Access Logs
+function openAddAccessUpdateLogModal(el) {
+  const modalContainer = document.getElementById('cyber-modal-container')
+  if (!modalContainer) return
+
+  const today = new Date().toISOString().split('T')[0]
+  const todayThai = toThaiDate(today)
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+      <div class="modal" style="background:#fff; border-radius:12px; width:100%; max-width:520px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+        <div class="modal-header" style="background:#1e293b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;">
+            🕒 เพิ่มประวัติการปรับปรุง (Update Log)
+          </h3>
+          <button id="close-al-upd-modal" style="background:none; border:none; font-size:24px; color:#fff; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <form id="al-add-upd-form" style="padding:22px; display:flex; flex-direction:column; gap:14px; font-size:13px;">
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">วันที่ปรับปรุง *</label>
+            <input type="text" id="al-upd-date" class="form-control" value="${todayThai}" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ผู้ปรับปรุง *</label>
+            <input type="text" id="al-upd-author" class="form-control" value="นายปิยะณัฐ วิเชียร" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">รายละเอียด *</label>
+            <textarea id="al-upd-detail" class="form-control" rows="3" required placeholder="ระบุสิ่งที่ปรับปรุงหรือผลการตรวจทาน" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;"></textarea>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; border-top:1px solid #e2e8f0; padding-top:14px;">
+            <button type="button" id="cancel-al-upd-btn" class="btn" style="background:#f1f5f9; color:#475569; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1;">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="background:#2563eb; color:#fff; font-weight:700; padding:8px 18px; border-radius:6px; border:none; cursor:pointer;">
+              💾 บันทึก
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+
+  const close = () => { modalContainer.innerHTML = '' }
+  document.getElementById('close-al-upd-modal')?.addEventListener('click', close)
+  document.getElementById('cancel-al-upd-btn')?.addEventListener('click', close)
+
+  document.getElementById('al-add-upd-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const newLog = {
+      id: 'log_' + Date.now(),
+      date: today,
+      displayDate: document.getElementById('al-upd-date')?.value || todayThai,
+      author: document.getElementById('al-upd-author')?.value || 'Admin',
+      detail: document.getElementById('al-upd-detail')?.value || ''
+    }
+
+    if (!cyberState.accessLogs.update_logs) cyberState.accessLogs.update_logs = []
+    cyberState.accessLogs.update_logs.unshift(newLog)
+    saveAccessLogs()
+    close()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มประวัติการปรับปรุงเรียบร้อยแล้ว', 'success')
+  })
+}
+
+// Modal: เพิ่มหรือแก้ไขบัญชีผู้ถือสิทธิ์ (User Access Review)
+function openAddOrEditAccountModal(el, accountToEdit = null) {
+  const modalContainer = document.getElementById('cyber-modal-container')
+  if (!modalContainer) return
+
+  const isEdit = !!accountToEdit
+  const todayThai = toThaiDate(new Date().toISOString().split('T')[0])
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+      <div class="modal" style="background:#fff; border-radius:12px; width:100%; max-width:640px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+        <div class="modal-header" style="background:#1e293b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;">
+            ${isEdit ? '✏️ แก้ไขข้อมูลบัญชีผู้ถือสิทธิ์' : '➕ เพิ่มบัญชีผู้ถือสิทธิ์เข้ารับการทบทวน (User Access Review)'}
+          </h3>
+          <button id="close-upm-acc-modal" style="background:none; border:none; font-size:24px; color:#fff; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <form id="upm-acc-form" style="padding:22px; display:flex; flex-direction:column; gap:14px; font-size:13px; max-height:80vh; overflow-y:auto;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ชื่อ-สกุล ผู้ถือสิทธิ์ *</label>
+              <input type="text" id="upm-acc-name" class="form-control" value="${accountToEdit?.name || ''}" required placeholder="เช่น นายชัยพร ผู้ดูแล" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">บัญชีผู้ใช้งาน (AD User) *</label>
+              <input type="text" id="upm-acc-ad" class="form-control" value="${accountToEdit?.user_ad || ''}" required placeholder="เช่น admin.chai" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; font-family:monospace; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ตำแหน่ง</label>
+              <input type="text" id="upm-acc-pos" class="form-control" value="${accountToEdit?.position || 'นักวิชาการคอมพิวเตอร์'}" placeholder="เช่น นักวิชาการคอมพิวเตอร์" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">กลุ่มงาน / ฝ่าย *</label>
+              <input type="text" id="upm-acc-dept" class="form-control" value="${accountToEdit?.department || 'กลุ่มงานสารสนเทศทางการแพทย์'}" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ระบบเป้าหมาย *</label>
+              <select id="upm-acc-target" class="form-control" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                <option value="Active Directory Domain Controller" ${accountToEdit?.target_system === 'Active Directory Domain Controller' ? 'selected' : ''}>Active Directory Domain Controller</option>
+                <option value="FortiGate Core Firewall" ${accountToEdit?.target_system === 'FortiGate Core Firewall' ? 'selected' : ''}>FortiGate Core Firewall</option>
+                <option value="HDC Database Server" ${accountToEdit?.target_system === 'HDC Database Server' ? 'selected' : ''}>HDC Database Server</option>
+                <option value="SSK e-Saraban Web Portal" ${accountToEdit?.target_system === 'SSK e-Saraban Web Portal' ? 'selected' : ''}>SSK e-Saraban Web Portal</option>
+                <option value="3-in-1 Governance Portal" ${accountToEdit?.target_system === '3-in-1 Governance Portal' ? 'selected' : ''}>3-in-1 Governance Portal</option>
+                <option value="Veeam Backup Repository" ${accountToEdit?.target_system === 'Veeam Backup Repository' ? 'selected' : ''}>Veeam Backup Repository</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">บทบาทในระบบ (Role) *</label>
+              <input type="text" id="upm-acc-role" class="form-control" value="${accountToEdit?.system_role || 'Enterprise Admin'}" required placeholder="เช่น Enterprise Admin, Network Admin, DB Admin" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">วิธีการพิสูจน์ตัวตน (Auth Method)</label>
+              <input type="text" id="upm-acc-auth" class="form-control" value="${accountToEdit?.auth_method || '2FA (MFA) + Password'}" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">สถานะการทบทวนสิทธิ์ *</label>
+              <select id="upm-acc-status" class="form-control" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+                <option value="คงสิทธิ์ถูกต้อง" ${accountToEdit?.review_status === 'คงสิทธิ์ถูกต้อง' ? 'selected' : ''}>คงสิทธิ์ถูกต้อง (Approved)</option>
+                <option value="รอเพิกถอนสิทธิ์" ${accountToEdit?.review_status === 'รอเพิกถอนสิทธิ์' ? 'selected' : ''}>รอเพิกถอนสิทธิ์ (Revoke)</option>
+                <option value="รอปรับลดสิทธิ์" ${accountToEdit?.review_status === 'รอปรับลดสิทธิ์' ? 'selected' : ''}>รอปรับลดสิทธิ์ (Modify)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ผลการตรวจทาน / ข้อเสนอแนะ</label>
+            <input type="text" id="upm-acc-remark" class="form-control" value="${accountToEdit?.review_remark || 'ปฏิบัติงานตามภารกิจปัจจุบัน ยังคงต้องใช้สิทธิ์'}" placeholder="เช่น ปฏิบัติงานตามภารกิจปัจจุบัน" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; border-top:1px solid #e2e8f0; padding-top:14px;">
+            <button type="button" id="cancel-upm-acc-btn" class="btn" style="background:#f1f5f9; color:#475569; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1;">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="background:#2563eb; color:#fff; font-weight:700; padding:8px 18px; border-radius:6px; border:none; cursor:pointer;">
+              💾 บันทึกข้อมูล
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+
+  const close = () => { modalContainer.innerHTML = '' }
+  document.getElementById('close-upm-acc-modal')?.addEventListener('click', close)
+  document.getElementById('cancel-upm-acc-btn')?.addEventListener('click', close)
+
+  document.getElementById('upm-acc-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const name = document.getElementById('upm-acc-name')?.value || ''
+    const user_ad = document.getElementById('upm-acc-ad')?.value || ''
+    const position = document.getElementById('upm-acc-pos')?.value || ''
+    const department = document.getElementById('upm-acc-dept')?.value || ''
+    const target_system = document.getElementById('upm-acc-target')?.value || ''
+    const system_role = document.getElementById('upm-acc-role')?.value || ''
+    const auth_method = document.getElementById('upm-acc-auth')?.value || ''
+    const review_status = document.getElementById('upm-acc-status')?.value || 'คงสิทธิ์ถูกต้อง'
+    const review_remark = document.getElementById('upm-acc-remark')?.value || ''
+
+    if (isEdit) {
+      accountToEdit.name = name
+      accountToEdit.user_ad = user_ad
+      accountToEdit.position = position
+      accountToEdit.department = department
+      accountToEdit.target_system = target_system
+      accountToEdit.system_role = system_role
+      accountToEdit.auth_method = auth_method
+      accountToEdit.review_status = review_status
+      accountToEdit.review_remark = review_remark
+      accountToEdit.last_reviewed = todayThai
+    } else {
+      if (!cyberState.userPermission.user_accounts) cyberState.userPermission.user_accounts = []
+      cyberState.userPermission.user_accounts.push({
+        id: 'acc_' + Date.now(),
+        name,
+        user_ad,
+        position,
+        department,
+        target_system,
+        system_role,
+        auth_method,
+        last_reviewed: todayThai,
+        review_status,
+        review_remark
+      })
+    }
+
+    saveUserPermission()
+    close()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(isEdit ? 'อัปเดตข้อมูลบัญชีเรียบร้อยแล้ว' : 'เพิ่มบัญชีเข้ารับการทบทวนเรียบร้อยแล้ว', 'success')
+  })
+}
+
+// Modal: เพิ่ม Update Log ใน 1.3 User Permission Matrix
+function openAddUserPermUpdateLogModal(el) {
+  const modalContainer = document.getElementById('cyber-modal-container')
+  if (!modalContainer) return
+
+  const today = new Date().toISOString().split('T')[0]
+  const todayThai = toThaiDate(today)
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+      <div class="modal" style="background:#fff; border-radius:12px; width:100%; max-width:520px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+        <div class="modal-header" style="background:#1e293b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;">
+            🕒 เพิ่มประวัติการทบทวนสิทธิ์ (Update Log)
+          </h3>
+          <button id="close-upm-upd-modal" style="background:none; border:none; font-size:24px; color:#fff; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <form id="upm-add-upd-form" style="padding:22px; display:flex; flex-direction:column; gap:14px; font-size:13px;">
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">วันที่ทบทวน *</label>
+            <input type="text" id="upm-upd-date" class="form-control" value="${todayThai}" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">ผู้ทบทวน *</label>
+            <input type="text" id="upm-upd-author" class="form-control" value="นายปิยะณัฐ วิเชียร" required style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; color:#1e293b; margin-bottom:4px;">รายละเอียด *</label>
+            <textarea id="upm-upd-detail" class="form-control" rows="3" required placeholder="ระบุผลการทบทวนสิทธิ์หรือการปรับปรุงเมทริกซ์สิทธิ์" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; box-sizing:border-box;"></textarea>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; border-top:1px solid #e2e8f0; padding-top:14px;">
+            <button type="button" id="cancel-upm-upd-btn" class="btn" style="background:#f1f5f9; color:#475569; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1;">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary" style="background:#2563eb; color:#fff; font-weight:700; padding:8px 18px; border-radius:6px; border:none; cursor:pointer;">
+              💾 บันทึก
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+
+  const close = () => { modalContainer.innerHTML = '' }
+  document.getElementById('close-upm-upd-modal')?.addEventListener('click', close)
+  document.getElementById('cancel-upm-upd-btn')?.addEventListener('click', close)
+
+  document.getElementById('upm-add-upd-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const newLog = {
+      id: 'log_' + Date.now(),
+      date: today,
+      displayDate: document.getElementById('upm-upd-date')?.value || todayThai,
+      author: document.getElementById('upm-upd-author')?.value || 'Admin',
+      detail: document.getElementById('upm-upd-detail')?.value || ''
+    }
+
+    if (!cyberState.userPermission.logs) cyberState.userPermission.logs = []
+    cyberState.userPermission.logs.unshift(newLog)
+    saveUserPermission()
+    close()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มประวัติการทบทวนสิทธิ์เรียบร้อยแล้ว', 'success')
+  })
+}
 
 function handleAssetRegisterAction(action, el) {
   if (!cyberState.assetRegister) {
