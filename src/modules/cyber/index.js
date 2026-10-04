@@ -97,6 +97,19 @@ import {
   DEFAULT_RISK_REGISTER_LOGS,
   DEFAULT_RISK_REGISTER_ITEMS
 } from './riskRegisterData.js'
+import {
+  renderThirdPartyRiskHtml,
+  bindThirdPartyRiskEvents,
+  exportThirdPartyRiskWord,
+  exportThirdPartyRiskCsv,
+  syncThirdPartyRiskToSupabase,
+  fetchThirdPartyRiskFromSupabase
+} from './thirdPartyRisk.js'
+import {
+  DEFAULT_THIRD_PARTY_PROFILES,
+  DEFAULT_THIRD_PARTY_HEADER,
+  DEFAULT_THIRD_PARTY_ITEMS
+} from './thirdPartyRiskData.js'
 
 const LOCAL_STORAGE_ROUNDS_KEY = 'sko_cii_assessment_rounds'
 const LOCAL_STORAGE_INCIDENTS_KEY = 'sko_cyber_incidents'
@@ -113,6 +126,7 @@ const LOCAL_STORAGE_ASSET_RISK_KEY = 'sko_cyber_asset_risk_assessment'
 const LOCAL_STORAGE_BIA_EVIDENT_KEY = 'sko_cyber_bia_evident'
 const LOCAL_STORAGE_BIA_REPORTS_KEY = 'sko_cyber_bia_reports'
 const LOCAL_STORAGE_RISK_REGISTER_KEY = 'sko_cyber_risk_register'
+const LOCAL_STORAGE_THIRD_PARTY_RISK_KEY = 'sko_cyber_third_party_risk'
 
 const DEFAULT_AUDIT_PROGRAMME_2569 = [
   {
@@ -256,6 +270,13 @@ let cyberState = {
   riskRegisterClusterFilter: 'all',
   riskRegisterSearchQuery: '',
   riskRegisterViewMode: 'table',
+  thirdPartyRisk: null,
+  activeThirdPartyVendorId: 'vendor_meeple',
+  thirdPartySubTab: 'assess',
+  thirdPartyClusterFilter: 'all',
+  thirdPartySearchQuery: '',
+  thirdPartyViewMode: 'table',
+  thirdPartyMatrixFilter: null,
   expandedNodes: {
     'ประมวลแนวทางปฏิบัติ': true,
     'กรอบมาตรฐาน': true,
@@ -265,7 +286,8 @@ let cyberState = {
     'Govern': true,
     'Identify': true,
     '1.Asset Management': true,
-    '2.Risk Assessment and Risk Management Strategy': true
+    '2.Risk Assessment and Risk Management Strategy': true,
+    '4.Third Party Management': true
   }
 }
 
@@ -592,18 +614,35 @@ function initData() {
     }
   }
 
+  // 16. Third Party Risk Assessment (4.5 การประเมินความเสี่ยงที่เกี่ยวข้องกับบริการและห่วงโซ่อุปทานผลิตภัณฑ์)
+  try {
+    const saved3rd = localStorage.getItem(LOCAL_STORAGE_THIRD_PARTY_RISK_KEY)
+    if (saved3rd) {
+      cyberState.thirdPartyRisk = JSON.parse(saved3rd)
+    }
+  } catch (e) {
+    cyberState.thirdPartyRisk = null
+  }
+  if (!Array.isArray(cyberState.thirdPartyRisk) || cyberState.thirdPartyRisk.length === 0) {
+    cyberState.thirdPartyRisk = JSON.parse(JSON.stringify(DEFAULT_THIRD_PARTY_PROFILES))
+  }
+  if (!cyberState.activeThirdPartyVendorId || !cyberState.thirdPartyRisk.some(p => p.id === cyberState.activeThirdPartyVendorId)) {
+    cyberState.activeThirdPartyVendorId = cyberState.thirdPartyRisk[0]?.id || 'vendor_meeple'
+  }
+
   // Background fetch from Supabase for all modules
   Promise.all([
     fetchAssetRiskFromSupabase(),
     fetchBiaFromSupabase(),
     fetchBiaReportsFromSupabase(),
     fetchRiskRegisterFromSupabase(),
+    fetchThirdPartyRiskFromSupabase(),
     fetchModuleFromSupabase('asset_inventory'),
     fetchModuleFromSupabase('asset_register'),
     fetchModuleFromSupabase('risk_assessment'),
     fetchModuleFromSupabase('risk_reports'),
     fetchModuleFromSupabase('kri_data')
-  ]).then(([assetRisk, bia, biaRep, riskReg, inv, reg, risk, rep, kri]) => {
+  ]).then(([assetRisk, bia, biaRep, riskReg, thirdParty, inv, reg, risk, rep, kri]) => {
     if (assetRisk?.items?.length > 0) {
       cyberState.assetRiskAssessment = assetRisk
       localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(assetRisk))
@@ -622,6 +661,13 @@ function initData() {
     if (riskReg?.items?.length > 0) {
       cyberState.riskRegister = riskReg
       localStorage.setItem(LOCAL_STORAGE_RISK_REGISTER_KEY, JSON.stringify(riskReg))
+    }
+    if (Array.isArray(thirdParty) && thirdParty.length > 0) {
+      cyberState.thirdPartyRisk = thirdParty
+      localStorage.setItem(LOCAL_STORAGE_THIRD_PARTY_RISK_KEY, JSON.stringify(thirdParty))
+      if (!cyberState.thirdPartyRisk.some(p => p.id === cyberState.activeThirdPartyVendorId)) {
+        cyberState.activeThirdPartyVendorId = cyberState.thirdPartyRisk[0].id
+      }
     }
     if (inv?.items?.length > 0) {
       cyberState.assetInventory = inv
@@ -743,6 +789,17 @@ function saveRiskRegister() {
     }
   } catch (e) {
     console.error('Error saving Risk Register:', e)
+  }
+}
+
+function saveThirdPartyRisk() {
+  try {
+    if (cyberState.thirdPartyRisk) {
+      localStorage.setItem(LOCAL_STORAGE_THIRD_PARTY_RISK_KEY, JSON.stringify(cyberState.thirdPartyRisk))
+      syncThirdPartyRiskToSupabase(cyberState.thirdPartyRisk)
+    }
+  } catch (e) {
+    console.error('Error saving Third Party Risk:', e)
   }
 }
 
@@ -2360,6 +2417,10 @@ function renderPolicyAndFrameworkTab(el) {
     currentKey.includes('2.2 Risk Register') ||
     cyberState.selectedDoc.title.includes('2.2 Risk Register')
   )
+  const isThirdPartyRisk = (
+    currentKey.includes('4.5') ||
+    cyberState.selectedDoc.title.includes('4.5')
+  )
 
   const savedData = cyberState.docLinks[currentKey] || {
     editLinks: [{ id: 1, label: 'ต้นฉบับเอกสาร Word / Google Docs', url: 'https://docs.google.com/document/d/example/edit' }],
@@ -2423,6 +2484,8 @@ function renderPolicyAndFrameworkTab(el) {
               ? 'ระบบจัดทำและพิมพ์รายงานการวิเคราะห์ผลกระทบทางธุรกิจ (BIA Report) 6 ส่วน พร้อมตารางเปรียบเทียบและระบบแนบเอกสาร PDF'
               : isRiskRegister
               ? 'ระบบทะเบียนความเสี่ยงไซเบอร์ (Risk Register) 3 ส่วน: ประเมิน, วางแผนจัดการ และติดตามผล พร้อมเกณฑ์ 5x5 และตารางเปรียบเทียบ'
+              : isThirdPartyRisk
+              ? 'ระบบประเมินความเสี่ยงบริการและห่วงโซ่อุปทานผลิตภัณฑ์ (Third-Party & Supply Chain Risk - Zero Trust) 10 คลัสเตอร์ 80 รายการ'
               : 'จัดการลิงก์เอกสารต้นฉบับ (Word / Google Docs) และแนบไฟล์ PDF แสดงผลบนระบบ'}
           </p>
         </div>
@@ -2494,6 +2557,16 @@ function renderPolicyAndFrameworkTab(el) {
               cyberState.riskRegisterClusterFilter || 'all',
               cyberState.riskRegisterSearchQuery || '',
               cyberState.riskRegisterViewMode || 'table'
+            )
+          : isThirdPartyRisk
+          ? renderThirdPartyRiskHtml(
+              cyberState.thirdPartyRisk,
+              cyberState.activeThirdPartyVendorId,
+              cyberState.thirdPartySubTab || 'assess',
+              cyberState.thirdPartyClusterFilter || 'all',
+              cyberState.thirdPartySearchQuery || '',
+              cyberState.thirdPartyViewMode || 'table',
+              cyberState.thirdPartyMatrixFilter || null
             )
           : renderGenericDocLinksHtml(savedData)}
 
@@ -2709,6 +2782,15 @@ function renderPolicyAndFrameworkTab(el) {
     bindRiskRegisterEvents(el, cyberState.riskRegister, (action) => {
       handleRiskRegisterAction(action, el)
     })
+  } else if (isThirdPartyRisk) {
+    bindThirdPartyRiskEvents(
+      el,
+      cyberState.thirdPartyRisk,
+      cyberState.activeThirdPartyVendorId,
+      (action) => {
+        handleThirdPartyRiskAction(action, el)
+      }
+    )
   } else {
     bindGenericDocEvents(el, currentKey)
   }
@@ -3453,6 +3535,165 @@ function handleRiskRegisterAction(action, el) {
     saveRiskRegister()
     renderPolicyAndFrameworkTab(el)
     showNotification('รีเซ็ตข้อมูลทะเบียนความเสี่ยงเป็นค่าเริ่มต้นเรียบร้อยแล้ว', 'success')
+    return
+  }
+}
+
+function handleThirdPartyRiskAction(action, el) {
+  if (!Array.isArray(cyberState.thirdPartyRisk) || cyberState.thirdPartyRisk.length === 0) {
+    cyberState.thirdPartyRisk = JSON.parse(JSON.stringify(DEFAULT_THIRD_PARTY_PROFILES))
+  }
+  let currentProfile = cyberState.thirdPartyRisk.find(p => p.id === cyberState.activeThirdPartyVendorId) || cyberState.thirdPartyRisk[0]
+
+  if (action.type === 'change_subtab') {
+    cyberState.thirdPartySubTab = action.subtab
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'change_vendor') {
+    cyberState.activeThirdPartyVendorId = action.vendorId
+    cyberState.thirdPartyClusterFilter = 'all'
+    cyberState.thirdPartyMatrixFilter = null
+    cyberState.thirdPartySearchQuery = ''
+    renderPolicyAndFrameworkTab(el)
+    const vName = cyberState.thirdPartyRisk.find(p => p.id === action.vendorId)?.vendor_name || action.vendorId
+    showNotification(`สลับไปยังบริษัท "${vName}"`, 'info')
+    return
+  }
+
+  if (action.type === 'create_vendor_profile') {
+    cyberState.thirdPartyRisk.push(action.profile)
+    cyberState.activeThirdPartyVendorId = action.profile.id
+    cyberState.thirdPartyClusterFilter = 'all'
+    cyberState.thirdPartyMatrixFilter = null
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification(`สร้างชุดประเมินสำหรับ "${action.profile.vendor_name}" สำเร็จ`, 'success')
+    return
+  }
+
+  if (action.type === 'delete_vendor') {
+    cyberState.thirdPartyRisk = cyberState.thirdPartyRisk.filter(p => p.id !== action.vendorId)
+    if (cyberState.thirdPartyRisk.length === 0) {
+      cyberState.thirdPartyRisk = JSON.parse(JSON.stringify(DEFAULT_THIRD_PARTY_PROFILES))
+    }
+    cyberState.activeThirdPartyVendorId = cyberState.thirdPartyRisk[0].id
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบชุดประเมินเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'change_view_mode') {
+    cyberState.thirdPartyViewMode = action.mode
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'filter_cluster') {
+    cyberState.thirdPartyClusterFilter = action.cluster
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'filter_matrix') {
+    cyberState.thirdPartyMatrixFilter = action.matrixFilter
+    renderPolicyAndFrameworkTab(el)
+    return
+  }
+
+  if (action.type === 'search_query') {
+    cyberState.thirdPartySearchQuery = action.query
+    renderPolicyAndFrameworkTab(el)
+    const inp = el.querySelector('#input-search-tpr')
+    if (inp) {
+      inp.focus()
+      inp.selectionStart = inp.selectionEnd = inp.value.length
+    }
+    return
+  }
+
+  if (action.type === 'update_header') {
+    currentProfile.header = { ...action.header }
+    currentProfile.vendor_name = action.header.vendor_name || currentProfile.vendor_name
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('บันทึกข้อมูลผู้ให้บริการและรายละเอียดเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'add_item') {
+    if (!currentProfile.items) currentProfile.items = []
+    currentProfile.items.push(action.item)
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มข้อประเมินความเสี่ยงสำเร็จ', 'success')
+    return
+  }
+
+  if (action.type === 'update_item') {
+    const idx = (currentProfile.items || []).findIndex(it => it.id === action.item.id)
+    if (idx !== -1 && idx !== undefined) {
+      currentProfile.items[idx] = { ...action.item }
+      saveThirdPartyRisk()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('อัปเดตข้อประเมินเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_item') {
+    currentProfile.items = (currentProfile.items || []).filter(it => it.id !== action.id)
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบข้อประเมินเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'add_log') {
+    if (!currentProfile.logs) currentProfile.logs = []
+    currentProfile.logs.unshift({
+      id: 'log_' + Date.now(),
+      date: action.date,
+      detail: action.detail
+    })
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มประวัติการปรับปรุงเรียบร้อยแล้ว', 'success')
+    return
+  }
+
+  if (action.type === 'edit_log') {
+    const log = (currentProfile.logs || []).find(l => l.id === action.id)
+    if (log) {
+      log.detail = action.detail
+      saveThirdPartyRisk()
+      renderPolicyAndFrameworkTab(el)
+      showNotification('แก้ไขประวัติเรียบร้อยแล้ว', 'success')
+    }
+    return
+  }
+
+  if (action.type === 'delete_log') {
+    currentProfile.logs = (currentProfile.logs || []).filter(l => l.id !== action.id)
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('ลบประวัติเรียบร้อยแล้ว', 'info')
+    return
+  }
+
+  if (action.type === 'reset_default_vendor') {
+    const defaultProfile = DEFAULT_THIRD_PARTY_PROFILES.find(p => p.id === action.vendorId) || DEFAULT_THIRD_PARTY_PROFILES[0]
+    currentProfile.header = JSON.parse(JSON.stringify(defaultProfile.header))
+    currentProfile.logs = JSON.parse(JSON.stringify(defaultProfile.logs))
+    currentProfile.items = JSON.parse(JSON.stringify(defaultProfile.items))
+    cyberState.thirdPartyClusterFilter = 'all'
+    cyberState.thirdPartyMatrixFilter = null
+    cyberState.thirdPartySearchQuery = ''
+    saveThirdPartyRisk()
+    renderPolicyAndFrameworkTab(el)
+    showNotification('รีเซ็ตข้อมูลเป็นค่ามาตรฐาน 80 ข้อเรียบร้อยแล้ว', 'success')
     return
   }
 }

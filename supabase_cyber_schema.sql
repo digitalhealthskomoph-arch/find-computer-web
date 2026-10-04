@@ -325,6 +325,18 @@ CREATE TABLE IF NOT EXISTS public.cyber_risk_register_logs (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 13. [4.5] การประเมินความเสี่ยงที่เกี่ยวข้องกับบริการและห่วงโซ่อุปทานผลิตภัณฑ์ (Third Party Risk Assessment)
+CREATE TABLE IF NOT EXISTS public.cyber_third_party_risk_profiles (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    service_type TEXT,
+    header JSONB DEFAULT '{}'::jsonb,
+    logs JSONB DEFAULT '[]'::jsonb,
+    items JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ====================================================================================================
 -- กำหนดสิทธิ์และความปลอดภัย (Row Level Security & Permissions)
 -- เพื่อให้ผู้ใช้งานทั้ง authenticated และ anon สามารถอ่าน/เขียน/อัปเดตข้อมูลได้จากทุกเครื่อง
@@ -347,6 +359,7 @@ DECLARE
         'cyber_risk_register_items',
         'cyber_risk_register_header',
         'cyber_risk_register_logs',
+        'cyber_third_party_risk_profiles',
         'cyber_risk_matrix_items',
         'cyber_risk_matrix_header',
         'cyber_risk_matrix_logs',
