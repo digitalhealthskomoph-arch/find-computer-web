@@ -323,56 +323,54 @@ function renderMatrixTableView(items, metrics) {
               <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:220px; text-align:left;">หมวดหมู่ความเสี่ยง (Risk Cluster)</th>
               <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:220px; text-align:left;">ภัยคุกคาม (Threat)</th>
               <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:220px; text-align:left;">ช่องโหว่ (Vulnerability)</th>
-              <th colspan="3" style="padding:4px; border:1px solid #cbd5e1; background:#eff6ff;">กระทบต่อ (CIA)</th>
-              <th colspan="6" style="padding:4px; border:1px solid #cbd5e1; background:#fef3c7;">ความรุนแรงแต่ละด้าน (FSRILO)</th>
+              <th colspan="3" style="padding:4px; border:1px solid #cbd5e1; background:#eff6ff;">กระทบต่อ</th>
+              <th colspan="6" style="padding:4px; border:1px solid #cbd5e1; background:#fef3c7;">ความรุนแรงแต่ละด้าน</th>
               <th colspan="3" style="padding:4px; border:1px solid #cbd5e1; background:#fee2e2;">Risk Analysis</th>
-              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:85px;">ค่าเฉลี่ย Cluster</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:95px;">ระดับความเสี่ยงโดยเฉลี่ย<br>(Average Risk Level)</th>
 
               <!-- Part 2 columns -->
-              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:120px;">Risk Treatment</th>
-              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:260px; text-align:left;">การจัดการความเสี่ยง (Treatment Plan)</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:130px;">ตัวเลือกการตอบสนอง<br>(Risk Treatment)</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:260px; text-align:left;">การจัดการความเสี่ยง<br>(Risk Treatment - Threat and Vulner.)</th>
               <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:110px;">ผู้รับผิดชอบ</th>
-              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:80px;">% ก้าวหน้า</th>
-              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:100px;">กำหนดเสร็จ</th>
-              <th colspan="3" style="padding:4px; border:1px solid #cbd5e1; background:#f0fdf4;">Residual CIA</th>
-              <th colspan="6" style="padding:4px; border:1px solid #cbd5e1; background:#fef9c3;">Residual FSRILO</th>
-              <th colspan="3" style="padding:4px; border:1px solid #cbd5e1; background:#dcfce7;">Residual Analysis</th>
-              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:180px; text-align:left;">ดำเนินการเพิ่มเติม</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:90px;">สถานะความคืบหน้า<br>(Progress Status)</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:110px;">คาดว่าดำเนินการแล้วเสร็จ<br>(Expected finish date)</th>
+              <th colspan="3" style="padding:4px; border:1px solid #cbd5e1; background:#f0fdf4;">กระทบต่อ</th>
+              <th colspan="6" style="padding:4px; border:1px solid #cbd5e1; background:#fef9c3;">ความรุนแรงแต่ละด้าน</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:70px;">โอกาสเกิด<br>(Likelihood)</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:70px;">ความรุนแรง<br>(Impact)</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:85px;">ระดับความเสี่ยงที่คงเหลือ<br>(Risk Residual Level)</th>
+              <th rowspan="2" style="padding:6px; border:1px solid #cbd5e1; width:220px; text-align:left;">ดำเนินการเพิ่มเติมเพื่อลดความเสี่ยงให้น้อยลงอีก<br>(Further actions to be taken to further minimize risk)</th>
             </tr>
 
             <!-- Third Header Level (Sub-columns) -->
             <tr style="background:#f8fafc; font-size:11px; text-align:center; color:#475569; position:sticky; top:70px; z-index:20;">
-              <!-- CIA -->
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">C</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">I</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">A</th>
-              <!-- FSRILO -->
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Financial">B/F</th>
+              <!-- กระทบต่อ -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Confidentiality">C</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Integrity">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Availability">A</th>
+              <!-- ความรุนแรงแต่ละด้าน -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px;" title="Financial (B/F)">B/F</th>
               <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Safety & Service">S</th>
               <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Reputation">R</th>
               <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Image">I</th>
               <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Legal">L</th>
               <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Other CII / System">O</th>
               <!-- Risk Analysis -->
-              <th style="padding:4px; border:1px solid #cbd5e1; width:38px;">A โอกาส</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:38px;">B รุนแรง</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:45px;">ระดับ C</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:65px;">โอกาสเกิด<br>(Likelihood)</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:65px;">ความรุนแรง<br>(Impact)</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:75px;">ระดับความเสี่ยง<br>(Risk Level)</th>
 
-              <!-- Residual CIA -->
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">C</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">I</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">A</th>
-              <!-- Residual FSRILO -->
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">B/F</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">S</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">R</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">I</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">L</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;">O</th>
-              <!-- Residual Analysis -->
-              <th style="padding:4px; border:1px solid #cbd5e1; width:38px;">Res A</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:38px;">Res B</th>
-              <th style="padding:4px; border:1px solid #cbd5e1; width:45px;">ระดับ Res</th>
+              <!-- Residual กระทบต่อ -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Confidentiality">C</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Integrity">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Availability">A</th>
+              <!-- Residual ความรุนแรงแต่ละด้าน -->
+              <th style="padding:4px; border:1px solid #cbd5e1; width:30px;" title="Financial (B/F)">B/F</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Safety & Service">S</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Reputation">R</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Image">I</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Legal">L</th>
+              <th style="padding:4px; border:1px solid #cbd5e1; width:28px;" title="Other CII / System">O</th>
             </tr>
           </thead>
           <tbody>
@@ -827,6 +825,12 @@ export function exportThirdPartyRiskWord(profile = {}) {
         <td style="border:1px solid #999; padding:4px; text-align:center;">${resCia.c ? 'x' : '-'}</td>
         <td style="border:1px solid #999; padding:4px; text-align:center;">${resCia.i ? 'x' : '-'}</td>
         <td style="border:1px solid #999; padding:4px; text-align:center;">${resCia.a ? 'x' : '-'}</td>
+        <td style="border:1px solid #999; padding:4px; text-align:center;">${resFsr.f ? 'x' : '-'}</td>
+        <td style="border:1px solid #999; padding:4px; text-align:center;">${resFsr.s ? 'x' : '-'}</td>
+        <td style="border:1px solid #999; padding:4px; text-align:center;">${resFsr.r ? 'x' : '-'}</td>
+        <td style="border:1px solid #999; padding:4px; text-align:center;">${resFsr.i ? 'x' : '-'}</td>
+        <td style="border:1px solid #999; padding:4px; text-align:center;">${resFsr.l ? 'x' : '-'}</td>
+        <td style="border:1px solid #999; padding:4px; text-align:center;">${resFsr.o ? 'x' : '-'}</td>
         <td style="border:1px solid #999; padding:4px; text-align:center;">${item.residual_likelihood || 1}</td>
         <td style="border:1px solid #999; padding:4px; text-align:center;">${item.residual_impact || 1}</td>
         <td style="border:1px solid #999; padding:4px; text-align:center; font-weight:bold; background:${resInfo.bg}; color:${resInfo.color};">${score2}</td>
@@ -866,7 +870,7 @@ export function exportThirdPartyRiskWord(profile = {}) {
         <thead>
           <tr style="background:#e2e8f0;">
             <th colspan="17" style="background:#dbeafe; color:#1e40af;">PART 1 : RISK ASSESSMENT & IDENTIFICATION</th>
-            <th colspan="12" style="background:#dcfce7; color:#166534;">PART 2 : RISK TREATMENT PLAN & RESIDUAL</th>
+            <th colspan="18" style="background:#dcfce7; color:#166534;">PART 2 : RISK TREATMENT PLAN & RESIDUAL</th>
           </tr>
           <tr>
             <th>No.</th>
@@ -874,17 +878,18 @@ export function exportThirdPartyRiskWord(profile = {}) {
             <th>ภัยคุกคาม (Threat)</th>
             <th>ช่องโหว่ (Vulnerability)</th>
             <th>C</th><th>I</th><th>A</th>
-            <th>F</th><th>S</th><th>R</th><th>I</th><th>L</th><th>O</th>
-            <th>A</th><th>B</th><th>C=A*B</th>
-            <th>Avg Cluster</th>
-            <th>Treatment</th>
-            <th>แผนการจัดการความเสี่ยง</th>
+            <th>B/F</th><th>S</th><th>R</th><th>I</th><th>L</th><th>O</th>
+            <th>โอกาสเกิด (Likelihood)</th><th>ความรุนแรง (Impact)</th><th>ระดับความเสี่ยง (Risk Level)</th>
+            <th>ระดับความเสี่ยงโดยเฉลี่ย (Average Risk Level)</th>
+            <th>ตัวเลือกการตอบสนอง (Risk Treatment)</th>
+            <th>การจัดการความเสี่ยง (Risk Treatment - Threat and Vulner.)</th>
             <th>ผู้รับผิดชอบ</th>
-            <th>% ก้าวหน้า</th>
-            <th>กำหนดเสร็จ</th>
-            <th>Res C</th><th>Res I</th><th>Res A</th>
-            <th>Res A</th><th>Res B</th><th>Res Level</th>
-            <th>ดำเนินการเพิ่มเติม</th>
+            <th>สถานะความคืบหน้า (Progress Status)</th>
+            <th>คาดว่าดำเนินการแล้วเสร็จ (Expected finish date)</th>
+            <th>C</th><th>I</th><th>A</th>
+            <th>B/F</th><th>S</th><th>R</th><th>I</th><th>L</th><th>O</th>
+            <th>โอกาสเกิด (Likelihood)</th><th>ความรุนแรง (Impact)</th><th>ระดับความเสี่ยงที่คงเหลือ (Risk Residual Level)</th>
+            <th>ดำเนินการเพิ่มเติมเพื่อลดความเสี่ยงให้น้อยลงอีก (Further actions to be taken to further minimize risk)</th>
           </tr>
         </thead>
         <tbody>
@@ -911,21 +916,24 @@ export function exportThirdPartyRiskCsv(profile = {}) {
   const metrics = calculateThirdPartyMetrics(items)
 
   const headers = [
-    'No.', 'Risk Cluster Title', 'Cluster ID',
-    'Threat', 'Vulnerability',
-    'CIA_C', 'CIA_I', 'CIA_A',
-    'Sev_F', 'Sev_S', 'Sev_R', 'Sev_I', 'Sev_L', 'Sev_O',
-    'Likelihood (A)', 'Impact (B)', 'Risk Level (C=A*B)', 'Cluster Avg Score',
-    'Risk Treatment', 'Treatment Plan', 'Responsible Person',
-    'Progress %', 'Expected Finish Date',
-    'Residual_CIA_C', 'Residual_CIA_I', 'Residual_CIA_A',
-    'Residual Likelihood', 'Residual Impact', 'Residual Risk Level', 'Further Actions'
+    'No.', 'หมวดหมู่ความเสี่ยง (Risk Cluster)', 'Cluster ID',
+    'ภัยคุกคาม (Threat)', 'ช่องโหว่ (Vulnerability)',
+    'กระทบต่อ_C', 'กระทบต่อ_I', 'กระทบต่อ_A',
+    'ความรุนแรง_BF', 'ความรุนแรง_S', 'ความรุนแรง_R', 'ความรุนแรง_I', 'ความรุนแรง_L', 'ความรุนแรง_O',
+    'โอกาสเกิด (Likelihood)', 'ความรุนแรง (Impact)', 'ระดับความเสี่ยง (Risk Level)', 'ระดับความเสี่ยงโดยเฉลี่ย (Average Risk Level)',
+    'ตัวเลือกการตอบสนอง (Risk Treatment)', 'การจัดการความเสี่ยง (Risk Treatment - Threat and Vulner.)', 'ผู้รับผิดชอบ',
+    'สถานะความคืบหน้า (Progress Status)', 'คาดว่าดำเนินการแล้วเสร็จ (Expected finish date)',
+    'Residual_กระทบต่อ_C', 'Residual_กระทบต่อ_I', 'Residual_กระทบต่อ_A',
+    'Residual_ความรุนแรง_BF', 'Residual_ความรุนแรง_S', 'Residual_ความรุนแรง_R', 'Residual_ความรุนแรง_I', 'Residual_ความรุนแรง_L', 'Residual_ความรุนแรง_O',
+    'Residual โอกาสเกิด (Likelihood)', 'Residual ความรุนแรง (Impact)', 'ระดับความเสี่ยงที่คงเหลือ (Risk Residual Level)',
+    'ดำเนินการเพิ่มเติมเพื่อลดความเสี่ยงให้น้อยลงอีก (Further actions to be taken to further minimize risk)'
   ]
 
   const rows = items.map(item => {
     const cia = item.cia || {}
     const fsr = item.severity_fsrilo || {}
     const resCia = item.residual_cia || {}
+    const resFsr = item.residual_severity_fsrilo || {}
     const cStat = metrics.clusterAverages[item.cluster_id] || { avgScore: '' }
 
     return [
@@ -955,6 +963,12 @@ export function exportThirdPartyRiskCsv(profile = {}) {
       resCia.c ? '1' : '0',
       resCia.i ? '1' : '0',
       resCia.a ? '1' : '0',
+      resFsr.f ? '1' : '0',
+      resFsr.s ? '1' : '0',
+      resFsr.r ? '1' : '0',
+      resFsr.i ? '1' : '0',
+      resFsr.l ? '1' : '0',
+      resFsr.o ? '1' : '0',
       item.residual_likelihood || 1,
       item.residual_impact || 1,
       item.residual_risk_level || 1,
