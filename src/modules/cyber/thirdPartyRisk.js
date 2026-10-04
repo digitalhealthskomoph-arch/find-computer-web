@@ -992,11 +992,28 @@ export function exportThirdPartyRiskCsv(profile = {}) {
 export async function syncThirdPartyRiskToSupabase(profiles) {
   try {
     if (!supabase || !profiles) return
+
+    // 1. Universal Module State cache
     await supabase.from('cyber_module_states').upsert({
       module_key: 'third_party_risk_profiles',
       data: profiles,
       updated_at: new Date().toISOString()
     })
+
+    // 2. Specific relational profiles table
+    if (Array.isArray(profiles)) {
+      for (const p of profiles) {
+        await supabase.from('cyber_third_party_risk_profiles').upsert({
+          id: p.id,
+          name: p.vendor_name || p.header?.vendor_name || 'Vendor',
+          service_type: p.header?.critical_service || '',
+          header: p.header || {},
+          logs: p.logs || [],
+          items: p.items || [],
+          updated_at: new Date().toISOString()
+        })
+      }
+    }
   } catch (err) {
     console.warn('Supabase sync deferred for Third Party Risk:', err.message)
   }
@@ -1005,6 +1022,24 @@ export async function syncThirdPartyRiskToSupabase(profiles) {
 export async function fetchThirdPartyRiskFromSupabase() {
   try {
     if (!supabase) return null
+
+    // 1. Try fetching from specific cyber_third_party_risk_profiles table
+    const { data: profRows, error: profErr } = await supabase
+      .from('cyber_third_party_risk_profiles')
+      .select('*')
+      .order('created_at', { ascending: true })
+
+    if (!profErr && Array.isArray(profRows) && profRows.length > 0) {
+      return profRows.map(p => ({
+        id: p.id,
+        vendor_name: p.name,
+        header: p.header || {},
+        logs: p.logs || [],
+        items: p.items || []
+      }))
+    }
+
+    // 2. Fallback to cyber_module_states
     const { data: stateData, error: stateErr } = await supabase
       .from('cyber_module_states')
       .select('data')
