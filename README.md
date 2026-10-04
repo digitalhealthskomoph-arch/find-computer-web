@@ -7,7 +7,8 @@
 
 ### 📖 เอกสารระบบ
 รายละเอียดสถาปัตยกรรม ฟังก์ชันการทำงาน โครงสร้างฐานข้อมูล Supabase และคู่มือระบบ:
-👉 **[SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md)**
+- 📑 **[SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md)**: ภาพรวมของระบบรวมทั้ง 3 ภารกิจ (จัดหาคอมพิวเตอร์, พรบ.ไซเบอร์, และ PDPA/ROPA)
+- 🛡️ **[CYBER_SECURITY_SYSTEM.md](./CYBER_SECURITY_SYSTEM.md)**: เอกสารระบบงาน พรบ.ไซเบอร์ & CII ฉบับสมบูรณ์ (CII Self Assessment, 80 หัวข้อ, BIA, Risk Register, Third Party, KRI, Incidents)
 
 ---
 
