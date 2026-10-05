@@ -257,6 +257,8 @@ const DEFAULT_AUDIT_PROGRAMME_2569 = [
   }
 ]
 
+let activeCyberContainer = null
+
 let cyberState = {
   activeTab: 'assessment', // 'assessment' | 'docs' | 'incidents'
   assessmentSubTab: 'assessment', // 'log' | 'instructions' | 'assessment'
@@ -739,8 +741,18 @@ function initData() {
     fetchModuleFromSupabase('asset_register'),
     fetchModuleFromSupabase('risk_assessment'),
     fetchModuleFromSupabase('risk_reports'),
-    fetchModuleFromSupabase('kri_data')
-  ]).then(([assetRisk, bia, biaRep, riskReg, thirdParty, accessLogs, userPerm, inv, reg, risk, rep, kri]) => {
+    fetchModuleFromSupabase('kri_data'),
+    fetchModuleFromSupabase('docs_links'),
+    fetchModuleFromSupabase('audit_programmes'),
+    fetchModuleFromSupabase('audit_reports'),
+    fetchModuleFromSupabase('incidents'),
+    fetchModuleFromSupabase('cii_rounds'),
+    fetchModuleFromSupabase('cii_update_logs')
+  ]).then(([
+    assetRisk, bia, biaRep, riskReg, thirdParty, accessLogs, userPerm,
+    inv, reg, risk, rep, kri,
+    docsLinks, auditProgs, auditReps, incidentsData, roundsData, logsData
+  ]) => {
     if (assetRisk?.items?.length > 0) {
       cyberState.assetRiskAssessment = assetRisk
       localStorage.setItem(LOCAL_STORAGE_ASSET_RISK_KEY, JSON.stringify(assetRisk))
@@ -794,6 +806,63 @@ function initData() {
     if (kri && Object.keys(kri).length > 0) {
       cyberState.kriData = kri
       localStorage.setItem(LOCAL_STORAGE_KRI_DATA_KEY, JSON.stringify(kri))
+    }
+
+    // Synchronize Document Links across all devices
+    if (docsLinks && typeof docsLinks === 'object' && Object.keys(docsLinks).length > 0) {
+      cyberState.docLinks = { ...cyberState.docLinks, ...docsLinks }
+      localStorage.setItem(LOCAL_STORAGE_DOCS_KEY, JSON.stringify(cyberState.docLinks))
+    } else if (cyberState.docLinks && Object.keys(cyberState.docLinks).length > 0) {
+      // First-time sync: Upload user's existing local doc links to Supabase so other users see them immediately
+      syncModuleToSupabase('docs_links', cyberState.docLinks)
+    }
+
+    // Synchronize Audit Programmes
+    if (auditProgs && typeof auditProgs === 'object' && Object.keys(auditProgs).length > 0) {
+      cyberState.auditProgrammes = auditProgs
+      localStorage.setItem(LOCAL_STORAGE_AUDIT_PROGRAMME_KEY, JSON.stringify(auditProgs))
+    } else if (cyberState.auditProgrammes && Object.keys(cyberState.auditProgrammes).length > 0) {
+      syncModuleToSupabase('audit_programmes', cyberState.auditProgrammes)
+    }
+
+    // Synchronize Audit Reports
+    if (auditReps && typeof auditReps === 'object' && Object.keys(auditReps).length > 0) {
+      cyberState.auditReports = auditReps
+      localStorage.setItem(LOCAL_STORAGE_AUDIT_REPORTS_KEY, JSON.stringify(auditReps))
+    } else if (cyberState.auditReports && Object.keys(cyberState.auditReports).length > 0) {
+      syncModuleToSupabase('audit_reports', cyberState.auditReports)
+    }
+
+    // Synchronize Incidents
+    if (Array.isArray(incidentsData) && incidentsData.length > 0) {
+      cyberState.incidents = incidentsData
+      localStorage.setItem(LOCAL_STORAGE_INCIDENTS_KEY, JSON.stringify(incidentsData))
+    } else if (Array.isArray(cyberState.incidents) && cyberState.incidents.length > 0) {
+      syncModuleToSupabase('incidents', cyberState.incidents)
+    }
+
+    // Synchronize CII Rounds
+    if (Array.isArray(roundsData) && roundsData.length > 0) {
+      cyberState.rounds = roundsData
+      localStorage.setItem(LOCAL_STORAGE_ROUNDS_KEY, JSON.stringify(roundsData))
+    } else if (Array.isArray(cyberState.rounds) && cyberState.rounds.length > 0) {
+      syncModuleToSupabase('cii_rounds', cyberState.rounds)
+    }
+
+    // Synchronize CII Update Logs
+    if (Array.isArray(logsData) && logsData.length > 0) {
+      cyberState.updateLogs = logsData
+      localStorage.setItem(LOCAL_STORAGE_LOGS_KEY, JSON.stringify(logsData))
+    } else if (Array.isArray(cyberState.updateLogs) && cyberState.updateLogs.length > 0) {
+      syncModuleToSupabase('cii_update_logs', cyberState.updateLogs)
+    }
+
+    // Re-render current active tab if the module is mounted and displayed
+    if (activeCyberContainer && document.body.contains(activeCyberContainer)) {
+      const isInputActive = document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)
+      if (!isInputActive) {
+        renderActiveTab(activeCyberContainer)
+      }
     }
   }).catch(() => {})
 
@@ -1043,12 +1112,14 @@ function saveRiskAssessment() {
 function saveRounds() {
   try {
     localStorage.setItem(LOCAL_STORAGE_ROUNDS_KEY, JSON.stringify(cyberState.rounds))
+    syncModuleToSupabase('cii_rounds', cyberState.rounds)
   } catch (e) {}
 }
 
 function saveUpdateLogs() {
   try {
     localStorage.setItem(LOCAL_STORAGE_LOGS_KEY, JSON.stringify(cyberState.updateLogs))
+    syncModuleToSupabase('cii_update_logs', cyberState.updateLogs)
   } catch (e) {}
 }
 
@@ -1062,18 +1133,21 @@ function saveIncidents() {
 function saveDocs() {
   try {
     localStorage.setItem(LOCAL_STORAGE_DOCS_KEY, JSON.stringify(cyberState.docLinks))
+    syncModuleToSupabase('docs_links', cyberState.docLinks)
   } catch (e) {}
 }
 
 function saveAuditProgrammes() {
   try {
     localStorage.setItem(LOCAL_STORAGE_AUDIT_PROGRAMME_KEY, JSON.stringify(cyberState.auditProgrammes))
+    syncModuleToSupabase('audit_programmes', cyberState.auditProgrammes)
   } catch (e) {}
 }
 
 function saveAuditReports() {
   try {
     localStorage.setItem(LOCAL_STORAGE_AUDIT_REPORTS_KEY, JSON.stringify(cyberState.auditReports))
+    syncModuleToSupabase('audit_reports', cyberState.auditReports)
   } catch (e) {}
 }
 
@@ -1129,6 +1203,7 @@ function getSelectScoreStyle(val) {
 }
 
 export function renderCyberModule(container) {
+  activeCyberContainer = container
   container.innerHTML = `
     <div class="module-wrapper" style="max-width:100%; margin:0 auto; padding:0 4px;">
       
@@ -2511,6 +2586,7 @@ function bindGenericDocEvents(el, currentKey) {
     cyberState.docLinks[currentKey].editLinks.push({ id: Date.now(), label, url })
     saveDocs()
     renderPolicyAndFrameworkTab(el)
+    showNotification('เพิ่มลิงก์เอกสารและซิงค์ข้อมูล Cloud สำเร็จ', 'success')
   })
 
   // Delete Doc Link
@@ -2521,6 +2597,7 @@ function bindGenericDocEvents(el, currentKey) {
         cyberState.docLinks[currentKey].editLinks = cyberState.docLinks[currentKey].editLinks.filter(l => l.id !== id)
         saveDocs()
         renderPolicyAndFrameworkTab(el)
+        showNotification('ลบลิงก์เอกสารเรียบร้อยแล้ว', 'info')
       }
     })
   })
@@ -2545,6 +2622,7 @@ function bindGenericDocEvents(el, currentKey) {
     cyberState.docLinks[currentKey].pdfLinks.push({ id: Date.now(), label, url })
     saveDocs()
     renderPolicyAndFrameworkTab(el)
+    showNotification('แนบลิงก์ PDF และซิงค์ข้อมูล Cloud สำเร็จ', 'success')
   })
 
   // Delete PDF Link
@@ -2555,6 +2633,7 @@ function bindGenericDocEvents(el, currentKey) {
         cyberState.docLinks[currentKey].pdfLinks = cyberState.docLinks[currentKey].pdfLinks.filter(p => p.id !== id)
         saveDocs()
         renderPolicyAndFrameworkTab(el)
+        showNotification('ลบลิงก์ PDF เรียบร้อยแล้ว', 'info')
       }
     })
   })
